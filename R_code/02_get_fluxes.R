@@ -16,6 +16,13 @@ codes <-
                              "site_codes_visits.csv")) %>% 
   dplyr::select(-`...1`)
 
+# Load fwdata
+fw_database <- 
+  readr::read_rds(here::here("data",
+                             "scalewebs",
+                             "fw_database.rds"))
+
+
 # Get biomass data --------------------------------------------------------
 # Read data
 dats <- 
@@ -52,7 +59,7 @@ str(dats)
 # Add biomass
 dats_biomass <- 
   hellometry::hello_metry(data_table = dats,
-                          biomass_kind = "both",
+                          biomass_kind = "dry",
                           database = TRUE)
 
 # Basic clean-up 
@@ -82,7 +89,7 @@ biomass_clean <-
   dplyr::rename(tot_biomass_g = biomass_g) %>% 
   ## Add site codes
   dplyr::left_join(codes %>% 
-                     dplyr::select(-replicate, -visit_id) %>% 
+                     dplyr::select(-replicate, -visit_id, -bio01) %>% 
                      dplyr::distinct(),
                    by = "location") %>%
   ## Remove location
@@ -96,34 +103,20 @@ stopifnot(biomass_clean %>%
             dplyr::select(bromeliad_id, bwg_name) %>% 
             nrow())
 
-# Add microorganism data
-## Let's just randomly say that microzooplankton and mesozooplantkon are 5 and 10 times bacteria
-## And bromeliad tissue is always 0.001
-## FPOM is total detritus * 0.005 and CPOM is * 0.01
-## IS TOTAL DETRITUS G OR MG?????????
+# Add basal resource data, always 3.456e-11 (lower than lowest biomass),so no real preference
 basal_biomass <- 
-  bromeliads_predicted %>% 
-  dplyr::select(visit_id, bromeliad_id, site, total_detritus_mg = fpom_mg_dry, 
-                algae = alg_g_estimate, microorganisms = bact_g_estimate) %>% 
-  ## CHANGE HERE THE SCALE ONCE WE KNOW UNIT OF TTOAL DETRITUS
-  dplyr::mutate(FPOM = total_detritus_mg * 0.005,
-                CPOM = total_detritus_mg * 0.01,
-                microzooplankton = microorganisms * 5,
-                mesozooplankton = microorganisms * 5,
-                bromeliad.tissue = 1) %>% 
-  ## Remove empty rows
-  dplyr::filter(!is.nan(algae)) %>% 
-  ## Add site names
-  dplyr::left_join(codes %>% 
-                     dplyr::select(site_code, visit_id) %>% 
-                     dplyr::mutate(visit_id = as.character(visit_id)),
-                   by = "visit_id") %>% 
-  ## Here couple problematic sites: cusuco just not in the data, and nouragues2006 wihtout code
-  dplyr::mutate(site_code = ifelse(site == "Nouragues2006",
-                                   "NOUR", site_code)) %>% 
-  dplyr::filter(!is.na(site_code)) %>% 
-  ## Remove superfluous columns
-  dplyr::select(-visit_id, -site, -total_detritus_mg) %>% 
+  biomass_clean %>% 
+  ## Select columns and add site code
+  dplyr::select(site_code, bromeliad_id) %>% 
+  dplyr::distinct() %>% 
+  ## Add resource columns
+  dplyr::mutate(algae = 1e-11,
+                microorganisms = 1e-11,
+                FPOM = 1e-11,
+                CPOM = 1e-11,
+                microzooplankton = 1e-11,
+                mesozooplankton = 1e-11,
+                bromeliad.tissue = 1e-11) %>% 
   ## Make longer
   tidyr::pivot_longer(cols = c(algae, microorganisms, FPOM,
                                CPOM, microzooplankton, mesozooplankton, bromeliad.tissue),
@@ -136,15 +129,19 @@ basal_biomass <-
 ## Combine the two biomass data frames together
 biomass_clean <- 
   biomass_clean %>% 
-  dplyr::mutate(bromeliad_id = as.character(bromeliad_id)) %>% 
   dplyr::bind_rows(basal_biomass)
+
+## Save data
+readr::write_csv(biomass_clean,
+                 here::here("data",
+                            "biomass_clean.csv"))
 
 # Get food webs -----------------------------------------------------------
 #  Register all site-level matrices 
 site_matrices <- 
   load_matrices(folder = here::here("data",
-                                    "probabilistic_matrices"),
-                ending = "_NM.txt") %>% 
+                                    "matrices"),
+                ending = "_PM.txt") %>% 
   make_binary_matrices(matrix_list = .,
                        cutoff = 0.02)
 
@@ -167,7 +164,6 @@ foodwebs <-
                  basal = basal,
                  binary_matrices = site_matrices,
                  biomass_data = biomass_clean)
-
 
 # Get temperature data ----------------------------------------------------
 # Add Boltzmann constant 
@@ -295,7 +291,7 @@ for (web in webs){
   dets <- 
     c("FPOM", "CPOM")
   pl <- 
-    c("bromeliad.tissue")
+    c("bromeliad.tissue", "algae")
   ## Save the detritus and plant tissue that are actually present in the web
   detritus <- 
     species[species %in% dets]

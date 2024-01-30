@@ -1,0 +1,392 @@
+---
+title: "Analysis proposal"
+author: "Pierrre"
+date: "2023-12-13"
+output: html_document
+---
+
+```{r setup, include=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Load all libraries 
+library(igraph)
+library(fluxweb)
+library(tidyverse)
+library(here)
+source(here::here("R_code",
+                  "functions.R"))
+library(brms)
+library(bayestestR)
+library(DescTools)
+library(ggeffects)
+
+# Load fluxes
+fluxes <- 
+  load_matrices(folder = here::here("data",
+                                    "fluxes"),
+                ending = ".txt")
+  
+# Load fwdata
+fw_database <- 
+  readr::read_rds(here::here("data",
+                             "scalewebs",
+                             "fw_database.rds"))
+
+# Load site matrices
+site_matrices <- 
+  load_matrices(folder = here::here("data",
+                                    "matrices"),
+                ending = "_PM.txt") %>% 
+  make_binary_matrices(matrix_list = .,
+                       cutoff = 0.02)
+
+# Biomass data
+biomass_clean <- 
+  readr::read_csv(here::here("data",
+                             "biomass_clean.csv"))
+
+# CPI
+# Now combine these values in CP3
+## For order-level do averages of values in the group
+cp3_search <- 
+  tibble::tibble(taxon = c("Trichoptera", "Ostracoda", "Odonata", "Toxorhynchites", 
+                           "Curculionidae", "Dytiscidae", "Elateridae", "Elmidae",
+                           "Hydrophilidae", "Lampyridae", "Planorbidae", "Scirtidae",
+                           "Tabanidae", "Coleoptera", "Diptera"),
+                 cp3_val = c(115.5, 450, 333, 60.5, 
+                             60, 676.5, 730, 450,
+                             270, 200, 144, 333,
+                             150, 
+                             (60 + 676.5 + 730 + 450 + 270 + 200 + 333) / 7,
+                             (60.5 + 150) / 2))
+
+
+# Get CPI
+traits_CPI <- 
+  fw_database$traits %>% 
+  dplyr::select(bwg_name, dplyr::contains(c("ord",
+                                            "subord",
+                                            "family",
+                                            "genus",
+                                            "CP", ## CPI
+                                            "FD", ## food
+                                            "FG", ## feeding mode
+                                            "functional_group"
+  ))) %>% 
+  ## Make a mock CPI column
+  dplyr::rowwise() %>% 
+  dplyr::mutate(CPI_crisp = ifelse(is.na(CP1)|is.na(CP2)|is.na(CP3),
+                                   NA, mean(c(rep(10, CP1), rep(40, CP2), 
+                                              rep(match_CP3(ord = ord, subord = subord, 
+                                                            family = family, genus = genus,
+                                                            cp3_search = cp3_search), 
+                                                  CP3)))))
+
+# Load stoichimetry data
+# stoichiometry <- 
+#   readr::read_csv(here::here("data",
+#                              "stoichiometry.csv"))
+## Make mock data until I get it
+stoichiometry <- 
+  fw_database$traits %>% 
+  dplyr::select(bwg_name) %>% 
+  ## Fake C, N, P content
+  dplyr::mutate(N = runif(n = nrow(.), min = 0, max = 0.25),
+                P = runif(n = nrow(.), min = 0, max = 0.1),
+                C =  1 - P - N) 
+
+# Convert matrices to list
+fluxes_long <- 
+  fluxes %>% 
+  purrr::map(~ make_mat_long(matrix = .,
+                             unit = "flux")) %>% 
+  ## Rename flux column to raw
+  purrr::map(~ dplyr::rename(.,
+                             flux_raw = flux)) %>% 
+  ## Convert flux data to proportion for each web
+  purrr::map(~ dplyr::mutate(.,
+                             flux_prop = flux_raw/sum(flux_raw))) %>% 
+  ## Add name of web as column
+  purrr::imap(~dplyr::mutate(.x,
+                             web = .y)) %>% 
+  ## Just remove those rows where consumers are resources
+  purrr::map(~ dplyr::filter(.,
+                             consumer %notin% c("algae", "FPOM", "CPOM",
+                                                "bromeliad.tissue", "microorganisms"))) %>% 
+  ## Flatten list
+  purrr::list_rbind() %>% 
+  ## Split web column in site and bromeliad
+  tidyr::separate_wider_delim(cols = web,
+                              delim = "_",
+                              names = c("site", "bromeliad_id"))
+# Combine for each consumer
+fluxes_long_percons <- 
+  fluxes_long %>% 
+  ## Pool per consumer
+  dplyr::select(-resource) %>% 
+  dplyr::group_by(site, bromeliad_id, consumer) %>% 
+  dplyr::summarise(dplyr::across(dplyr::everything(),
+                                 ~sum(.))) %>% 
+  ## Add data relative to consuemr
+  ### traits_CPI from script 01
+  dplyr::left_join(traits_CPI %>% 
+                     dplyr::select(dplyr::everything()) %>% 
+                     dplyr::rename_with(~paste0("cons_",.x )) %>% 
+                     dplyr::rename(consumer = cons_bwg_name),
+                   by = "consumer") %>% 
+  ### stoichiometry from script 01
+  dplyr::left_join(stoichiometry %>% 
+                     dplyr::select(dplyr::everything()) %>% 
+                     dplyr::rename_with(~paste0(., "_cons")) %>% 
+                     dplyr::rename(consumer = bwg_name_cons),
+                   by = "consumer") %>% 
+  dplyr::ungroup()
+
+# Get Gini coefficient and total energy flux for each bromeliad, 
+# based on all the fluxes (i.e. not pooled per consumer, excluding zooplankton)
+fluxes_long_perbrom <- 
+  fluxes_long_percons %>% 
+  ## Remove zooplankton
+  dplyr::filter(!stringr::str_detect(string = consumer,
+                                    pattern = "plankton")) %>% 
+  dplyr::select(site, bromeliad_id, flux_raw, C_cons, N_cons, P_cons) %>%
+  ## Group by site and bromeliad id
+  dplyr::group_by(site, bromeliad_id) %>%
+  ## Summarise
+  dplyr::summarise(dplyr::across(flux_raw,
+                                 ~ DescTools::Gini(.),
+                                 .names = "gini"),
+                   dplyr::across(flux_raw,
+                                 ~ sum(.),
+                                 .names = "totalflow_Jy")) %>% 
+  dplyr::ungroup() %>% 
+  ## Add flow just to predators
+  dplyr::left_join(fluxes_long_percons %>% 
+                     ## Keep just predators
+                     dplyr::filter(cons_functional_group %in% c("piercer", "engulfer")) %>%
+                     dplyr::select(site, bromeliad_id, flux_raw) %>%
+                     ## Group by site and bromeliad id
+                     dplyr::group_by(site, bromeliad_id) %>%
+                     ## Summarise
+                     dplyr::summarise(dplyr::across(flux_raw,
+                                                    ~ sum(.),
+                                                    .names = "predflow_Jy")),
+                   by = c("site", "bromeliad_id"))
+
+
+# Mock data, just CABO 
+fluxes_long_percons_CABO <- 
+  fluxes_long_percons %>% 
+  dplyr::filter(site == "CABO")
+fluxes_long_perbrom_CABO <- 
+  fluxes_long_perbrom %>% 
+  dplyr::filter(site == "CABO") %>% 
+  ## I am getting frustrated at this so I will just do it inefficiently
+  dplyr::left_join(
+    fluxes_long_percons %>% 
+    ## REMOVE FLUXES EQUAL TO 0
+    dplyr::filter(flux_raw > 0) %>% 
+    dplyr::filter(site == "CABO") %>% 
+    ## Remove zooplankton
+    dplyr::filter(!stringr::str_detect(string = consumer,
+                                       pattern = "plankton")) %>% 
+    ## Keep only detritivore functional groups
+    dplyr::filter(cons_functional_group %in% c("gatherer", "scraper", "filter.feeder", "shredder")) %>% 
+    dplyr::select(site, bromeliad_id, C_cons, N_cons, P_cons) %>% 
+    dplyr::distinct() %>% 
+    dplyr::nest_by(site, bromeliad_id) %>%
+    dplyr::summarise(detr_dist = average_dist(data)),
+    by = c("site", "bromeliad_id"))
+
+
+
+```
+
+## Data structure
+The flux data is in long format, with each row being the energy flux going to a given consumer. This flux is both presented as a raw value and as the proportion of this flux in the total amount of flux in the bromeliad of interest. Then there are a bunch of columns with traits from the consumers (all from the fwdatabase). 
+<br>
+The crisp CPI column was calculated as the weighted mean of the fuzzy values from Régis and Olivier, with the CP3 values (unbounded interval) is from a literature search I did.
+<br>
+The stoichiometry values here were generated at random for each row of the data, with no intent on realism. I just generated them so that you can see the analyses I have in mind
+```{r data pres 1}
+dplyr::glimpse(fluxes_long_percons)
+```
+<br>
+<br>
+There is a second data frame that I will do analysis on, one in which each row represents metric summarised at the bromeliad level. Here I will just show for CABO because the distances take a while to compute. We now have the Gini index (bounded between 0 (perfect equality) and 1 (perfect inequality), measuring the inequality in energy fluxes going to consumers, the total amount of energy flowing within the bromeliad, and the average euclidean distance between detritivore stoichiometries (using the triangle formula in a 3D CNP space), which represents how dissimilar these detritivores are in their stoichiometries. The Gini index reflects evenness of energy use by consumer community and energetic overdominance. High inequality is associated with low biodiversity and stability of the system (Potapov 2019)
+```{r data pres 2}
+dplyr::glimpse(fluxes_long_perbrom_CABO)
+```
+
+
+
+## A few plots to start
+
+Here are three plots of energy flux within the bromeliads, based on different values of the Gini index. The idea is that here the Gini index give us a hint on the number of channels in the web, with more channels leading to more equality (i.e. more strong, few weak fluxes), while bromeliads with little or no channel structre will be highly imbalanced.
+
+```{r bromeliad plots, warning = FALSE, echo=FALSE}
+# Plot most unequal bromeliad
+plot_food_web(bromtoplot = "12706",
+              sitetoplot = "CARDO",
+              fluxes_long_format = fluxes_long,
+              clean_biomass_data = biomass_clean,
+              binary_matrices = site_matrices)
+
+# Plot least unequal bromeliad
+plot_food_web(bromtoplot = "8001",
+              sitetoplot = "GAMAS",
+              fluxes_long_format = fluxes_long,
+              clean_biomass_data = biomass_clean,
+              binary_matrices = site_matrices)
+
+# Plot something in the middle
+plot_food_web(bromtoplot = "12006",
+              sitetoplot = "MAC",
+              fluxes_long_format = fluxes_long,
+              clean_biomass_data = biomass_clean,
+              binary_matrices = site_matrices)
+```
+
+
+## Hypothesis 1 - Because of a faster growth and turnover rate, consumers with a low CPI and high P content will attract more energy flux than organisms with a slower growth.
+Relation between P and CPI
+We first need to prove our assumption that there is a link between CPI and P content, i.e. a test of the Growth Rate Hypothesis. 
+<br>
+```{r hyp1.1, echo=FALSE, warning=FALSE}
+## Histograms
+hist(log(fluxes_long_percons_CABO$cons_CPI_crisp))
+hist(log(fluxes_long_percons_CABO$P_cons))
+## Model with P explaining CPI 
+cpi_model_P <- 
+  brms::brm(log(cons_CPI_crisp) ~
+              log(P_cons) + (1|bromeliad_id/site),
+            iter = 5000,
+            family = gaussian(),      
+            control = list(adapt_delta = 0.9,
+                           max_treedepth = 10),
+            data = fluxes_long_percons_CABO)
+## Look at the effect
+bayestestR::describe_posterior(cpi_model_P)
+## Plot
+basic_line(model = cpi_model_P, 
+           dats = fluxes_long_percons %>%
+              dplyr::filter(site == "CABO"), 
+           x_var = "P_cons", 
+           y_var = "cons_CPI_crisp",
+           scale = "log")
+```
+
+<br>
+Then, we can go on and see if a higher CPI means lower energy flow
+NB we are doing this in relative terms because we wouldn't want bromeliads with higher biomasses (thus more energy to flow) to artificially drive the pattern. 
+```{r hyp 1.2, echo=FALSE, warning=FALSE}
+## Histogram
+hist(fluxes_long_percons_CABO$flux_prop)
+## Model
+cpi_model_fluxprop <- 
+  brms::brm(flux_prop ~
+              log(cons_CPI_crisp) + (1|bromeliad_id/site),
+            iter = 5000,
+            family = lognormal(),      
+            control = list(adapt_delta = 0.92,
+                           max_treedepth = 10),
+            data = fluxes_long_percons_CABO %>%
+              dplyr::filter(site == "CABO"))
+       
+## Look at the effect
+bayestestR::describe_posterior(cpi_model_fluxprop)
+## Plot of relative energy flow entering the consumer node vs. CPI score
+basic_line(model = cpi_model_fluxprop, 
+           dats = fluxes_long_percons %>%
+             dplyr::filter(site == "CABO"), 
+           x_var = "cons_CPI_crisp", 
+           y_var= "flux_prop")
+```
+<br>
+
+In these two plots, we can first see that P content and CPI are positively associated, implying that the growth rate hypothesis may not apply in our system, and that more P is associated with longer growth rates. A potential confounder would be body size, as P content tends to be lower with body size, but our results tend to go the other way. We can then see that more energy goes through organisms with slower growth rates, but that this relationship is not significant. 
+<br>
+These results indicate that P tends to be higher in slower-growing organisms, and that growth rate is not associated with the amount of energy accumulated by a consumer.
+
+## Hypothesis 2 - Because organisms make feeding decisions based on their stoichiometry and that of their prey, more stoichiometric dissimilarity of consumers in a food web generates more energy channels.
+
+```{r hyp 2, echo=FALSE, warning=FALSE}
+## Histograms
+hist(log(fluxes_long_perbrom_CABO$gini))
+hist(log(fluxes_long_perbrom_CABO$detr_dist))
+## Model with P explaining CPI 
+gini_model_detrdist <- 
+  brms::brm(log(gini) ~
+              log(detr_dist) #+ (1|/site)
+            ,
+            iter = 5000,
+            family = gaussian(),      
+            control = list(adapt_delta = 0.9,
+                           max_treedepth = 10),
+            data = fluxes_long_perbrom_CABO)
+## Look at the effect
+bayestestR::describe_posterior(gini_model_detrdist)
+## Plot
+basic_line(model = gini_model_detrdist, 
+           dats = fluxes_long_perbrom_CABO, 
+           x_var = "detr_dist", 
+           y_var = "gini",
+           scale = "log")
+```
+<br>
+Here we have no association between the channel structure and the stoichiometric dissimilarity of detritivores. This suggests that stoichiometry may not underly channel structures, potentially because phenotypic traits (e.g. different kinds of predator defense or different usage of the environment) could allow organisms with similar stoichiometries to coexist.
+
+# Hypothesis 3 - Stoichiometric dissimilarity and productivity of food webs have a unimodal relationship, because a low dissimilarity (i.e. few channels) and a high dissimilarity (i.e. many, little connected channels) will not allow an efficient transfer of energy towards higher trophic levels.
+
+```{r hyp 3.1, echo=FALSE, warning=F}
+## Histograms
+hist(log(fluxes_long_perbrom_CABO$totalflow_Jy))
+hist(log(fluxes_long_perbrom_CABO$detr_dist))
+## Model with P explaining CPI 
+totalflow_model_detrdist <- 
+  brms::brm(log(totalflow_Jy) ~
+              poly(log(detr_dist), degree = 2) #+ (1|/site)
+            ,
+            iter = 5000,
+            family = gaussian(),      
+            control = list(adapt_delta = 0.9,
+                           max_treedepth = 10),
+            data = fluxes_long_perbrom_CABO)
+## Look at the effect
+bayestestR::describe_posterior(totalflow_model_detrdist)
+## Plot
+basic_line(model = totalflow_model_detrdist, 
+           dats = fluxes_long_perbrom_CABO, 
+           x_var = "detr_dist", 
+           y_var = "totalflow_Jy",
+           scale = "log")
+```
+<br>
+Here can see that the total energy flow in a bromeliad follows a unimodal relationship with the stoichiometric dissimilarity of detritivores. This suggest that more channels, hence a more even parsing of resource use can sustain a more diverse community.
+
+```{r hyp 3.2, echo=FALSE, warning=F}
+## Histograms
+hist(log(fluxes_long_perbrom_CABO$predflow_Jy))
+hist(log(fluxes_long_perbrom_CABO$detr_dist))
+## Model with P explaining CPI 
+predflow_model_detrdist <- 
+  brms::brm(log(totalflow_Jy) ~
+              poly(log(detr_dist), degree = 2) #+ (1|/site)
+            ,
+            iter = 5000,
+            family = gaussian(),      
+            control = list(adapt_delta = 0.9,
+                           max_treedepth = 10),
+            data = fluxes_long_perbrom_CABO)
+## Look at the effect
+bayestestR::describe_posterior(predflow_model_detrdist)
+## Plot
+basic_line(model = predflow_model_detrdist, 
+           dats = fluxes_long_perbrom_CABO, 
+           x_var = "detr_dist", 
+           y_var = "predflow_Jy",
+           scale = "log")
+```
+<br>
+Here, however, our relationship is not significant, so dissimilarity does not allow more predators to survive in a food web.
+
