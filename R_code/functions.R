@@ -323,10 +323,6 @@ make_mat_long <- function(matrix, unit){
   return(ret)
 
 }
-
-
-
-
 # Get CP3 values ----------------------------------------------------------
 match_CP3 <- function(ord, subord, family, genus, cp3_search){
   # Return object
@@ -598,13 +594,25 @@ plot_food_web <- function(bromtoplot,
 # Labels for plots --------------------------------------------------------
 full_label <- function(var, scale = "none"){
   
-  if(var == "cons_P_mean")
+  if(var == "cons_P")
     ret <- 
       "P content of consumer"
   
   if(var == "flux_prop")
     ret <- 
-      "Proportion of total energy flux \nentering consumer node"
+      "Prop. of total energy flux \nentering consumer node"
+  
+  if(var == "flux_raw")
+    ret <- 
+      expression(paste("Energy flux entering a \nconsumer node (log J.y"^"-1"*")"))
+  
+  if(var == "flux_prop_pair")
+    ret <- 
+      "Prop. of total energy flux \nbetween a consumer-resource pair"
+  
+  if(var == "flux_raw_pair")
+    ret <- 
+      expression(paste("Energy flux between a \nconsumer-resource pair (log J.y"^"-1"*")"))
   
   if(var == "cons_CPI_crisp")
     ret <- 
@@ -624,19 +632,19 @@ full_label <- function(var, scale = "none"){
   
   if(var == "avg_CN_dist")
     ret <- 
-      "Mean euclidean distance between \nconsumers in CN plane"
+      "Mean Euclidean distance between \nconsumers in CN plane"
   
   if(var == "avg_CNP_dist")
     ret <- 
-      "Mean euclidean distance between \nconsumers in CNP space"
+      "Mean Euclidean distance between \nconsumers in CNP space"
   
   if(var == "totalflow_Jy")
     ret <- 
-      expression(paste("Total energy flow (J.y"^"-1"*")"))
+      expression(paste("Total energy flow (log J.y"^"-1"*")"))
   
   if(var == "predflow_Jy")
     ret <- 
-      expression(paste("Energy flow to \npredators (J.y"^"-1"*")"))
+      expression(paste("Energy flow to \npredators (log J.y"^"-1"*")"))
   
   if(var == "n_removed")
     ret <- 
@@ -673,19 +681,7 @@ full_label <- function(var, scale = "none"){
   if(var == "rope_rel2")
     ret <- 
       "% in ROPE of second-\norder relationship"
-  
-  # Add if logged or square rooted
-  if(scale == "log"){
-    ret <- 
-      paste(ret, 
-            "(log)")
-  } else if(scale == "sqrt"){
-    ret <- 
-      paste(ret,
-            "(sqrt)") }
-  
-  
-  
+
   # Return
   return(ret)
 }
@@ -696,18 +692,35 @@ basic_line <- function(model, dats, x_var, y_var, scale = "none"){
   model_effect <- 
     brms::conditional_effects(model,
                               method = "fitted")[[1]] 
-  # Rescale y variable
+  # Rescale effect
   if(scale == "log"){
-    dats <- 
-      dats %>% 
-      dplyr::mutate(dplyr::across(dplyr::all_of(y_var),
-                                  ~log(.)))
+    model_effect <- 
+      model_effect %>% 
+      dplyr::mutate(dplyr::across(c(estimate__, lower__, upper__),
+                                  ~exp(.)))
+    # dats <- 
+    #   dats %>% 
+    #   dplyr::mutate(dplyr::across(dplyr::all_of(y_var),
+    #                               ~log(.)))
       
   } else if(scale == "sqrt"){
-    dats <- 
-      dats %>% 
-      dplyr::mutate(dplyr::across(dplyr::all_of(y_var),
-                                  ~sqrt(.)))
+    model_effect <- 
+      model_effect %>% 
+      dplyr::mutate(dplyr::across(c(estimate__, lower__, upper__),
+                                  ~(.)^2))
+    # dats <- 
+    #   dats %>% 
+    #   dplyr::mutate(dplyr::across(dplyr::all_of(y_var),
+    #                               ~sqrt(.)))
+  } else if(scale == "third"){
+    model_effect <- 
+      model_effect %>% 
+      dplyr::mutate(dplyr::across(c(estimate__, lower__, upper__),
+                                  ~(.)^3))
+    # dats <- 
+    #   dats %>% 
+    #   dplyr::mutate(dplyr::across(dplyr::all_of(y_var),
+    #                               ~sqrt(.)))
   }
   
   # Make plot
@@ -719,8 +732,8 @@ basic_line <- function(model, dats, x_var, y_var, scale = "none"){
     geom_jitter(data = dats,
                aes(x = .data[[x_var]],
                    y = .data[[y_var]]),
-               colour = "lightsteelblue3",
-               alpha = 0.2) +
+               colour = "lightsteelblue4",
+               alpha = 0.4) +
     ## Line
     geom_line(linewidth = 1.2,
               colour = "steelblue") +
@@ -732,7 +745,7 @@ basic_line <- function(model, dats, x_var, y_var, scale = "none"){
                 fill = "steelblue") +
     ## Styling
     xlab(full_label(x_var)) +
-    ylab(full_label(y_var, scale = scale)) + 
+    ylab(full_label(y_var)) + 
     theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(),
           panel.background = element_blank(), 
@@ -793,7 +806,7 @@ average_dist <- function(data, CN = FALSE, CNP = FALSE){
   ## Remove all NAs
   data <- 
     data %>%
-    dplyr::filter(!is.na(cons_C_mean) & !is.na(cons_N_mean) & !is.na(cons_P_mean)) 
+    dplyr::filter(!is.na(cons_C) & !is.na(cons_N) & !is.na(cons_P)) 
   
   # Get average distance
   ret <- 
@@ -810,8 +823,8 @@ average_dist <- function(data, CN = FALSE, CNP = FALSE){
     ret <- 
       ret %>% 
       ## Get the euclidean distance between the correspoding pair of points
-      mutate(distance = get_euclidean_distance(c(data$cons_C_mean[id.x], data$cons_N_mean[id.x]),
-                                               c(data$cons_C_mean[id.y], data$cons_N_mean[id.y]))) %>% 
+      mutate(distance = get_euclidean_distance(c(data$cons_C[id.x], data$cons_N[id.x]),
+                                               c(data$cons_C[id.y], data$cons_N[id.y]))) %>% 
       ## Ungroup to remove the rowwise
       dplyr::ungroup() %>% 
       ## Keep the distances, get mean and extract
@@ -826,8 +839,8 @@ average_dist <- function(data, CN = FALSE, CNP = FALSE){
     ret <- 
       ret %>% 
       ## Get the euclidean distance between the correspoding pair of points
-      mutate(distance = get_euclidean_distance(c(data$cons_C_mean[id.x], data$cons_N_mean[id.x], data$cons_P_mean[id.x]),
-                                               c(data$cons_C_mean[id.y], data$cons_N_mean[id.y], data$cons_P_mean[id.y]))) %>% 
+      mutate(distance = get_euclidean_distance(c(data$cons_C[id.x], data$cons_N[id.x], data$cons_P[id.x]),
+                                               c(data$cons_C[id.y], data$cons_N[id.y], data$cons_P[id.y]))) %>% 
       ## Ungroup to remove the rowwise
       dplyr::ungroup() %>% 
       ## Keep the distances, get mean and extract
@@ -875,6 +888,78 @@ remove_add_specs <- function(data, number, mock_nspecs, action){
   # Return
   return(ret)
 }
+
+
+# Do predictions from model from CNP --------------------------------------
+do_predictions <- function(data, model_list){
+  
+  # Save data
+  ret <- 
+    tibble::tibble()
+  
+  
+  
+  # Do row by row
+  for(index in 1:nrow(data)){
+    print(index)
+    # Get row
+    row <- 
+      data[index,]
+    
+    # Extract model
+    thismodel <- 
+      model_list %>% 
+      dplyr::filter(taxon == row$taxon) %>% 
+      dplyr::select(model)[[1]]
+    
+    # Blank prediction
+    prediction <- 
+      NA
+  # No model
+    if(is.na(row$nsites))
+      # No model
+    {
+      
+      prediction <- 
+        tibble::tibble(Estimate = NA,
+                       Est.Error = NA,
+                       Q2.5 = NA,
+                       Q97.5 = NA)
+    } else
+    
+  # Model with random effect
+  if(row$nsites > 1){
+    prediction <- 
+      row %>% 
+      predict(object = thismod,
+              allow_new_levels = TRUE, ### new random effects
+              sample_new_levels = "gaussian") %>% 
+      tibble::as_tibble()
+    
+  } else if (row$nsites == 1)
+  # Model without random effect
+  {
+    prediction <- 
+      data %>% 
+      predict(object = thismod) %>% 
+      tibble::as_tibble()
+  }
+    # Extract values and credible intervals
+    ret <- 
+      ret %>% 
+      dplyr::bind_rows(dplyr::bind_cols(c(row %>% 
+                                            dplyr::select(-model, -nsites), prediction)))
+  }
+
+  
+  # Return
+  return(ret)
+  
+  
+  
+  
+}
+  
 
 # Average C, N, P values over a different taxonomic levels ----------------
 average_stoich_content <- function(data, stoich){

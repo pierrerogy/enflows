@@ -1,14 +1,15 @@
-# Get raw FPOM CPOM
+# Get CPI and stoichiometry
 library(tidyverse)
 library(bwgdata)
 library(here)
-library(bwgdata)
 library(fwdata)
 source(here::here("R_code",
                   "functions.R"))
 library(hellometry)
 library(cowplot)
 library(plotly)
+library(brms)
+library(bayestestR)
 
 # Make rules for CPI ------------------------------------------------------
 # Load fwdata
@@ -189,7 +190,10 @@ traits_CPI <-
                                 "Hirudidae", family))
 
 
-
+# Save
+readr::write_csv(traits_CPI,
+                 here::here("data",
+                            "traits_CPI.csv"))
 
 
 
@@ -197,13 +201,15 @@ traits_CPI <-
 # Stoichiometry data -------------------------------------------------------------
 # Data from 2017 paper
 ## https://www.frontiersin.org/articles/10.3389/fevo.2017.00110/full
+## Raw data here obtained after communicating with lead author
+## Data at the link above includes interpolated rows
 stoich1 <- 
   readr::read_delim(here::here("data",
-                               "stoich2017.txt")) %>% 
+                               "Atacama.Cardoso.CR.data.csv")) %>% 
   ## Filter aquatic communities
   dplyr::filter(Habitat == "aquatic") %>% 
   ## Remove line column
-  dplyr::select(-Line, -Site, -Habitat) %>% 
+  dplyr::select(-Lat, -Long, -Site, -Habitat, -CN, -CP, -NP, -TL, -id) %>% 
   ## Convert C and N percentage to proportion
   dplyr::mutate(C = C/100,
                 N = N/100,
@@ -215,94 +221,18 @@ stoich1 <-
   ## Fix that typo in species name
   dplyr::mutate(Sp = ifelse(Sp == "Mecystogaster.modesta",
                                        "Mecistogaster.modesta", Sp)) %>% 
-  ## Make family column to avoid duplicating rows
-  dplyr::mutate(Family = ifelse(Sp == "Limnocytheridae.sp",
-                                "Limnocytheridae",
-                                ifelse(stringr::str_detect(string = Sp,
-                                                           pattern = "Chiron|Monopelopia|Polypedilum|Orthocladiinae|Tanypodinae"),
-                                       "Chironomidae",
-                                       ifelse(stringr::str_detect(string = Sp,
-                                                                 pattern = "ulex|Anopheles|Toxorhy|Wyeomyia"),
-                                              "Culicidae",
-                                              ifelse(stringr::str_detect(string = Sp,
-                                                                        pattern = "Corethrella"),
-                                                     "Corethrellidae",
-                                                     ifelse(stringr::str_detect(string = Sp,
-                                                                               pattern = "Dytiscidae"),
-                                                            "Dytiscidae",
-                                                            ifelse(stringr::str_detect(string = Sp,
-                                                                                      pattern = "Mecistogaster"),
-                                                                   "Pseudostigmatidae",
-                                                                   ifelse(stringr::str_detect(string = Sp,
-                                                                                              pattern = "Leptagrion"),
-                                                                          "Coenagrionidae",
-                                                                          ifelse(Sp == "Hirudinidae.sp",
-                                                                                 "Hirudidae",
-                                                                                  ifelse(Sp == "Phylloicus.bromeliarium",
-                                                                                         "Calamoceratidae",
-                                                                                         ifelse(stringr::str_detect(string = Sp,
-                                                                                                                   pattern = "Scirt"),
-                                                                                                "Scirtidae",
-                                                                                                ifelse(stringr::str_detect(string = Sp,
-                                                                                                                          pattern = "Tipu"),
-                                                                                                       "Tipulidae",
-                                                                                                       ifelse(Sp == "Naididae.sp",
-                                                                                                              "Naididae",
-                                                                                                              ifelse(Sp == "Psychodidae.sp1",
-                                                                                                                     "Psychodidae",
-                                                                                                                     ifelse(Sp == "Syrphidae.sp1",
-                                                                                                                            "Syrphidae", "Tabanidae"))))))))))))))) %>% 
-  ## Make Class column
-  dplyr::mutate(Class = ifelse(Family %in% c("Hirudidae", "Naididae"),
-                               "Clitellata",
-                               ifelse(Family == "Limnocytheridae",
-                                      "Ostracoda", "Insecta"))) %>%
-  ## Make order column
+  ## Mutate Family column 
+  dplyr::mutate(Family = ifelse(Sp == "Hirudinidae.sp",
+                                "Hirudidae", Family)) %>% 
+  ## Mutate Class column
+  dplyr::mutate(Class = ifelse(Family == "Limnocytheridae",
+                               "Ostracoda", Class)) %>%
+  ## Mutate order column
   dplyr::mutate(Order = ifelse(Family == "Limnocytheridae",
-                               "Podocopidae",
-                               ifelse(Family == "Hirudidae",
-                                      "Gnathobdela", 
-                                      ifelse(Family == "Naididae",
-                                             "Haplotaxida",
-                                             ifelse(Family %in% c("Dytiscidae", "Scirtidae"),
-                                                    "Coleoptera",
-                                                    ifelse(Family == "Calamoceratidae",
-                                                           "Trichoptera",
-                                                           ifelse(Family == "Coenagrionidae",
-                                                                  "Odonata", "Diptera"))))))) %>% 
-  ## Make Genus column 
-  dplyr::mutate(Genus = ifelse(Sp == "Chironomus.sp",
-                               "Chironomus",
-                               ifelse(stringr::str_detect(string = Sp,
-                                                          pattern = "Culex"),
-                                      "Culex",
-                                      ifelse(stringr::str_detect(string = Sp,
-                                                                 pattern = "Corethrella"),
-                                             "Corethrella",
-                                             ifelse(stringr::str_detect(string = Sp,
-                                                                        pattern = "Leptagrion"),
-                                                    "Leptagrion",
-                                                    ifelse(Sp =="Microculex.sp",
-                                                           "Microculex",
-                                                           ifelse(Sp == "Monopelopia.sp",
-                                                                  "Monopelopia",
-                                                                  ifelse(Sp == "Phylloicus.bromeliarium",
-                                                                         "Phylloicus",
-                                                                         ifelse(stringr::str_detect(string = Sp,
-                                                                                                    pattern = "Polypedilum"),
-                                                                                "Polypedilum",
-                                                                                ifelse(stringr::str_detect(string = Sp,
-                                                                                                           pattern = "Scirtes"),
-                                                                                       "Scirtes",
-                                                                                       ifelse(stringr::str_detect(string = Sp,
-                                                                                                                  pattern = "Anopheles"),
-                                                                                              "Anopheles",
-                                                                                              ifelse(Sp == "Mecistogaster.modesta",
-                                                                                                     "Mecistogaster",
-                                                                                                     ifelse(Sp == "Toxorhynchites.sp",
-                                                                                                            "Toxorhynchites",
-                                                                                                            ifelse(Sp == "Wyeomyia.mel",
-                                                                                                                   "Wyeomyia", NA))))))))))))))
+                               "Podocopidae", Order)) %>% 
+  ## Mutate Genus column 
+  dplyr::mutate(Genus = ifelse(Sp == "Mecistogaster.modesta",
+                               "Mecistogaster", Genus))
 
 # Data from 2018 paper
 ## https://datadryad.org/stash/dataset/doi:10.5061/dryad.3cd2611
@@ -310,10 +240,12 @@ stoich2 <-
   readr::read_csv(here::here("data",
                              "stoich2018.csv")) %>% 
   ## Remove extra columns
-  dplyr::select(-TL, -CNmolar, -Wmg, -Ndet, -CNdet, -Tmin, - Tmax, -Tvar) %>% 
+  dplyr::select(-TL, -CNmolar, -Ndet, -CNdet, -Tmin, - Tmax, -Tvar, -FG) %>% 
   ## Convert C and N percentage to proportion
   dplyr::mutate(C = C/100,
                 N = N/100) %>% 
+  ## Rename column
+  dplyr::rename(BS.mg = Wmg) %>% 
   ## Fix typos
   dplyr::mutate(dplyr::across(dplyr::where(is.character),
                               ~stringr::str_replace(string = .,
@@ -352,14 +284,12 @@ stoich_full <-
                                        by = c("Family", "N", "C")) %>% 
                      dplyr::select(-Family, -sp2),
                    by = c("Sp", "N", "C")) %>% 
-  ## Adapt column names and remove extra columns
+  ## Adapt column name
   dplyr::rename(Site = Locality) %>% 
-  dplyr::select(-TL) %>% 
-  ## Add second tibble, removing extra column
-  dplyr::bind_rows(stoich2 %>% 
-                     dplyr::select(-FG)) %>% 
+  ## Add second tibble
+  dplyr::bind_rows(stoich2) %>% 
   ## Just do a quick reordering of columns
-  dplyr::select(Site, Class, Order, Family, Genus, Sp, C, N, P) %>% 
+  dplyr::select(Site, Class, Order, Family, Genus, Sp, BS.mg, C, N, P) %>% 
   ## Give actual names needed by hellometry
   dplyr::rename(class = Class,
                 ord = Order,
@@ -418,6 +348,9 @@ stoich_full <-
                                 "Tipulidae_Limoniidae", family))
 
 
+
+
+
 # Explore a bit CN stoichiometric patterns with heatplots -----------------------------------
 # Which taxa do we have
 stoich_full %>% 
@@ -444,13 +377,6 @@ stoich_full %>%
   print(n = 50)
 
 # What is the spread of points in a taxa
-## Overall
-ggplot(stoich_full, 
-       aes(x = C, 
-           y = N) ) +
-  geom_hex(bins = 70) +
-  scale_fill_continuous(type = "viridis") +
-  theme_bw()
 ## For each family
 ### Empty list
 plotlist <- 
@@ -464,7 +390,7 @@ for(i in unique(stoich_full$family)){
                y = N) ) +
     ylim(0.02, 0.16) +
     xlim(0.2, 0.8) +
-    geom_hex(bins = 70) +
+    geom_hex(bins = 50) +
     ggtitle(i) +
     scale_fill_continuous(type = "viridis") +
     theme_bw()
@@ -679,14 +605,6 @@ ggsave(here::here("plots",
        width = 15,
        height = 15)
 
-
-
-  
-
-
-
-
-
 # CNP scatterplot -----------------------------------
 ## Overall
 plotly::save_image( 
@@ -759,21 +677,471 @@ for(i in unique(stoich_full$species)[!stringr::str_detect(string = unique(stoich
   
 }
 
-# Combine data frames and save -----------------------------------------------------
-# Combine
-CPI_stoich <- 
+
+# Get models best explaining CNP for different taxa ---------------------
+# Empty tibble to store models
+model_pars <- 
+  tibble::tibble()
+
+# Run models
+for(h in c("family", "genus", "bwg_name")){
+  # Select list of taxa
+  taxa <- 
+    stoich_full %>%
+    dplyr::select(taxa = dplyr::all_of(h)) %>%
+    dplyr::filter(!is.na(taxa)) %>% 
+    dplyr::distinct() %>% 
+    dplyr::pull()
+  
+  # Now for each taxa within this list
+  for(i in taxa){
+    ## Let's keep track of things
+    print(h)
+    print(i)
+    ## For each element
+    for(j in c("C", "N", "P")){
+      ### Let's keep track of things
+      print(j)
+      ### Prepare data
+      dats <- 
+        stoich_full %>% 
+        dplyr::filter(.data[[h]] == i) %>% 
+        dplyr::select(Site, dplyr::all_of(h), element = dplyr::all_of(j), BS.mg) %>%
+        dplyr::filter(!is.na(element) & !is.na(BS.mg))
+      
+      ### Count how many sites for random effect
+      sites <- 
+        length(unique(dats$Site))
+      
+      ### Count number of rows
+      #### If less than 5 rows, add blank
+      if(nrow(dats) < 3){
+        model_pars <- 
+          model_pars %>% 
+          dplyr::bind_rows(tibble::tibble(taxon_level = h,
+                                          taxon_name = i,
+                                          element = j))
+        
+      } 
+      #### If more than five rows, run model
+      if(nrow(dats) > 3){
+        ##### No random effects
+        if(sites < 2){
+          model <- 
+            # brms::brm(log10(element) ~ log10(BS.mg),
+            #           iter = 2000,
+            #           family = gaussian(),      
+            #           control = list(adapt_delta = 0.99,
+            #                          max_treedepth = 15),
+            #           data = dats)
+            lm(log(element) ~ log(BS.mg),
+               data = dats)
+          
+          }
+        
+        ##### Yes random effects
+        if(sites >= 2){
+          model <- 
+            # brms::brm(log10(element) ~ log10(BS.mg) + (1|Site),
+            #           iter = 2000,
+            #           family = gaussian(),      
+            #           control = list(adapt_delta = 0.99,
+            #                          max_treedepth = 15),
+            #           data = dats)
+            lme4::lmer(log(element) ~ log(BS.mg) + (1|Site),
+                       data = dats)
+          
+          
+          }
+        
+        ##### Extract model outputs
+        outputs <- 
+          # bayestestR::describe_posterior(model)
+          car::Anova(model)
+        
+        summary <- 
+          summary(model)$coefficients %>% 
+          tibble::as_tibble()
+        
+        ##### Store in tibble
+        model_pars <- 
+          model_pars %>% 
+          # dplyr::bind_rows(tibble::tibble(taxon_level = h,
+          #                                 taxon_name = i,
+          #                                 element = j,
+          #                                 slope = outputs$Median[2],
+          #                                 intercept = outputs$Median[1],
+          #                                 pd = outputs$pd[2],
+          #                                 prcnt_rope =outputs$ROPE_Percentage[2] ,
+          #                                 r_squared = brms::bayes_R2(model)[1],
+          #                                 nsites = sites,
+          #                                 model = list(model)))
+        dplyr::bind_rows(tibble::tibble(taxon_level = h,
+                                        taxon_name = i,
+                                        element = j,
+                                        slope = summary$Estimate[2],
+                                        intercept = summary$Estimate[1],
+                                        p_value = outputs$`Pr(>Chisq)`,
+                                        nsites = sites,
+                                        model = list(model)))
+      }
+      
+    }
+    
+  }
+
+}
+
+# Remove those models that did not work out
+model_pars_fil <- 
+  # model_pars %>% 
+  # dplyr::filter(pd > 0.95 & prcnt_rope < 0.05) %>% 
+  # dplyr::mutate(taxon = taxon_name)
+  model_pars %>% 
+  dplyr::filter(p_value < 0.01) %>% 
+  dplyr::mutate(taxon = taxon_name)
+
+# Use biomass data to estimate stoichiometry -----------------------------------------------------
+## Load equation file
+equations <- 
+  readr::read_csv(here::here("data",
+                             "equations.csv")) %>% 
+  dplyr::select(element:slope)
+
+
+## Get lowest taxonomic level for each species in database
+last_taxon <-
   traits_CPI %>% 
   ## Tipulidae and Limoniidae are the same family now
   dplyr::mutate(family = ifelse(family %in% c("Tipulidae", "Limoniidae"),
                                 "Tipulidae_Limoniidae", family)) %>% 
-  average_stoich_content(data = .,
-                         stoich = stoich_full)
+  ## Remove columns I do not want,
+  dplyr::select(-dplyr::contains("FD"), 
+                -dplyr::contains("FG")) %>% 
+  ## Very annoyed here
+  dplyr::mutate(genus = ifelse(is.na(genus),
+                               family, genus)) %>% 
+  ## Make column with last taxon available
+  dplyr::mutate(last_taxon = ifelse(!is.na(genus),
+                                     genus, ifelse(!is.na(family),
+                                                   family, NA))) %>% 
+  ## Make some exceptions
+  dplyr::mutate(last_taxon = ifelse(subfamily == "Orthocladiinae",
+                                    "Orthocladiinae",
+                                    ifelse(family == "Chironomidae" &
+                                             genus %notin% c("Chironomus", "Monopelopia",
+                                                             "Chironomidae"), 
+                                           "Chironomidae",
+                                           ifelse(family == "Culicidae" &
+                                                    genus %notin% c("Anopheles", "Culex", "Microculex",
+                                                                    "Toxorhynchites", "Wyeomyia", NA),
+                                                  "Culicidae", last_taxon)))) %>%
+  ## Last attempt
+  dplyr::mutate(last_taxon = ifelse(family %in% c("Syrphidae", "Tabanidae",
+                                                   "Scirtidae", "Tipulidae_Limoniidae",
+                                                   "Limnocytheridae",
+                                                   "Muscidae", "Corethrellidae",
+                                                   "Coenagrionidae", "Dytiscidae",
+                                                   "Pseudostigmatidae", "Psychodidae"),
+                                     family, last_taxon)) %>%
+  ## Get names and taxa
+  dplyr::select(bwg_name, taxon = last_taxon)
 
-# Save
-readr::write_csv(CPI_stoich,
+## Read biomass data
+biomass_stoich  <- 
+  readr::read_csv(here::here("data",
+                           "biomass_clean.csv")) %>% 
+  ## Add last taxon
+  dplyr::left_join(last_taxon,
+                   by = "bwg_name") %>% 
+  ## Add C
+  dplyr::left_join(equations %>% 
+                     dplyr::filter(element == "C"),
+                   by = "taxon") %>% 
+  dplyr::mutate(C = intercept + slope *(avg_bodymass_g/1000)) %>% 
+  dplyr::select(-slope, -element, -intercept) %>% 
+  ## Add N
+  dplyr::left_join(equations %>% 
+                     dplyr::filter(element == "N"),
+                   by = "taxon") %>% 
+  dplyr::mutate(N = intercept + slope * (avg_bodymass_g/1000)) %>% 
+  dplyr::select(-slope, -element, -intercept) %>% 
+  ## Add P
+  dplyr::left_join(equations %>% 
+                     dplyr::filter(element == "P"),
+                   by = "taxon") %>% 
+  dplyr::mutate(P = intercept + slope * (avg_bodymass_g/1000)) %>% 
+  dplyr::select(-slope, -element, -intercept) %>% 
+  ## Remove 0s put on proportion scale
+  dplyr::mutate(dplyr::across(c(C, N, P),
+                              ~ ifelse(. < 0, 
+                                       NA, ./100)))
+
+
+
+## Save data
+readr::write_csv(biomass_stoich,
                  here::here("data",
-                            "CPI_stoich.csv"))
+                            "biomass_stoich.csv"))
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+# Try to find the same equations than Ang ---------------------------------
+# Get models best explaining CNP for different taxa ---------------------
+# Empty tibble to store models
+model_pars <- 
+  tibble::tibble()
+
+
+test <- 
+  stoich1 %>% 
+  ## Adapt column name
+  dplyr::rename(Site = Locality) %>% 
+  ## Just do a quick reordering of columns
+  dplyr::select(Site, Class, Order, Family, Genus, Sp, BS.mg, C, N, P) %>% 
+  ## Give actual names needed by hellometry
+  dplyr::rename(class = Class,
+                ord = Order,
+                family = Family,
+                genus = Genus,
+                species = Sp) %>% 
+  ## Replace different character to later split whole column
+  dplyr::mutate(species = stringr::str_replace(string = species,
+                                               pattern = "\\.",
+                                               replacement = "_")) %>% 
+  ## Split species column
+  tidyr::separate(col = species,
+                  into = c("gen", "species"),
+                  sep = "_") %>% 
+  ## Remove extra splitted column
+  dplyr::select(-gen) %>% 
+  ## Fix typos
+  dplyr::mutate(species = ifelse(species %in% c("bromeliarium", "bromelarium"),
+                                 "bromeliarum",
+                                 ifelse(species == "mel",
+                                        "melanopus", species)),
+                genus = ifelse(genus == "Elphidium",
+                               "Elpidium", genus)) %>% 
+  ## Add columns I need for hellometry
+  dplyr::mutate(stage = ifelse(class == "Insecta",
+                               "larva", "adult"),
+                abundance = 1,
+                bwg_name = ifelse(species == "davisi",
+                                  "Diptera.113",
+                                  ifelse(species == "andromache",
+                                         "Odonata.5",
+                                         ifelse(species == "elongatum",
+                                                "Odonata.7",
+                                                ifelse(genus == "Phylloicus",
+                                                       "Trichoptera.1",
+                                                       ifelse(genus == "Elpidium",
+                                                              "Ostracoda.8",
+                                                              ifelse(species == "kompii",
+                                                                     "Diptera.11",
+                                                                     ifelse(species == "neivai",
+                                                                            "Diptera.12",
+                                                                            ifelse(species == "jenningsi",
+                                                                                   "Diptera.97",
+                                                                                   ifelse(species == "rejector",
+                                                                                          "Diptera.98",
+                                                                                          ifelse(species == "modesta",
+                                                                                                 "Odonata.4",
+                                                                                                 ifelse(species == "melanopus",
+                                                                                                        "Diptera.298",
+                                                                                                        ifelse(species == "superterrenus",
+                                                                                                               "Oligochaeta.13", NA))))))))))))) %>%
+  ## Add the taxonomy columns
+  hellometry::add_taxonomy() %>% 
+  ## Tipulidae and Limoniidae are the same family now
+  dplyr::mutate(family = ifelse(family %in% c("Tipulidae", "Limoniidae"),
+                                "Tipulidae_Limoniidae", family))
+
+# Run models
+for(h in c("family", "genus", "bwg_name")){
+  # Select list of taxa
+  taxa <- 
+    test %>%
+    dplyr::select(taxa = dplyr::all_of(h)) %>%
+    dplyr::filter(!is.na(taxa)) %>% 
+    dplyr::distinct() %>% 
+    dplyr::pull()
+  
+  # Now for each taxa within this list
+  for(i in taxa){
+    ## Let's keep track of things
+    print(h)
+    print(i)
+    ## For each element
+    for(j in c("C", "N", "P")){
+      ### Let's keep track of things
+      print(j)
+      ### Prepare data
+      dats <- 
+        test %>% 
+        dplyr::filter(.data[[h]] == i) %>% 
+        dplyr::select(Site, dplyr::all_of(h), element = dplyr::all_of(j), BS.mg) %>%
+        dplyr::filter(!is.na(element) & !is.na(BS.mg))
+      
+      ### Count how many sites for random effect
+      sites <- 
+        length(unique(dats$Site))
+      
+      ### Count number of rows
+      #### If less than 5 rows, add blank
+      if(nrow(dats) < 3){
+        model_pars <- 
+          model_pars %>% 
+          dplyr::bind_rows(tibble::tibble(taxon_level = h,
+                                          taxon_name = i,
+                                          element = j))
+        
+      } 
+      #### If more than five rows, run model
+      if(nrow(dats) > 3){
+        ##### No random effects
+        if(sites < 2){
+          model <- 
+            # brms::brm(log10(element) ~ log10(BS.mg),
+            #           iter = 2000,
+            #           family = gaussian(),      
+            #           control = list(adapt_delta = 0.99,
+            #                          max_treedepth = 15),
+            #           data = dats)
+            lm(log(element) ~ log(BS.mg),
+               data = dats)
+          
+        }
+        
+        ##### Yes random effects
+        if(sites >= 2){
+          model <- 
+            # brms::brm(log10(element) ~ log10(BS.mg) + (1|Site),
+            #           iter = 2000,
+            #           family = gaussian(),      
+            #           control = list(adapt_delta = 0.99,
+            #                          max_treedepth = 15),
+            #           data = dats)
+            lme4::lmer(log(element) ~ log(BS.mg) + (1|Site),
+                       data = dats)
+          
+          
+        }
+        
+        ##### Extract model outputs
+        outputs <- 
+          # bayestestR::describe_posterior(model)
+          car::Anova(model)
+        
+        summary <- 
+          summary(model)$coefficients %>% 
+          tibble::as_tibble()
+        
+        ##### Store in tibble
+        model_pars <- 
+          model_pars %>% 
+          # dplyr::bind_rows(tibble::tibble(taxon_level = h,
+          #                                 taxon_name = i,
+          #                                 element = j,
+          #                                 slope = outputs$Median[2],
+          #                                 intercept = outputs$Median[1],
+          #                                 pd = outputs$pd[2],
+          #                                 prcnt_rope =outputs$ROPE_Percentage[2] ,
+          #                                 r_squared = brms::bayes_R2(model)[1],
+          #                                 nsites = sites,
+          #                                 model = list(model)))
+          dplyr::bind_rows(tibble::tibble(taxon_level = h,
+                                          taxon_name = i,
+                                          element = j,
+                                          slope = summary$Estimate[2],
+                                          intercept = summary$Estimate[1],
+                                          p_value = outputs$`Pr(>Chisq)`,
+                                          nsites = sites,
+                                          model = list(model)))
+      }
+      
+    }
+    
+  }
+  
+}
+
+# Remove those models that did not work out
+model_pars_fil <- 
+  # model_pars %>% 
+  # dplyr::filter(pd > 0.95 & prcnt_rope < 0.05) %>% 
+  # dplyr::mutate(taxon = taxon_name)
+  model_pars %>% 
+  dplyr::filter(p_value < 0.01) %>% 
+  dplyr::mutate(taxon = taxon_name)
+
+
+
+# Sort later  SAME THING WITH WHICH EQUATIONS TO USE--------------------------------------------------------------
+
+
+## Add C
+biomass_stoich <- 
+  biomass_data %>% 
+  ## Add C
+  dplyr::rename(BS.mg = avg_bodymass_g) %>%
+  do_predictions(.,
+                 model_list = model_pars %>% 
+                   dplyr::filter(element == "C")) %>% 
+  dplyr::rename(C = Estimate,
+                C_err = Est.Error,
+                C_low = Q2.5,
+                C_high = Q97.5)
+
+## Add N
+biomass_stoich2 <- 
+  biomass_stoich %>% 
+  ## Add N
+  do_predictions(.,
+                 model_list = model_pars_fil %>% 
+                   dplyr::filter(element == "N")) %>% 
+  dplyr::rename(N = Estimate,
+                N_err = Est.Error,
+                N_low = Q2.5,
+                N_high = Q97.5)
+
+## Add P
+biomass_stoich3 <- 
+  biomass_stoich2 %>% 
+  ## Add N
+  do_predictions(do_predictions(.,
+                                model_list = model_pars_fil %>% 
+                                  dplyr::filter(element == "P")) %>% 
+  dplyr::rename(P = Estimate,
+                P_err = Est.Error,
+                P_low = Q2.5,
+                P_high = Q97.5)
+  
+
+## Save
+
+tt=
+  biomass_data %>% 
+  ## Add C
+  dplyr::left_join(stoich_dic %>% 
+                     dplyr::filter(element == "C") %>% 
+                     dplyr::select(-taxon, -element),
+                   by = "bwg_name") %>% 
+  dplyr::rename(BS.mg = avg_bodymass_g) %>%
+  do_predictions() %>% 
+  dplyr::rename(C = Estimate,
+                C_err = Est.Error,
+                C_low = Q2.5,
+                C_high = Q97.5)

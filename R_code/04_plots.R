@@ -197,31 +197,39 @@ ggplot2::ggsave(here::here("plots",
 
 
 # Figure 2 (run script 03) ------------------------------------------------
+## Plot by hand because here covariate
+# Get effect
+model_effect <- 
+  brms::conditional_effects(cpi_model_P,
+                            method = "fitted")$cons_P %>% 
+  dplyr::mutate(estimate__ = exp(estimate__),
+                lower__ = exp(lower__),
+                upper__ = exp(upper__))
+
 # Fig2a
 fig2a <- 
-  ggplot(data = fluxes_long_percons %>% 
-           dplyr::filter(site %in% c("CARDO", "CARDC", "PTL")),
-         aes(x = jitter(cons_P_mean),
+  ggplot(data = fluxes_long_percons,
+         aes(x = jitter(cons_P),
              y = cons_CPI_crisp)) +
   ## Add raw data points
-  geom_jitter(colour = "lightsteelblue3",
-              alpha = 0.5) +
+  geom_jitter(colour = "lightsteelblue4",
+              alpha = 0.4) +
   ## Line
   geom_line(data = model_effect,
-            aes(x = cons_P_mean,
+            aes(x = cons_P,
                 y = estimate__),
             linewidth = 1.2,
             colour = "steelblue") +
   ## Confidence interval
   geom_ribbon(data = model_effect,
-              aes(x = cons_P_mean,
+              aes(x = cons_P,
                   ymin = lower__,
                   ymax = upper__),
               alpha = 0.5,
               colour = NA,
               fill = "steelblue") +
   ## Styling
-  xlab(full_label("cons_P_mean")) +
+  xlab(full_label("cons_P")) +
   ylab(full_label("cons_CPI_crisp")) + 
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
@@ -239,20 +247,19 @@ fig2b <-
 # Fig 2c
 fig2c <- 
   basic_line(model = fluxprop_model_p, 
-             dats = fluxes_long_percons %>%
-               dplyr::filter(site %in% c("CARDO", "CARDC", "PTL")), 
-             x_var = "cons_P_mean", 
+             dats = fluxes_long_percons, 
+             x_var = "cons_P", 
              y_var = "flux_prop",
              scale = "sqrt")
 
 # Compile
 fig2 <- 
   cowplot::plot_grid(plotlist = list(fig2a +
-                                       ggtitle("a"), 
+                                       ggtitle("(a)"), 
                                      fig2b +
-                                       ggtitle("b"), 
+                                       ggtitle("(b)"), 
                                      fig2c +
-                                       ggtitle("c")),
+                                       ggtitle("(c)")),
                      nrow = 2)
 
 # Save
@@ -270,27 +277,54 @@ ggplot2::ggsave(filename = here::here("plots",
 # Fig 3a
 fig3a <- 
   basic_line(model = fluxprop_model_cndist, 
-             dats = fluxes_long_perpair, 
+             dats = fluxes_long_perpair %>% 
+               dplyr::mutate(flux_prop_pair = flux_prop_pair + 0.0000000001), 
              x_var = "CN_dist", 
-             y_var = "flux_prop",
-             scale = "sqrt")
+             y_var = "flux_prop_pair",
+             scale = "log") +
+  scale_y_continuous(trans = "log10",
+                     breaks = c(0.0000000001,
+                                0.00000001,
+                                0.00001,
+                                0.001,
+                                0.1,
+                                1),
+                     labels = c("1 e-10",
+                                "1 e-7",
+                                "1 e-5",
+                                "0.001",
+                                "0.1",
+                                "1"))
 
 # Fig 3b
 fig3b <- 
   basic_line(model = fluxprop_model_cnpdist, 
-             dats = fluxes_long_perpair %>%
-               dplyr::filter(site %in% c("CARDO", "CARDC", "PTL")), 
+             dats = fluxes_long_perpair %>% 
+               dplyr::mutate(flux_prop_pair = flux_prop_pair + 0.0000000001), 
              x_var = "CNP_dist", 
-             y_var = "flux_prop",
-             scale = "sqrt")
+             y_var = "flux_prop_pair",
+             scale = "log") +
+  scale_y_continuous(trans = "log10",
+                     breaks = c(0.0000000001,
+                                0.00000001,
+                                0.00001,
+                                0.001,
+                                0.1,
+                                1),
+                     labels = c("1 e-10",
+                                "1 e-7",
+                                "1 e-5",
+                                "0.001",
+                                "0.1",
+                                "1"))
 
 
 # Compile
 fig3 <- 
   cowplot::plot_grid(plotlist = list(fig3a + 
-                                       ggtitle("a"), 
+                                       ggtitle("(a)"), 
                                      fig3b +
-                                       ggtitle("b")),
+                                       ggtitle("(b)")),
                      nrow = 1)
 
 # Save
@@ -310,7 +344,10 @@ fig4a <-
              dats = fluxes_long_perbrom, 
              x_var = "avg_CN_dist", 
              y_var= "totalflow_Jy",
-             scale = "log")
+             scale = "log") +
+  scale_y_continuous(trans = "log",
+                     breaks = c(0.01, 1, 20, 500, 1500),
+                     labels = c("0.1", "1", "20", "500", "1500"))
 
 # Fig 4b
 fig4b <- 
@@ -318,36 +355,43 @@ fig4b <-
              dats = fluxes_long_perbrom, 
              x_var = "avg_CN_dist", 
              y_var= "predflow_Jy",
-             scale = "log")
+             scale = "log") +
+  scale_y_continuous(trans = "log",
+                     breaks = c(0.01, 1, 20, 500, 1500),
+                     labels = c("0.1", "1", "20", "500", "1500"))
 
-# Fig 2c
+# Fig 4c
 fig4c <- 
   basic_line(model = totalflow_model_CNPdist, 
-             dats = fluxes_long_perbrom %>%
-               dplyr::filter(site %in% c("CARDO", "CARDC", "PTL")), 
+             dats = fluxes_long_perbrom, 
              x_var = "avg_CNP_dist", 
              y_var = "totalflow_Jy",
-             scale = "log")
+             scale = "log") +
+  scale_y_continuous(trans = "log",
+                     breaks = c(0.01, 1, 20, 500, 1500),
+                     labels = c("0.1", "1", "20", "500", "1500"))
 
 # Fig 4d
 fig4d <- 
   basic_line(model = predflow_model_CNPdist, 
-             dats = fluxes_long_perbrom %>%
-               dplyr::filter(site %in% c("CARDO", "CARDC", "PTL")), 
+             dats = fluxes_long_perbrom, 
              x_var = "avg_CNP_dist", 
              y_var = "predflow_Jy",
-             scale = "log")
+             scale = "log") +
+  scale_y_continuous(trans = "log",
+                     breaks = c(0.01, 1, 20, 500, 1500),
+                     labels = c("0.1", "1", "20", "500", "1500"))
 
 # Compile
 fig4 <- 
   cowplot::plot_grid(plotlist = list(fig4a +
-                                       ggtitle("a"), 
+                                       ggtitle("(a)"), 
                                      fig4b +
-                                       ggtitle("b"), 
+                                       ggtitle("(b)"), 
                                      fig4c +
-                                       ggtitle("c"), 
+                                       ggtitle("(c)"), 
                                      fig4d +
-                                       ggtitle("d")),
+                                       ggtitle("(d)")),
                      nrow = 2)
 
 # Save
@@ -356,5 +400,80 @@ ggplot2::ggsave(filename = here::here("plots",
                 fig4,
                 height = 10,
                 width = 10)
+
+
+
+# Figure S1 (run script 03) ------------------------------------------------
+# Fig s1a
+figs1a <- 
+  basic_line(model = fluxraw_model_cpi, 
+             dats = fluxes_long_percons %>% 
+               dplyr::mutate(flux_raw = flux_raw + 0.0000000001), 
+             x_var = "cons_CPI_crisp", 
+             y_var= "flux_raw",
+             scale = "log") +
+  scale_y_continuous(trans = "log",
+                     breaks = c(0.01, 1, 20, 300, 900),
+                     labels = c("0.1", "1", "20", "300", "900")) +
+  theme(axis.title.y = element_text(margin = margin(r = 0, l = 5)))
+
+# Fig s1b
+figs1b <- 
+  basic_line(model = fluxraw_model_p, 
+             dats = fluxes_long_percons %>% 
+               dplyr::mutate(flux_raw = flux_raw + 0.0000000001), 
+             x_var = "cons_P", 
+             y_var = "flux_raw",
+             scale = "log") +
+  scale_y_continuous(trans = "log",
+                     breaks = c(0.01, 1, 20, 300, 900),
+                     labels = c("0.1", "1", "20", "300", "900")) +
+  theme(axis.title.y = element_text(margin = margin(r = 0, l = 5)))
+
+# Fig s1c
+figs1c <- 
+  basic_line(model = fluxraw_model_cndist, 
+             dats = fluxes_long_perpair %>% 
+               dplyr::mutate(flux_raw_pair = flux_raw_pair + 0.0000000001), 
+             x_var = "CN_dist", 
+             y_var= "flux_raw_pair",
+             scale = "log") +
+  scale_y_continuous(trans = "log",
+                     breaks = c(0.01, 1, 20, 300, 900),
+                     labels = c("0.1", "1", "20", "300", "900")) +
+  theme(axis.title.y = element_text(margin = margin(r = 0,  l = 5)))
+
+# Fig s1d
+figs1d <- 
+  basic_line(model = fluxraw_model_cnpdist, 
+             dats = fluxes_long_perpair %>% 
+               dplyr::mutate(flux_raw_pair = flux_raw_pair + 0.0000000001), 
+             x_var = "CNP_dist", 
+             y_var= "flux_raw_pair",
+             scale = "log") +
+  scale_y_continuous(trans = "log",
+                     breaks = c(0.01, 1, 20, 300, 900),
+                     labels = c("0.1", "1", "20", "300", "900")) +
+  theme(axis.title.y = element_text(margin = margin(r = 0,  l = 5)))
+
+
+# Compile
+figs1 <- 
+  cowplot::plot_grid(plotlist = list(figs1a +
+                                       ggtitle("(a)"), 
+                                     figs1b +
+                                       ggtitle("(b)"),
+                                     figs1c +
+                                       ggtitle("(c)"),
+                                     figs1d +
+                                       ggtitle("(d)")), 
+                     nrow = 2)
+
+# Save
+ggplot2::ggsave(filename = here::here("plots",
+                                      "figs1.pdf"),
+                figs1,
+                height = 10,
+                width = 12)
 
 
