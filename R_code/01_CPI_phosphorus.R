@@ -728,13 +728,13 @@ for(h in c("family", "genus", "bwg_name")){
         ##### No random effects
         if(sites < 2){
           model <- 
-            # brms::brm(log10(element) ~ log10(BS.mg),
+            # brms::brm(element ~ log(BS.mg),
             #           iter = 2000,
             #           family = gaussian(),      
             #           control = list(adapt_delta = 0.99,
             #                          max_treedepth = 15),
             #           data = dats)
-            lm(log(element) ~ log(BS.mg),
+            lm(element ~ log(BS.mg),
                data = dats)
           
           }
@@ -742,13 +742,13 @@ for(h in c("family", "genus", "bwg_name")){
         ##### Yes random effects
         if(sites >= 2){
           model <- 
-            # brms::brm(log10(element) ~ log10(BS.mg) + (1|Site),
+            # brms::brm(element ~ (BS.mg) + (1|Site),
             #           iter = 2000,
             #           family = gaussian(),      
             #           control = list(adapt_delta = 0.99,
             #                          max_treedepth = 15),
             #           data = dats)
-            lme4::lmer(log(element) ~ log(BS.mg) + (1|Site),
+            lme4::lmer(element ~ log(BS.mg) + (1|Site),
                        data = dats)
           
           
@@ -798,7 +798,7 @@ model_pars_fil <-
   # dplyr::filter(pd > 0.95 & prcnt_rope < 0.05) %>% 
   # dplyr::mutate(taxon = taxon_name)
   model_pars %>% 
-  dplyr::filter(p_value < 0.01) %>% 
+  dplyr::filter(p_value < 0.05) %>% 
   dplyr::mutate(taxon = taxon_name)
 
 # Use biomass data to estimate stoichiometry -----------------------------------------------------

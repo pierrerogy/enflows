@@ -15,7 +15,7 @@ library(ggeffects)
 #                              "fluxes_long_perpair_01.csv"))
 fluxes_long_perbrom <- 
   readr::read_csv(here::here("data",
-                             "fluxes_long_perbrom_01.csv"))
+                             "fluxes_long_perbrom_10.csv"))
 
 # # Hypothesis 1 - more energy flow with low CPI/high P (P only where measured)------------------------------------------------------------
 # # Linear model of RELATIVE energy flow entering consumer node ~ CPI score
@@ -112,7 +112,6 @@ fluxes_long_perbrom <-
 #               log(CNP_dist) + (1|bromeliad_id/site),
 #             iter = 20000,
 #             family = gaussian(),   
-#             chains = 3,
 #             control = list(adapt_delta = 0.95,
 #                            max_treedepth = 15),
 #             data = fluxes_long_perpair)
@@ -174,7 +173,7 @@ totalflow_model_cndist <-
 # Save
 readr::write_rds(x = totalflow_model_cndist,
                  file = here::here("data",
-                                   "totalflow_model_cndist_01.RDS"))
+                                   "totalflow_model_cndist_10.RDS"))
 
 # Total flow CNP distance
 ## Model
@@ -191,7 +190,7 @@ totalflow_model_cnpdist <-
 # Save
 readr::write_rds(x = totalflow_model_cnpdist,
                  file = here::here("data",
-                                   "totalflow_model_cnpdist_01.RDS"))
+                                   "totalflow_model_cnpdist_10.RDS"))
 
 
 # Predator flow CN distance
@@ -209,7 +208,7 @@ predflow_model_cndist <-
 # Save
 readr::write_rds(x = predflow_model_cndist,
                  file = here::here("data",
-                                   "predflow_model_cndist_01.RDS"))
+                                   "predflow_model_cndist_10.RDS"))
 
 # Predator flow CNP distance
 ## Model
@@ -226,4 +225,4 @@ predflow_model_cnpdist <-
 # Save
 readr::write_rds(x = predflow_model_cnpdist,
                  file = here::here("data",
-                                   "predflow_model_cnpdist_01.RDS"))
+                                   "predflow_model_cnpdist_10.RDS"))

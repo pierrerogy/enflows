@@ -692,46 +692,16 @@ basic_line <- function(model, dats, x_var, y_var, scale = "none"){
   model_effect <- 
     brms::conditional_effects(model,
                               method = "fitted")[[1]] 
-  # Rescale effect
-  if(scale == "log"){
-    model_effect <- 
-      model_effect %>% 
-      dplyr::mutate(dplyr::across(c(estimate__, lower__, upper__),
-                                  ~exp(.)))
-    # dats <- 
-    #   dats %>% 
-    #   dplyr::mutate(dplyr::across(dplyr::all_of(y_var),
-    #                               ~log(.)))
-      
-  } else if(scale == "sqrt"){
-    model_effect <- 
-      model_effect %>% 
-      dplyr::mutate(dplyr::across(c(estimate__, lower__, upper__),
-                                  ~(.)^2))
-    # dats <- 
-    #   dats %>% 
-    #   dplyr::mutate(dplyr::across(dplyr::all_of(y_var),
-    #                               ~sqrt(.)))
-  } else if(scale == "third"){
-    model_effect <- 
-      model_effect %>% 
-      dplyr::mutate(dplyr::across(c(estimate__, lower__, upper__),
-                                  ~(.)^3))
-    # dats <- 
-    #   dats %>% 
-    #   dplyr::mutate(dplyr::across(dplyr::all_of(y_var),
-    #                               ~sqrt(.)))
-  }
-  
+
   # Make plot
   ret <- 
     ggplot(data = model_effect,
-         aes(x = .data[[x_var]],
+         aes(x = log(.data[[x_var]]),
              y = estimate__)) +
     ## Add raw data points
     geom_jitter(data = dats,
-               aes(x = .data[[x_var]],
-                   y = .data[[y_var]]),
+               aes(x = log(.data[[x_var]]),
+                   y = log(.data[[y_var]])),
                colour = "lightsteelblue4",
                alpha = 0.4) +
     ## Line

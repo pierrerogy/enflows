@@ -12,6 +12,18 @@ library(bayestestR)
 library(DescTools)
 library(ggeffects)
 
+# Load data
+fluxes_long_percons <- 
+  readr::read_csv(here::here("data",
+                             "fluxes_long_percons.csv"))
+fluxes_long_perpair <-
+  readr::read_csv(here::here("data",
+                             "fluxes_long_perpair.csv"))
+fluxes_long_perbrom <-
+  readr::read_csv(here::here("data",
+                             "fluxes_long_perbrom.csv"))
+
+
 # Read RDS if needed
 cpi_model_P <- 
   readr::read_rds(here::here("data",
@@ -30,7 +42,7 @@ fluxraw_model_p <-
                              "fluxraw_model_p.RDS"))
 fluxprop_model_cndist <- 
   readr::read_rds(here::here("data",
-                             "fluxprop_model_cndist.RDS"))
+                             "fluxprop_smallmodel_cndist.RDS"))
 fluxprop_model_cnpdist <- 
   readr::read_rds(here::here("data",
                              "fluxprop_model_cnpdist.RDS"))
@@ -40,6 +52,18 @@ fluxraw_model_cndist <-
 fluxraw_model_cnpdist <- 
   readr::read_rds(here::here("data",
                              "fluxraw_model_cnpdist.RDS"))
+totalflow_model_cndist <- 
+  readr::read_rds(here::here("data",
+                             "totalflow_model_cndist.RDS"))
+totalflow_model_cnpdist <- 
+  readr::read_rds(here::here("data",
+                             "totalflow_model_cnpdist.RDS"))
+predflow_model_cndist <- 
+  readr::read_rds(here::here("data",
+                             "predflow_model_cndist.RDS"))
+predflow_model_cnpdist <- 
+  readr::read_rds(here::here("data",
+                             "predflow_model_cnpdist.RDS"))
 
 # Hypothesis 1 - more energy flow with low CPI/high P (P only where measured)------------------------------------------------------------
 # Relation between P and CPI
@@ -80,7 +104,7 @@ bayestestR::describe_posterior(fluxprop_model_cpi)
 fluxraw_model_cpi <- 
   brms::brm(log(flux_raw + 0.001) ~
               log(cons_CPI_crisp) + (1|bromeliad_id/site),
-            iter = 50000,
+            iter = 20000,
             family = gaussian(),   
             control = list(adapt_delta = 0.99,
                            max_treedepth = 15),
@@ -106,7 +130,7 @@ bayestestR::describe_posterior(fluxprop_model_p)
 fluxraw_model_p <-
   brms::brm(log(flux_raw + 0.001) ~
               log(cons_P) + (1|bromeliad_id/site),
-            iter = 50000,
+            iter = 20000,
             family = gaussian(),
             control = list(adapt_delta = 0.95,
                            max_treedepth = 15),
@@ -139,7 +163,6 @@ fluxprop_model_cnpdist <-
               log(CNP_dist) + (1|bromeliad_id/site),
             iter = 50000,
             family = gaussian(),   
-            chains = 3,
             control = list(adapt_delta = 0.95,
                            max_treedepth = 15),
             data = fluxes_long_perpair)
@@ -181,8 +204,8 @@ hist(log(fluxes_long_perbrom$avg_CNP_dist))
 
 # Total flow CN distance
 ## Model
-totalflow_model_CNdist <- 
-  brms::brm(log(totalflow_Jy + 0.001) ~
+totalflow_model_cndist <- 
+  brms::brm(log(totalflow_Jy) ~
               log(avg_CN_dist) + (1|site),
             iter = 20000,
             family = gaussian(),      
@@ -190,12 +213,12 @@ totalflow_model_CNdist <-
                            max_treedepth = 15),
             data = fluxes_long_perbrom)
 ## Look at the effect
-bayestestR::describe_posterior(totalflow_model_CNdist)
+bayestestR::describe_posterior(totalflow_model_cndist)
 
 # Total flow CNP distance
 ## Model
-totalflow_model_CNPdist <- 
-  brms::brm(log(totalflow_Jy + 0.001) ~
+totalflow_model_cnpdist <- 
+  brms::brm(log(totalflow_Jy) ~
               log(avg_CNP_dist) + (1|site),
             iter = 20000,
             family = gaussian(),      
@@ -203,12 +226,12 @@ totalflow_model_CNPdist <-
                            max_treedepth = 15),
             data = fluxes_long_perbrom)
 ## Look at the effect
-bayestestR::describe_posterior(totalflow_model_CNPdist)
+bayestestR::describe_posterior(totalflow_model_cnpdist)
 
 # Predator flow CN distance
 ## Model
-predflow_model_CNdist <- 
-  brms::brm(log(predflow_Jy + 0.001) ~
+predflow_model_cndist <- 
+  brms::brm(log(predflow_Jy) ~
               log(avg_CN_dist) + (1|site),
             iter = 20000,
             family = gaussian(),      
@@ -216,12 +239,12 @@ predflow_model_CNdist <-
                            max_treedepth = 15),
             data = fluxes_long_perbrom)
 ## Look at the effect
-bayestestR::describe_posterior(predflow_model_CNdist)
+bayestestR::describe_posterior(predflow_model_cndist)
 
 # Predator flow CNP distance
 ## Model
-predflow_model_CNPdist <- 
-  brms::brm(log(predflow_Jy + 0.001) ~
+predflow_model_cnpdist <- 
+  brms::brm(log(predflow_Jy) ~
               log(avg_CNP_dist) + (1|site),
             iter = 20000,
             family = gaussian(),      
@@ -229,10 +252,7 @@ predflow_model_CNPdist <-
                            max_treedepth = 15),
             data = fluxes_long_perbrom)
 ## Look at the effect
-bayestestR::describe_posterior(predflow_model_CNPdist)
-
-
-
+bayestestR::describe_posterior(predflow_model_cnpdist)
 
 
 

@@ -112,7 +112,6 @@ fluxprop_model_cnpdist <-
               log(CNP_dist) + (1|bromeliad_id/site),
             iter = 20000,
             family = gaussian(),   
-            chains = 3,
             control = list(adapt_delta = 0.95,
                            max_treedepth = 15),
             data = fluxes_long_perpair)

@@ -112,7 +112,6 @@ fluxprop_model_cnpdist <-
               log(CNP_dist) + (1|bromeliad_id/site),
             iter = 20000,
             family = gaussian(),   
-            chains = 3,
             control = list(adapt_delta = 0.95,
                            max_treedepth = 15),
             data = fluxes_long_perpair)
@@ -126,7 +125,7 @@ readr::write_rds(x = fluxprop_model_cnpdist,
 # With CN distance - raw
 ## Model
 fluxraw_model_cndist <- 
-  brms::brm(log(flux_raw_pair + 0.01) ~
+  brms::brm(log(flux_raw_pair + 0.001) ~
               log(CN_dist) + (1|bromeliad_id/site),
             iter = 20000,
             family = gaussian(),      
@@ -162,7 +161,7 @@ readr::write_rds(x = fluxraw_model_cnpdist,
 # Total flow CN distance
 ## Model
 totalflow_model_cndist <- 
-  brms::brm(log(totalflow_Jy + 0.001) ~
+  brms::brm(log(totalflow_Jy) ~
               log(avg_CN_dist) + (1|site),
             iter = 20000,
             family = gaussian(),      
@@ -174,12 +173,12 @@ totalflow_model_cndist <-
 # Save
 readr::write_rds(x = totalflow_model_cndist,
                  file = here::here("data",
-                                   "totalflow_model_cndist_01.RDS"))
+                                   "totalflow_model_cndist.RDS"))
 
 # Total flow CNP distance
 ## Model
 totalflow_model_cnpdist <- 
-  brms::brm(log(totalflow_Jy + 0.001) ~
+  brms::brm(log(totalflow_Jy) ~
               log(avg_CNP_dist) + (1|site),
             iter = 20000,
             family = gaussian(),      
@@ -191,13 +190,13 @@ totalflow_model_cnpdist <-
 # Save
 readr::write_rds(x = totalflow_model_cnpdist,
                  file = here::here("data",
-                                   "totalflow_model_cnpdist_01.RDS"))
+                                   "totalflow_model_cnpdist.RDS"))
 
 
 # Predator flow CN distance
 ## Model
 predflow_model_cndist <- 
-  brms::brm(log(predflow_Jy + 0.001) ~
+  brms::brm(log(predflow_Jy) ~
               log(avg_CN_dist) + (1|site),
             iter = 20000,
             family = gaussian(),      
@@ -209,12 +208,12 @@ predflow_model_cndist <-
 # Save
 readr::write_rds(x = predflow_model_cndist,
                  file = here::here("data",
-                                   "predflow_model_cndist_01.RDS"))
+                                   "predflow_model_cndist.RDS"))
 
 # Predator flow CNP distance
 ## Model
 predflow_model_cnpdist <- 
-  brms::brm(log(predflow_Jy + 0.001) ~
+  brms::brm(log(predflow_Jy) ~
               log(avg_CNP_dist) + (1|site),
             iter = 20000,
             family = gaussian(),      
@@ -226,4 +225,4 @@ predflow_model_cnpdist <-
 # Save
 readr::write_rds(x = predflow_model_cnpdist,
                  file = here::here("data",
-                                   "predflow_model_cnpdist_01.RDS"))
+                                   "predflow_model_cnpdist.RDS"))
