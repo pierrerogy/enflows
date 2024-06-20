@@ -10,6 +10,7 @@ library(sp)
 library(cheddar)
 library(viridis)
 library(brms)
+library(latex2exp)
 
 # Download data from chelsa -----------------------------------------------
 get_chelsa <- function(txt_file, output_folder){
@@ -626,6 +627,10 @@ full_label <- function(var, scale = "none"){
     ret <- 
       "Euclidean distance in CN plane\n of a consumer-resource pair"
   
+  if(var == "CP_dist")
+    ret <- 
+      "Euclidean distance in CP plane\n of a consumer-resource pair"
+  
   if(var == "CNP_dist")
     ret <- 
       "Euclidean distance in CNP space\n of a consumer-resource pair"
@@ -633,6 +638,10 @@ full_label <- function(var, scale = "none"){
   if(var == "avg_CN_dist")
     ret <- 
       "Mean Euclidean distance between \nconsumers in CN plane"
+  
+  if(var == "avg_CP_dist")
+    ret <- 
+      "Mean Euclidean distance between \nconsumers in CP plane"
   
   if(var == "avg_CNP_dist")
     ret <- 
@@ -687,22 +696,24 @@ full_label <- function(var, scale = "none"){
 }
 
 # Basic line plot ---------------------------------------------------------
-basic_line <- function(model, dats, x_var, y_var, scale = "none"){
+basic_line <- function(model, dats, x_var, y_var, index = 1, colour = NA, scale = "none"){
   # Get effect
   model_effect <- 
     brms::conditional_effects(model,
-                              method = "fitted")[[1]] 
+                              method = "fitted")[[index]]
 
-  # Make plot
+  # Make plot, depending on if we want the interaction or not
+  if(scale == "x_original"){
+    if(index !=3){
   ret <- 
     ggplot(data = model_effect,
-         aes(x = log(.data[[x_var]]),
+         aes(x = .data[[x_var]],
              y = estimate__)) +
     ## Add raw data points
     geom_jitter(data = dats,
-               aes(x = log(.data[[x_var]]),
+               aes(x = .data[[x_var]],
                    y = log(.data[[y_var]])),
-               colour = "lightsteelblue4",
+               width = 0.001,
                alpha = 0.4) +
     ## Line
     geom_line(linewidth = 1.2,
@@ -719,7 +730,130 @@ basic_line <- function(model, dats, x_var, y_var, scale = "none"){
     theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(),
           panel.background = element_blank(), 
-          axis.line = element_line(colour = "black")) 
+          axis.line = element_line(colour = "black"))} else
+            {## Modify data so that lines only show in the original point range
+              model_effect <- 
+                get_point_range(x_var = x_var,
+                                model_effect = model_effect,
+                                dats = dats)
+              
+              ## Plot
+              ret <- 
+                ggplot(data = model_effect,
+                       aes(x = .data[[x_var]],
+                           y = estimate__,
+                           colour = effect2__)) +
+                ## Add raw data points
+                geom_jitter(data = dats,
+                            aes(x = .data[[x_var]],
+                                y = log(.data[[y_var]]),
+                                colour = .data[[colour]]),
+                            width = 0.001,
+                            alpha = 0.4) +
+                ## Line
+                geom_line(aes(group = .data[[colour]]),
+                          colour = "black",
+                          linewidth = 1.2) +
+                ## Confidence interval
+                geom_ribbon(aes(ymin = lower__,
+                                ymax = upper__,
+                                group = .data[[colour]],
+                                fill = .data[[colour]]),
+                            alpha = 0.5) +
+                ## Styling
+                xlab(full_label(x_var)) +
+                ylab(full_label(y_var)) + 
+                scale_colour_manual(paste(stringr::str_remove(string = colour,
+                                                                       pattern = "lower_cons_"),
+                                                   "ratio of\nconsumer\nvs. resource"),
+                                    values = c("burlywood4", "cadetblue4"),
+                                    labels = c("Higher", "Lower")) +
+                scale_fill_manual(paste(stringr::str_remove(string = colour,
+                                                              pattern = "lower_cons_"),
+                                          "ratio of\nconsumer\nvs. resource"),
+                                    values = c("burlywood4", "cadetblue4"),
+                                    labels = c("Higher", "Lower")) +
+                theme(panel.grid.major = element_blank(), 
+                      panel.grid.minor = element_blank(),
+                      panel.background = element_blank(), 
+                      axis.line = element_line(colour = "black"))}} 
+  else{ 
+    if(index == 3) 
+      {## Modify data so that lines only show in the original point range
+      model_effect <- 
+        get_point_range(x_var = x_var,
+                        model_effect = model_effect,
+                        dats = dats)
+      
+      
+      ## Plot
+      ret <- 
+      ggplot(data = model_effect,
+             aes(x = log(.data[[x_var]]),
+                 y = estimate__,
+                 colour = effect2__)) +
+      ## Add raw data points
+      geom_jitter(data = dats,
+                  aes(x = log(.data[[x_var]]),
+                      y = log(.data[[y_var]]),
+                      colour = .data[[colour]]),
+                  width = 0.3,
+                  alpha = 0.4) +
+      ## Line
+      geom_line(aes(group = .data[[colour]]),
+                linewidth = 1.2) +
+      ## Confidence interval
+      geom_ribbon(aes(ymin = lower__,
+                      ymax = upper__,
+                      group = .data[[colour]],
+                      fill = .data[[colour]]),
+                  alpha = 0.5) +
+      ## Styling
+      xlab(full_label(x_var)) +
+      ylab(full_label(y_var)) + 
+      scale_colour_manual(paste(stringr::str_remove(string = colour,
+                                                    pattern = "lower_cons_"),
+                                "ratio of\nconsumer\nvs. resource"),
+                          values = c("burlywood4", "cadetblue4"),
+                          labels = c("Higher", "Lower")) +
+      scale_fill_manual(paste(stringr::str_remove(string = colour,
+                                                  pattern = "lower_cons_"),
+                              "ratio of\nconsumer\nvs. resource"),
+                        values = c("burlywood4", "cadetblue4"),
+                        labels = c("Higher", "Lower")) +
+        theme(panel.grid.major = element_blank(), 
+              panel.grid.minor = element_blank(),
+              panel.border = element_rect(colour = "black", 
+                                          fill = NA))} else
+             {
+                ret <- 
+                  ggplot(data = model_effect,
+                         aes(x = log(.data[[x_var]]),
+                             y = estimate__)) +
+                  ## Add raw data points
+                  geom_jitter(data = dats,
+                              aes(x = log(.data[[x_var]]),
+                                  y = log(.data[[y_var]])),
+                              width = 0.001,
+                              alpha = 0.4) +
+                  ## Line
+                  geom_line(linewidth = 1.2,
+                            colour = "steelblue") +
+                  ## Confidence interval
+                  geom_ribbon(aes(ymin = lower__,
+                                  ymax = upper__),
+                              alpha = 0.5,
+                              colour = NA,
+                              fill = "steelblue") +
+                  ## Styling
+                  xlab(full_label(x_var)) +
+                  ylab(full_label(y_var)) + 
+                  theme(panel.grid.major = element_blank(), 
+                        panel.grid.minor = element_blank(),
+                        panel.border = element_rect(colour = "black", 
+                                                    fill = NA))
+              }
+                    
   
   # Return plot
   return(ret)
@@ -727,8 +861,217 @@ basic_line <- function(model, dats, x_var, y_var, scale = "none"){
   
   
   
+}}
+
+
+# Subsetted line plot ---------------------------------------------------------
+subset_line <- function(model, dats, x_var, y_var, index = 1, colour = NA){
+  
+  # Get effect
+  model_effect <- 
+    brms::conditional_effects(model,
+                              method = "fitted")[[index]] 
+  
+  # Subset model effect data with point range
+  if(index == 3)
+    model_effect <- 
+      get_point_range(x_var = x_var,
+                      model_effect = model_effect,
+                      dats = dats)
+  
+  # Subset depending on y variable
+  if(x_var == "CN_dist"){
+    ## Filter in model effect
+    model_effect <-
+      model_effect %>% 
+      dplyr::filter(log(CN_dist) > -10) %>% 
+      dplyr::filter(estimate__ < 3)
+    
+    ## Filter in data
+    dats <-
+      dats %>% 
+      dplyr::filter(log(CN_dist) > -10) %>% 
+      dplyr::filter(log(flux_raw_pair)< 3)
+    
+  } else if(x_var == "CP_dist"){
+    ## Filter in model effect
+    model_effect <-
+      model_effect %>% 
+      dplyr::filter(log(CP_dist) > -6) %>% 
+      dplyr::filter(estimate__ < 3)
+    
+    ## Filter in data
+    dats <-
+      dats %>% 
+      dplyr::filter(log(CP_dist) > -6) %>% 
+      dplyr::filter(log(flux_raw_pair)< 3)
+    
+  } else if(x_var == "CNP_dist"){
+  ## Filter in model effect
+  model_effect <-
+    model_effect %>% 
+    dplyr::filter(log(CNP_dist) > -6) %>% 
+    dplyr::filter(estimate__ < 3)
+  
+  ## Filter in data
+  dats <-
+    dats %>% 
+    dplyr::filter(log(CNP_dist) > -6) %>% 
+    dplyr::filter(log(flux_raw_pair)< 3)
+  }
+  else if(x_var == "avg_CN_dist" ){
+    ## Filter in model effect
+    model_effect <-
+      model_effect %>% 
+      dplyr::filter(log(avg_CN_dist) > -7) %>% 
+      dplyr::filter(estimate__ < 5)
+    
+    ## Filter in data
+    dats <-
+      dats %>% 
+      dplyr::filter(log(avg_CN_dist) > -7) %>% 
+      dplyr::filter(log(totalflow_Jy)< 5)
+    
+  } else if(x_var == "avg_CP_dist" ){
+    ## Filter in model effect
+    model_effect <-
+      model_effect %>% 
+      dplyr::filter(log(avg_CP_dist) > -7) %>% 
+      dplyr::filter(estimate__ < 5)
+    
+    ## Filter in data
+    dats <-
+      dats %>% 
+      dplyr::filter(log(avg_CP_dist) > -7) %>% 
+      dplyr::filter(log(totalflow_Jy)< 5)
+    
+  } else if(x_var == "avg_CNP_dist" ){
+    ## Filter in model effect
+    model_effect <-
+      model_effect %>% 
+      dplyr::filter(log(avg_CNP_dist) > -7) %>% 
+      dplyr::filter(estimate__ < 5)
+    
+    ## Filter in data
+    dats <-
+      dats %>% 
+      dplyr::filter(log(avg_CNP_dist) > -7) %>% 
+      dplyr::filter(log(totalflow_Jy)< 5)
+    
+  }
+  
+  # Make plot with colours
+  if(index == 3){
+  ret <- 
+    ggplot(data = model_effect,
+           aes(x = log(.data[[x_var]]),
+               y = estimate__,
+               colour = effect2__)) +
+    ## Add raw data points
+    geom_jitter(data = dats,
+                aes(x = log(.data[[x_var]]),
+                    y = log(.data[[y_var]]),
+                    colour = .data[[colour]]),
+                width = 0.2,
+                alpha = 0.4) +
+    ## Line
+    geom_line(aes(group = .data[[colour]]),
+              linewidth = 1.2) +
+    ## Confidence interval
+    geom_ribbon(aes(ymin = lower__,
+                    ymax = upper__,
+                    group = .data[[colour]],
+                    fill = .data[[colour]]),
+                alpha = 0.5) +
+    ## Styling
+    xlab(full_label(x_var)) +
+    ylab(full_label(y_var)) + 
+    scale_colour_manual(paste(stringr::str_remove(string = colour,
+                                                  pattern = "lower_cons_"),
+                              "ratio of\nconsumer\nvs. resource"),
+                        values = c("burlywood4", "cadetblue4"),
+                        labels = c("Higher", "Lower")) +
+    scale_fill_manual(paste(stringr::str_remove(string = colour,
+                                                pattern = "lower_cons_"),
+                            "ratio of\nconsumer\nvs. resource"),
+                      values = c("burlywood4", "cadetblue4"),
+                      labels = c("Higher", "Lower")) +
+    theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          panel.background = element_blank(), 
+          axis.line = element_line(colour = "black"))
+  
+  } else 
+    # Make plot without colours
+    if(index == 1){
+      ret <- 
+        ggplot(data = model_effect,
+               aes(x = log(.data[[x_var]]),
+                   y = estimate__)) +
+        ## Add raw data points
+        geom_jitter(data = dats,
+                    aes(x = log(.data[[x_var]]),
+                        y = log(.data[[y_var]])),
+                    width = 0.03,
+                    alpha = 0.4) +
+        ## Line
+        geom_line(linewidth = 1.2,
+                  colour = "steelblue") +
+        ## Confidence interval
+        geom_ribbon(aes(ymin = lower__,
+                        ymax = upper__),
+                    alpha = 0.5,
+                    colour = NA,
+                    fill = "steelblue") +
+        ## Styling
+        xlab(full_label(x_var)) +
+        ylab(full_label(y_var)) + 
+        theme(panel.grid.major = element_blank(), 
+              panel.grid.minor = element_blank(),
+              panel.background = element_blank(), 
+              axis.line = element_line(colour = "black"))
+      
+    }
+  
+  
+  # Return plot
+  return(ret)
+  
 }
 
+
+
+# Get point range to plot -------------------------------------------------
+get_point_range <- function(x_var, model_effect, dats){
+  # Get max
+  range <- 
+    dats %>% 
+    dplyr::select(colnames(model_effect)[1:2]) %>% 
+    dplyr::group_by(pick(2)) %>% 
+    dplyr::summarise(dplyr::across(where(is.numeric),
+                                   list(
+                                     min = ~min(.x) - 0.01,
+                                     max = ~max(.x) + 0.001),
+                                   .names = '{fn}'))
+  
+  # Transform data to NAs if above or below cutoff
+  ret <- 
+    model_effect %>% 
+    dplyr::left_join(range, 
+                     by = colnames(model_effect)[2]) %>% 
+    dplyr::mutate(dplyr::across(c(estimate__, lower__, upper__),
+                                ~ifelse(effect1__ <= min | effect1__ >= max,
+                                        NA, .)))
+  # Return 
+  return(ret)
+  
+  
+  
+  
+  
+  
+  
+}
 
 # Power and artifact line plot ---------------------------------------------------------
 explo_line <- function(model, dats, x_var, y_var, scale = "none"){
@@ -771,7 +1114,7 @@ get_euclidean_distance <- function(a, b){
 }
 
 # Get average distance between all points in a dataframe ------------------
-average_dist <- function(data, CN = FALSE, CNP = FALSE){
+average_dist <- function(data, CN = FALSE, CNP = FALSE, CP = FALSE){
   
   ## Remove all NAs
   data <- 
@@ -795,6 +1138,22 @@ average_dist <- function(data, CN = FALSE, CNP = FALSE){
       ## Get the euclidean distance between the correspoding pair of points
       mutate(distance = get_euclidean_distance(c(data$cons_C[id.x], data$cons_N[id.x]),
                                                c(data$cons_C[id.y], data$cons_N[id.y]))) %>% 
+      ## Ungroup to remove the rowwise
+      dplyr::ungroup() %>% 
+      ## Keep the distances, get mean and extract
+      dplyr::select(distance) %>%
+      dplyr::summarise_all(mean) %>% 
+      dplyr::pull()
+    
+  }
+  
+  # Get average CP distance
+  if(CP == TRUE){
+    ret <- 
+      ret %>% 
+      ## Get the euclidean distance between the correspoding pair of points
+      mutate(distance = get_euclidean_distance(c(data$cons_C[id.x], data$cons_P[id.x]),
+                                               c(data$cons_C[id.y], data$cons_P[id.y]))) %>% 
       ## Ungroup to remove the rowwise
       dplyr::ungroup() %>% 
       ## Keep the distances, get mean and extract
@@ -1028,5 +1387,68 @@ average_stoich_content <- function(data, stoich){
   
   # Return
   return(ret)
+}
+
+
+
+# Get title for significant relationships ---------------------------------
+title_sig <- function(sitename, model, index){
+  # In cases where there is no interaction to plot
+  if(index !=3){
+    ## Extract pd and percent in rope
+    pd <- 
+      round(bayestestR::pd(model)$pd[index],
+            digits = 3) * 100
+    rope <- 
+      round(bayestestR::rope(model)$ROPE_Percentage[index],
+            digits = 3) * 100
+    ## Depending on if pd and ROPE meet trheshold make text bold or not
+    ret <- 
+      paste0("pd = ", 
+             round(pd,
+                   digits = 3),
+             "%; ",
+             "% rope = ", 
+             round(rope,
+                   digits = 3))
+
+  # In cases where we have to plot the interaction
+  } else if(index == 3){
+    ## Initiate string
+    ret <- 
+      ""
+  
+    ## Two reps of extracting coefficients
+    for(i in c(2,4)){
+      ## Add beginning of string depeding on rep
+      if(i == 2)
+        ret <- 
+          paste0(ret, "R. higher: ")
+      if(i == 4)
+        ret <- 
+          paste0(ret, ";\nR. lower: ")
+      
+      
+      ## Extract pd and percent in rope
+      pd <- 
+        round(bayestestR::pd(model)$pd[i],
+              digits = 3) * 100
+      rope <- 
+        round(bayestestR::rope(model)$ROPE_Percentage[i],
+              digits = 3) * 100
+      ## Store it in expression
+      ret <- paste0(ret,
+                     "pd = ", 
+                     round(pd,
+                           digits = 3),
+                     "%; ",
+                     "% rope = ", 
+                     round(rope,
+                           digits = 3))}}
+  
+  ## Return
+  return(ret)
+  
+  
 }
 

@@ -9,6 +9,7 @@ library(here)
 library(hellometry)
 source(here::here("R_code",
                   "functions.R"))
+library(DescTools)
 
 # Load site codes
 codes <- 
@@ -189,8 +190,6 @@ T0 <-
   273.15 + 20   
 
 # Combine data ------------------------------------------------------------
-
-# Combine
 foodwebs_full <- 
   foodwebs %>% 
   # Combine food webs and temperature
@@ -443,7 +442,9 @@ fluxes_long <-
   ## Split web column in site and bromeliad
   tidyr::separate_wider_delim(cols = web,
                               delim = "_",
-                              names = c("site", "bromeliad_id"))
+                              names = c("site", "bromeliad_id")) %>% 
+  ## Remove when consumer is resource
+  dplyr::filter(consumer != resource)
 
 # Combine for each consumer
 fluxes_long_percons <- 
@@ -467,9 +468,7 @@ fluxes_long_percons <-
                                    tot_biomass_g, avg_bodymass_g, abundance, 
                                    cons_C = C, cons_N = N, cons_P = P) %>% 
                      dplyr::mutate(bromeliad_id = as.character(bromeliad_id)),
-                   by = c("site", "bromeliad_id", "consumer")) %>% 
-  ## Remove proportion 0 (e.g. small food webs)
-  dplyr::filter(flux_prop > 0)
+                   by = c("site", "bromeliad_id", "consumer")) 
 
 # Get distance between consumer/resource pairs
 fluxes_long_perpair <- 
@@ -514,20 +513,29 @@ fluxes_long_perpair <-
                    by = c("site", "bromeliad_id", "resource")) %>% 
   ## Get CN distance
   dplyr::mutate(CN_dist = sqrt((cons_C - res_C)^2 + (cons_N - res_N)^2)) %>% 
+  ## Get CP distance
+  dplyr::mutate(CP_dist = sqrt((cons_C - res_C)^2 + (cons_P - res_P)^2)) %>% 
   ## Get CNP distance
   dplyr::mutate(CNP_dist = sqrt((cons_C - res_C)^2 + (cons_N - res_N)^2 + (cons_P - res_P)^2)) %>% 
-  ## Replace distances of 0 with Nas
-  dplyr::mutate(CN_dist = ifelse(CN_dist == 0, 
-                                 NA, CN_dist),
-                CNP_dist = ifelse(CNP_dist == 0, 
-                                  NA, CNP_dist)) %>% 
   ## Rename flux_prop column
   dplyr::rename(flux_prop_pair = flux_prop,
-                flux_raw_pair = flux_raw)
+                flux_raw_pair = flux_raw) %>% 
+  ## Remove cannibalism
+  dplyr::filter(CN_dist !=0 & CP_dist !=0 & CNP_dist !=0) %>% 
+  ## Get ratios
+  dplyr::mutate(cons_CN = cons_C/cons_N,
+                cons_CP = cons_C/cons_P,
+                cons_NP = cons_N/cons_P,
+                res_CN = res_C/res_N,
+                res_CP = res_C/res_P,
+                res_NP = res_N/res_P) %>% 
+  ## Do comparisons
+  dplyr::mutate(lower_cons_CN = ifelse(cons_CN < res_CN, "yes", "no"),
+                lower_cons_CP = ifelse(cons_CP < res_CP, "yes", "no"),
+                lower_cons_NP = ifelse(cons_NP < res_NP, "yes", "no"))  
 
 
-
-# Get Gini coefficient and total energy flux for each bromeliad, 
+# Get total energy flux for each bromeliad, 
 # based on all the fluxes (i.e. not pooled per consumer, excluding zooplankton)
 fluxes_long_perbrom <- 
   fluxes_long_percons %>% 
@@ -567,15 +575,15 @@ fluxes_long_perbrom <-
                      dplyr::nest_by(site, bromeliad_id) %>% 
                      ## Get average
                      dplyr::mutate(avg_CN_dist = average_dist(data, CN = TRUE),
+                                   avg_CP_dist = average_dist(data, CP = TRUE),
                                    avg_CNP_dist = average_dist(data, CNP = TRUE)) %>% 
                      ## Select columns
                      dplyr::select(-data),
                    by = c("site", "bromeliad_id")) %>% 
   ## Remove NaN and 0 
-  dplyr::mutate(dplyr::across(c(avg_CN_dist, avg_CNP_dist),
-                              ~ifelse(is.nan(.),
-                                      NA, ifelse(. == 0,
-                                                 NA, .)))) 
+  dplyr::filter(!is.nan(avg_CN_dist) & !is.nan(avg_CNP_dist)) %>% 
+  dplyr::filter(avg_CN_dist !=0 & avg_CNP_dist !=0)
+
 
 # Write data
 readr::write_csv(fluxes_long_perbrom,
@@ -583,7 +591,7 @@ readr::write_csv(fluxes_long_perbrom,
                             "fluxes_long_perbrom.csv"))
 readr::write_csv(fluxes_long_perpair,
                  here::here("data",
-                            "fluxes_long_perpair_.csv"))
+                            "fluxes_long_perpair.csv"))
 readr::write_csv(fluxes_long_percons,
                  here::here("data",
                             "fluxes_long_percons.csv"))
