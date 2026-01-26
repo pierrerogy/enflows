@@ -26,9 +26,9 @@
      inkscape:document-units="mm"
      showgrid="false"
      showguides="true"
-     inkscape:zoom="0.94316065"
-     inkscape:cx="567.24165"
-     inkscape:cy="389.11717"
+     inkscape:zoom="1.8847266"
+     inkscape:cx="731.14053"
+     inkscape:cy="235.57793"
      inkscape:window-width="1920"
      inkscape:window-height="1094"
      inkscape:window-x="-11"
@@ -12672,6 +12672,16 @@
      id="layer3"
      inkscape:label="Contenu">
     <path
+       style="opacity:0.3;fill:#5f5f5f;fill-opacity:1;stroke:#0b0a08;stroke-width:0.499999;stroke-linejoin:round;paint-order:stroke markers fill"
+       d="m 212.56662,157.07006 c 0.36983,0.27738 -6.7495,3.79081 -6.7495,3.79081 l -1.20196,7.67408 2.0341,13.59144 3.69835,8.32129 26.62813,-1.38688 0.18492,-5.27015 -2.86622,-10.63276 -3.1436,-4.43802 -3.01725,-4.94099 z"
+       id="path6257"
+       sodipodi:nodetypes="ccccccccccc" />
+    <path
+       style="fill:#999999;fill-opacity:1;stroke:#080b07;stroke-width:0.15;stroke-linejoin:round;stroke-dasharray:0.6, 0.15;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill"
+       d="m 219.41843,172.81132 7.86144,-4.91341 0.56153,5.7557 -11.23063,10.52872 z"
+       id="path6209"
+       sodipodi:nodetypes="ccccc" />
+    <path
        d="m 118.12816,92.136986 0.007,-0.01175 0.0435,-0.07284 0.10574,-0.176235 0.17623,-0.294899 0.24203,-0.402989 0.28785,-0.481707 0.31135,-0.518129 0.31134,-0.520479 0.2996,-0.499331 0.28315,-0.477008 0.26905,-0.454685 0.25378,-0.434711 0.2432,-0.420613 0.23498,-0.412389 0.23146,-0.411213 0.0869,-0.156261 0.22675,-0.412389 0.22324,-0.410038 0.21735,-0.404165 0.20796,-0.392415 0.19855,-0.378316 0.18799,-0.363043 0.17976,-0.348944 0.17506,-0.341895 0.17623,-0.346595 0.18211,-0.358343 0.18916,-0.374792 0.19503,-0.392415 0.19973,-0.407689 0.20209,-0.418263 0.20325,-0.424137 0.0752,-0.160961 0.19973,-0.426487 0.19503,-0.424138 0.19033,-0.417088 0.18094,-0.405339 0.17271,-0.39124 0.16331,-0.374792 0.15626,-0.359518 0.15274,-0.353644 0.15273,-0.357168 0.15861,-0.368918 0.16331,-0.387715 0.16801,-0.404165 0.17271,-0.419437 0.17389,-0.431187 0.17388,-0.435887 0.0658,-0.16566 0.17036,-0.439411 0.16683,-0.435887 0.16096,-0.428837 0.15509,-0.417088 0.14569,-0.401814 0.13863,-0.384191 0.13159,-0.370092 0.12807,-0.361868 0.12923,-0.366568 0.13394,-0.379491 0.13747,-0.397115 0.14098,-0.414738 0.14452,-0.430012 0.14451,-0.441761 0.14451,-0.446461 0.054,-0.169185 0.14098,-0.449985 0.13747,-0.44646 0.13276,-0.438237 0.12571,-0.426487 0.11984,-0.410039 0.11279,-0.392415 0.10692,-0.378316 0.10339,-0.370093 0.10574,-0.374791 0.10691,-0.386541 0.11044,-0.405339 0.11397,-0.422963 0.11514,-0.439411 0.11514,-0.449985 0.11514,-0.45586 0.0423,-0.172709 0.11161,-0.45821 0.10809,-0.459384 0.10809,-0.468784 0.10809,-0.484057 0.11044,-0.50638 0.11397,-0.532228 0.11866,-0.560425 0.12337,-0.585099 0.12571,-0.596847 0.12101,-0.569824 0.10457,-0.499331 0.0811,-0.385366 0.0529,-0.252603 0.027,-0.123364 0.006,-0.0329 0.001,-0.0012"
        style="fill:none;stroke:#eb6528;stroke-width:0.375967;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:0.839"
        id="path1439-0"
@@ -18000,7 +18010,7 @@
          id="tspan11443"
          style="font-size:5.84175px;fill:#1a1a1a;stroke-width:0.413983"
          x="262.88004"
-         y="5.2875652">Hypothesis 1: species level</tspan></text>
+         y="5.2875652">Hypothesis 1: species scale</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:5.64444px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';white-space:pre;inline-size:74.4462;display:inline;fill:#1a1a1a;stroke-width:0.4"
@@ -18010,7 +18020,7 @@
        transform="matrix(1.0738115,0,0,1.0738115,257.68606,-13.108116)"><tspan
          x="4.5361366"
          y="82.766876"
-         id="tspan26196">Hypothesis 2: species pair level</tspan></text>
+         id="tspan22621">Hypothesis 2: species pair scale</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:5.64444px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';white-space:pre;inline-size:71.1483;display:inline;fill:#1a1a1a;stroke-width:0.4"
@@ -18020,7 +18030,7 @@
        transform="matrix(1.0133886,0,0,1.0133886,258.62788,65.575147)"><tspan
          x="4.5361366"
          y="82.766876"
-         id="tspan26198">Hypothesis 3: food web level</tspan></text>
+         id="tspan22623">Hypothesis 3: food web scale</tspan></text>
     <path
        d="m 118.12816,129.15913 0.002,-0.0129 0.0141,-0.0869 0.0353,-0.20796 0.0576,-0.34307 0.0775,-0.46408 0.0917,-0.54515 0.0963,-0.57923 0.0963,-0.57217 0.0905,-0.54633 0.0858,-0.5193 0.0787,-0.49346 0.0728,-0.47231 0.0681,-0.45821 0.0646,-0.45116 0.0517,-0.37831 0.0588,-0.44999 0.0552,-0.44763 0.0517,-0.43824 0.0482,-0.42414 0.0447,-0.40651 0.04,-0.38889 0.0388,-0.37362 0.0364,-0.36892 0.0376,-0.37714 0.0364,-0.39124 0.0376,-0.41121 0.0364,-0.42766 0.0352,-0.44177 0.0341,-0.44998 0.0258,-0.37949 0.0294,-0.45351 0.0258,-0.44999 0.0223,-0.44058 0.02,-0.42649 0.0176,-0.40769 0.0141,-0.39124 0.0129,-0.37597 0.0129,-0.37009 0.0118,-0.37831 0.0106,-0.39359 0.0106,-0.41239 0.008,-0.42884 0.006,-0.44294 0.004,-0.45233 10e-4,-0.37949 -10e-4,-0.45469 -0.005,-0.44998 -0.006,-0.44176 -0.008,-0.42649 -0.0106,-0.40886 -0.0118,-0.39124 -0.0117,-0.37597 -0.0129,-0.37009 -0.0129,-0.37832 -0.0141,-0.39359 -0.0176,-0.41121 -0.0211,-0.43002 -0.0235,-0.44176 -0.0258,-0.45116 -0.0247,-0.37949 -0.0317,-0.45351 -0.0329,-0.44881 -0.0364,-0.43941 -0.0364,-0.42531 -0.0376,-0.40769 -0.0376,-0.38889 -0.0364,-0.37479 -0.0376,-0.36892 -0.0376,-0.37597 -0.0411,-0.39124 -0.0446,-0.410036 -0.0493,-0.426488 -0.0517,-0.440586 -0.0564,-0.447635 -0.0494,-0.377142 -0.0623,-0.449985 -0.0646,-0.452335 -0.0693,-0.459384 -0.074,-0.475833 -0.0799,-0.496981 -0.0858,-0.524003 -0.0917,-0.551027 -0.0963,-0.574524 -0.0963,-0.576874 -0.0905,-0.535752 -0.074,-0.446461 -0.0541,-0.321921 -0.0317,-0.185634 -0.0118,-0.07167 -0.001,-0.0082"
        style="fill:none;stroke:#fca50a;stroke-width:0.375967;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
@@ -23549,14 +23559,19 @@
     <text
        xml:space="preserve"
        style="font-size:4.02948px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.456885"
-       x="217.99545"
-       y="23.826105"
+       x="218.99088"
+       y="36.169353"
        id="text18138-5"><tspan
          sodipodi:role="line"
          id="tspan18136-2"
          style="font-size:4.02948px;fill:#000000;stroke-width:0.456885"
-         x="217.99545"
-         y="23.826105">Crisp CPI</tspan></text>
+         x="218.99088"
+         y="36.169353">Defuzzified</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:4.02948px;fill:#000000;stroke-width:0.456885"
+         x="218.99088"
+         y="41.206203"
+         id="tspan6038">CPI</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:4.02948px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.456885"
@@ -23567,139 +23582,62 @@
          id="tspan18136-2-7"
          style="font-size:4.02948px;fill:#000000;stroke-width:0.456885"
          x="218.66173"
-         y="37.247925">P content</tspan></text>
+         y="37.247925" /></text>
     <path
        style="fill:#000000;fill-opacity:1;stroke:#1b0a02;stroke-width:0.653142;stroke-opacity:0.839"
        d="M 207.86144,114.72938 Z"
        id="path33797" />
     <path
        style="fill:none;fill-opacity:1;stroke:#1b0a02;stroke-width:0.504383;stroke-opacity:0.839"
-       d="m 201.72372,82.384459 v 38.557081 h 37.8496"
+       d="m 239.57332,120.94154 h -37.8496 V 82.384459 l 37.76946,0.02029 z"
        id="path33799" />
-    <text
-       xml:space="preserve"
-       style="font-size:4.99468px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.566327"
-       x="212.42033"
-       y="126.10453"
-       id="text18138-5-4-9"><tspan
-         sodipodi:role="line"
-         id="tspan18136-2-7-3"
-         style="font-size:4.99468px;fill:#000000;stroke-width:0.566327"
-         x="212.42033"
-         y="126.10453">C content</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-size:4.99468px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.566327"
-       x="-110.44008"
-       y="197.74397"
-       id="text18138-5-4-8"
-       transform="rotate(-90.358138)"><tspan
-         sodipodi:role="line"
-         id="tspan18136-2-7-9"
-         style="font-size:4.99468px;fill:#000000;stroke-width:0.566327"
-         x="-110.44008"
-         y="197.74397">N content</tspan></text>
     <path
        style="fill:none;fill-opacity:1;stroke:#1b0a02;stroke-width:0.289779;stroke-dasharray:1.15912, 0.289779;stroke-dashoffset:0;stroke-opacity:0.839"
        d="m 216.7747,92.2605 12.28847,19.31046"
        id="path34257" />
     <text
        xml:space="preserve"
-       style="font-size:4.02948px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.456885"
-       x="203.71506"
-       y="58.948818"
-       id="text18138-7"><tspan
-         sodipodi:role="line"
-         id="tspan18136-1"
-         style="font-size:4.02948px;fill:#000000;stroke-width:0.456885"
-         x="203.71506"
-         y="58.948818">Get crisp CPI and P content</tspan></text>
-    <text
-       xml:space="preserve"
        style="font-size:4.23326px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.479992"
-       x="187.31277"
-       y="135.63425"
+       x="197.42264"
+       y="131.99454"
        id="text18138-7-6"><tspan
          sodipodi:role="line"
          id="tspan18136-1-2"
          style="font-size:4.23326px;fill:#000000;stroke-width:0.479992"
-         x="187.31277"
-         y="135.63425">Get Euclidean distance in CN plane</tspan></text>
+         x="197.42264"
+         y="131.99454">Get Euclidean distance in</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:4.23326px;fill:#000000;stroke-width:0.479992"
+         x="197.42264"
+         y="137.28612"
+         id="tspan6094">trait hypervolume</tspan></text>
     <path
        style="fill:#000000;fill-opacity:1;stroke:#1b0a02;stroke-width:0.674269;stroke-opacity:0.839"
-       d="M 207.75528,187.70846 Z"
+       d="M 206.79558,200.18708 Z"
        id="path33797-6" />
     <path
        style="fill:none;fill-opacity:1;stroke:#1b0a02;stroke-width:0.520698;stroke-opacity:0.839"
-       d="m 201.69955,150.67041 v 39.80428 h 39.07391"
+       d="m 240.21193,195.38809 h -39.07391 v -39.80428 l 39.05708,-0.0396 z"
        id="path33799-4" />
     <text
        xml:space="preserve"
-       style="font-size:5.15624px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.584645"
-       x="212.74219"
-       y="195.80467"
-       id="text18138-5-4-9-7"><tspan
-         sodipodi:role="line"
-         id="tspan18136-2-7-3-6"
-         style="font-size:5.15624px;fill:#000000;stroke-width:0.584645"
-         x="212.74219"
-         y="195.80467">C content</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-size:5.15624px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.584645"
-       x="-179.59129"
-       y="197.18105"
-       id="text18138-5-4-8-8"
-       transform="rotate(-90.358138)"><tspan
-         sodipodi:role="line"
-         id="tspan18136-2-7-9-1"
-         style="font-size:5.15624px;fill:#000000;stroke-width:0.584645"
-         x="-179.59129"
-         y="197.18105">N content</tspan></text>
-    <path
-       style="fill:none;fill-opacity:1;stroke:#1b0a02;stroke-width:0.299153;stroke-dasharray:1.19661, 0.299153;stroke-dashoffset:0;stroke-opacity:0.839"
-       d="m 216.19427,157.9455 11.86354,2.41031"
-       id="path34257-1"
-       sodipodi:nodetypes="cc" />
-    <path
-       style="fill:none;fill-opacity:1;stroke:#1b0a02;stroke-width:0.299153;stroke-dasharray:1.19661, 0.299153;stroke-dashoffset:0;stroke-opacity:0.839"
-       d="m 233.67415,161.76466 2.54193,10.58357"
-       id="path34257-1-0"
-       sodipodi:nodetypes="cc" />
-    <path
-       style="fill:none;fill-opacity:1;stroke:#1b0a02;stroke-width:0.299153;stroke-dasharray:1.19661, 0.299153;stroke-dashoffset:0;stroke-opacity:0.839"
-       d="m 216.5561,157.96066 -4.90759,8.36455"
-       id="path34257-1-9"
-       sodipodi:nodetypes="cc" />
-    <path
-       style="fill:none;fill-opacity:1;stroke:#1b0a02;stroke-width:0.299153;stroke-dasharray:1.19661, 0.299153;stroke-dashoffset:0;stroke-opacity:0.839"
-       d="m 214.65409,167.78769 19.34298,6.30403"
-       id="path34257-1-4"
-       sodipodi:nodetypes="cc" />
-    <path
-       style="fill:none;fill-opacity:1;stroke:#1b0a02;stroke-width:0.299153;stroke-dasharray:1.19661, 0.299153;stroke-dashoffset:0;stroke-opacity:0.839"
-       d="m 216.3976,157.80215 -1.73759,26.75061"
-       id="path34257-1-6"
-       sodipodi:nodetypes="cc" />
-    <text
-       xml:space="preserve"
        style="font-size:4.23535px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.480227"
-       x="202.13843"
-       y="202.86327"
+       x="191.46935"
+       y="203.98631"
        id="text18138-7-6-7"><tspan
          sodipodi:role="line"
-         id="tspan18136-1-2-5"
          style="font-size:4.23535px;fill:#000000;stroke-width:0.480227"
-         x="202.13843"
-         y="202.86327">Average all Euclidean</tspan><tspan
+         x="191.46935"
+         y="203.98631"
+         id="tspan34661">Get proportion of overall functional</tspan><tspan
          sodipodi:role="line"
          style="font-size:4.23535px;fill:#000000;stroke-width:0.480227"
-         x="202.13843"
-         y="208.15746"
-         id="tspan34661">distances in CN plane</tspan></text>
+         x="191.46935"
+         y="209.2805"
+         id="tspan6102">hull covered by bromeliad</tspan></text>
     <g
        id="g38006"
-       transform="matrix(1.296947,0,0,1.296947,-56.220111,-47.156846)">
+       transform="matrix(0.75447895,0,0,0.75447895,60.620128,54.297019)">
       <path
          d="m 78.457486,84.996214 h 7.878852 -0.0094 l 0.03995,-0.0012 0.03995,-0.0082 0.03877,-0.01527 0.03525,-0.01997 0.03172,-0.02585 0.02702,-0.03055 0.02232,-0.03407 0.01527,-0.0376 0.0094,-0.03995 0.0035,-0.04112 v 0 -1.285336 0 l -0.0035,-0.04112 -0.0094,-0.03877 -0.01527,-0.0376 -0.02232,-0.03525 -0.02702,-0.03055 -0.03172,-0.02585 -0.03525,-0.01997 -0.03877,-0.01527 -0.03995,-0.0082 -0.03055,-0.0012 h -7.878852 l 0.03055,0.0012 -0.03995,-0.0012 -0.04112,0.0047 -0.03877,0.01175 -0.0376,0.01762 -0.0329,0.0235 -0.02937,0.0282 -0.02467,0.03172 -0.0188,0.03642 -0.01292,0.03877 -0.0071,0.04112 -0.0012,0.01997 v 1.285336 l 0.0012,-0.01997 v 0.04112 l 0.0071,0.03995 0.01292,0.03877 0.0188,0.03642 0.02467,0.03172 0.02937,0.02937 0.0329,0.02232 0.0376,0.01762 0.03877,0.01175 0.04112,0.0047 z"
          style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.0622695;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
@@ -23720,7 +23658,7 @@
     </g>
     <g
        id="g38006-2"
-       transform="matrix(1.296947,0,0,1.296947,-61.379707,-34.838877)">
+       transform="matrix(0.75447895,0,0,0.75447895,69.270391,49.389881)">
       <path
          d="m 78.457486,84.996214 h 7.878852 -0.0094 l 0.03995,-0.0012 0.03995,-0.0082 0.03877,-0.01527 0.03525,-0.01997 0.03172,-0.02585 0.02702,-0.03055 0.02232,-0.03407 0.01527,-0.0376 0.0094,-0.03995 0.0035,-0.04112 v 0 -1.285336 0 l -0.0035,-0.04112 -0.0094,-0.03877 -0.01527,-0.0376 -0.02232,-0.03525 -0.02702,-0.03055 -0.03172,-0.02585 -0.03525,-0.01997 -0.03877,-0.01527 -0.03995,-0.0082 -0.03055,-0.0012 h -7.878852 l 0.03055,0.0012 -0.03995,-0.0012 -0.04112,0.0047 -0.03877,0.01175 -0.0376,0.01762 -0.0329,0.0235 -0.02937,0.0282 -0.02467,0.03172 -0.0188,0.03642 -0.01292,0.03877 -0.0071,0.04112 -0.0012,0.01997 v 1.285336 l 0.0012,-0.01997 v 0.04112 l 0.0071,0.03995 0.01292,0.03877 0.0188,0.03642 0.02467,0.03172 0.02937,0.02937 0.0329,0.02232 0.0376,0.01762 0.03877,0.01175 0.04112,0.0047 z"
          style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.0622695;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
@@ -23741,7 +23679,7 @@
     </g>
     <g
        id="g38006-3"
-       transform="matrix(1.296947,0,0,1.296947,-39.506652,-43.080898)">
+       transform="matrix(0.75447895,0,0,0.75447895,69.921777,55.264311)">
       <path
          d="m 78.457486,84.996214 h 7.878852 -0.0094 l 0.03995,-0.0012 0.03995,-0.0082 0.03877,-0.01527 0.03525,-0.01997 0.03172,-0.02585 0.02702,-0.03055 0.02232,-0.03407 0.01527,-0.0376 0.0094,-0.03995 0.0035,-0.04112 v 0 -1.285336 0 l -0.0035,-0.04112 -0.0094,-0.03877 -0.01527,-0.0376 -0.02232,-0.03525 -0.02702,-0.03055 -0.03172,-0.02585 -0.03525,-0.01997 -0.03877,-0.01527 -0.03995,-0.0082 -0.03055,-0.0012 h -7.878852 l 0.03055,0.0012 -0.03995,-0.0012 -0.04112,0.0047 -0.03877,0.01175 -0.0376,0.01762 -0.0329,0.0235 -0.02937,0.0282 -0.02467,0.03172 -0.0188,0.03642 -0.01292,0.03877 -0.0071,0.04112 -0.0012,0.01997 v 1.285336 l 0.0012,-0.01997 v 0.04112 l 0.0071,0.03995 0.01292,0.03877 0.0188,0.03642 0.02467,0.03172 0.02937,0.02937 0.0329,0.02232 0.0376,0.01762 0.03877,0.01175 0.04112,0.0047 z"
          style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.0622695;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
@@ -23761,29 +23699,8 @@
            y="157.25662">Sp C</tspan></text>
     </g>
     <g
-       id="g38006-0"
-       transform="matrix(1.296947,0,0,1.296947,-57.100195,-17.086834)">
-      <path
-         d="m 78.457486,84.996214 h 7.878852 -0.0094 l 0.03995,-0.0012 0.03995,-0.0082 0.03877,-0.01527 0.03525,-0.01997 0.03172,-0.02585 0.02702,-0.03055 0.02232,-0.03407 0.01527,-0.0376 0.0094,-0.03995 0.0035,-0.04112 v 0 -1.285336 0 l -0.0035,-0.04112 -0.0094,-0.03877 -0.01527,-0.0376 -0.02232,-0.03525 -0.02702,-0.03055 -0.03172,-0.02585 -0.03525,-0.01997 -0.03877,-0.01527 -0.03995,-0.0082 -0.03055,-0.0012 h -7.878852 l 0.03055,0.0012 -0.03995,-0.0012 -0.04112,0.0047 -0.03877,0.01175 -0.0376,0.01762 -0.0329,0.0235 -0.02937,0.0282 -0.02467,0.03172 -0.0188,0.03642 -0.01292,0.03877 -0.0071,0.04112 -0.0012,0.01997 v 1.285336 l 0.0012,-0.01997 v 0.04112 l 0.0071,0.03995 0.01292,0.03877 0.0188,0.03642 0.02467,0.03172 0.02937,0.02937 0.0329,0.02232 0.0376,0.01762 0.03877,0.01175 0.04112,0.0047 z"
-         style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.0622695;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
-         id="path2891-6-0-6-9-8"
-         clip-path="url(#clipPath18721-8-8-4-5)"
-         transform="matrix(0.71325568,0,0,1.5429652,150.7661,26.945448)" />
-      <text
-         xml:space="preserve"
-         style="font-size:2.11667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.450786"
-         x="207.34178"
-         y="157.25662"
-         id="text18138-5-4-9-5-55"><tspan
-           sodipodi:role="line"
-           id="tspan18136-2-7-3-4-18"
-           style="font-size:2.11667px;fill:#000000;stroke-width:0.450786"
-           x="207.34178"
-           y="157.25662">Sp E</tspan></text>
-    </g>
-    <g
        id="g38006-4"
-       transform="matrix(1.296947,0,0,1.296947,-34.117639,-28.974363)">
+       transform="matrix(0.75447895,0,0,0.75447895,58.7377,65.997462)">
       <path
          d="m 78.457486,84.996214 h 7.878852 -0.0094 l 0.03995,-0.0012 0.03995,-0.0082 0.03877,-0.01527 0.03525,-0.01997 0.03172,-0.02585 0.02702,-0.03055 0.02232,-0.03407 0.01527,-0.0376 0.0094,-0.03995 0.0035,-0.04112 v 0 -1.285336 0 l -0.0035,-0.04112 -0.0094,-0.03877 -0.01527,-0.0376 -0.02232,-0.03525 -0.02702,-0.03055 -0.03172,-0.02585 -0.03525,-0.01997 -0.03877,-0.01527 -0.03995,-0.0082 -0.03055,-0.0012 h -7.878852 l 0.03055,0.0012 -0.03995,-0.0012 -0.04112,0.0047 -0.03877,0.01175 -0.0376,0.01762 -0.0329,0.0235 -0.02937,0.0282 -0.02467,0.03172 -0.0188,0.03642 -0.01292,0.03877 -0.0071,0.04112 -0.0012,0.01997 v 1.285336 l 0.0012,-0.01997 v 0.04112 l 0.0071,0.03995 0.01292,0.03877 0.0188,0.03642 0.02467,0.03172 0.02937,0.02937 0.0329,0.02232 0.0376,0.01762 0.03877,0.01175 0.04112,0.0047 z"
          style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.0622695;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
@@ -23817,19 +23734,14 @@
     <text
        xml:space="preserve"
        style="font-size:3.6511px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.413983"
-       x="278.89316"
-       y="62.605129"
+       x="286.05267"
+       y="63.16666"
        id="text18138-7-5"><tspan
          sodipodi:role="line"
-         id="tspan18136-1-20"
          style="font-size:3.6511px;fill:#000000;stroke-width:0.413983"
-         x="278.89316"
-         y="62.605129">Increasing crisp CPI or </tspan><tspan
-         sodipodi:role="line"
-         style="font-size:3.6511px;fill:#000000;stroke-width:0.413983"
-         x="278.89316"
-         y="67.169006"
-         id="tspan10293">decreasing P content</tspan></text>
+         x="286.05267"
+         y="63.16666"
+         id="tspan10293">Defuzzified CPI </tspan></text>
     <text
        xml:space="preserve"
        style="font-size:3.6511px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.413983"
@@ -23845,14 +23757,14 @@
     <text
        xml:space="preserve"
        style="font-size:3.78817px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.429525"
-       x="273.63208"
-       y="136.60854"
+       x="269.28021"
+       y="138.01236"
        id="text18138-7-5-0"><tspan
          sodipodi:role="line"
          id="tspan18136-1-20-7"
          style="font-size:3.78817px;fill:#000000;stroke-width:0.429525"
-         x="273.63208"
-         y="136.60854">Euclidean distance in CN plane</tspan></text>
+         x="269.28021"
+         y="138.01236">Euclidean distance in trait hypervolume</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:3.57501px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.405355"
@@ -23860,15 +23772,15 @@
        y="203.38408"
        id="text18138-7-5-0-3"><tspan
          sodipodi:role="line"
-         id="tspan18136-1-20-7-8"
          style="font-size:3.57501px;fill:#000000;stroke-width:0.405355"
          x="275.67786"
-         y="203.38408">Average Euclidean distance </tspan><tspan
+         y="203.38408"
+         id="tspan7746">Proportion of overall functional</tspan><tspan
          sodipodi:role="line"
          style="font-size:3.57501px;fill:#000000;stroke-width:0.405355"
          x="275.67786"
          y="207.85284"
-         id="tspan7746">in CN plane</tspan></text>
+         id="tspan7943">hull covered by bromeliad</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:3.78817px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.429525"
@@ -23905,7 +23817,7 @@
        sodipodi:nodetypes="cc" />
     <path
        style="fill:none;stroke:#08186e;stroke-width:0.608033;stroke-dasharray:none;stroke-opacity:0.839"
-       d="m 277.69519,159.29067 35.54313,34.03066"
+       d="M 277.97596,194.94792 318.2921,161.5948"
        id="path9802-18"
        sodipodi:nodetypes="cc" />
     <g
@@ -24061,5 +23973,16 @@
          style="font-size:5.84175px;fill:#1a1a1a;stroke-width:0.413983"
          x="255.96645"
          y="5.0502582">(c)</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:3.00919px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';opacity:0.526;fill:#e2dfdf;fill-opacity:0.84;stroke:#e2dfdf;stroke-width:4;stroke-opacity:0.839"
+       x="222.57664"
+       y="59.128143"
+       id="text14531"><tspan
+         sodipodi:role="line"
+         id="tspan14529"
+         style="stroke-width:4"
+         x="222.57664"
+         y="59.128143">  </tspan></text>
   </g>
 </svg>

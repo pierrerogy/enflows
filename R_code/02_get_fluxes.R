@@ -23,78 +23,55 @@ fw_database <-
                              "scalewebs",
                              "fw_database.rds"))
 
-
-# Get biomass data --------------------------------------------------------
-# Read data
-dats <- 
-  readr::read_csv(here::here("data", "scalewebs",
-                             "abundance_cleaned.csv")) 
-
-# Add taxonomy to data
-dats <- 
-  hellometry::add_taxonomy(data_table = dats)
-
-# Add columns required by the package to work
-dats <-
-  readr::read_csv(here::here("data", "scalewebs",
-                             "abundance_cleaned.csv")) %>% 
-  hellometry::add_taxonomy() %>% 
-  ## Everyone's size will be unknown
-  dplyr::mutate(size_mm = "unknown") %>%
-  ## Fix the couple problems with missing taxonomy
-  ### two coleoptera with that info only in bwg_name
-  dplyr::mutate(ord = ifelse(bwg_name %in% c("Coleoptera.19", "Coleoptera.48"),
-                             "Coleoptera", ord),
-                class = ifelse(bwg_name %in% c("Coleoptera.19", "Coleoptera.48"),
-                               ## some lost platyhelminthes
-                               "Insecta", ifelse(phylum == "Platyhelminthes",
-                                                 "Turbellaria", class))) %>% 
-  ## Add column with development stage
-  ## Let's make everything all insects larvae and rest adults
-  dplyr::mutate(stage = ifelse(class == "Insecta",
-                               "larva", "adult"))
-
-# Quick check to make sure things are alright   
-str(dats)
-
-# Add biomass
+# Load biomass data
 dats_biomass <- 
-  hellometry::hello_metry(data_table = dats,
-                          biomass_kind = "dry",
-                          database = TRUE)
+  readr::read_csv(here::here("data",
+                             "dats_biomass.csv")) 
 
+# Load CPI 
+traits_CPI <-
+  readr::read_csv(here::here("data",
+                             "traits_CPI.csv")) 
+
+# Prepare biomass data --------------------------------------------------------
 # Basic clean-up 
 biomass_clean <- 
   dats_biomass %>% 
   dplyr::filter(abundance > 0) %>% 
-  dplyr::select(-size_original, -path, 
-                -stage, -size_used_mm,
-                -visit_id, -dataset_id) %>% 
+  dplyr::select(-biomass_type) %>% 
   ## Mass should be in gram
-  dplyr::mutate(biomass_mg = as.numeric(biomass_mg),
-                biomass_g = biomass_mg/1000) %>% 
+  dplyr::mutate(biomass_col = as.numeric(biomass_col),
+                biomass_g = biomass_col/1000) %>% 
   ## Some characters in biomass estimation, remove
-  dplyr::filter(!is.na(biomass_mg)) %>% 
-  ## Remove the biomass_mg and the confidence intervals
-  dplyr::select(-biomass_mg, -ci_lwr, -ci_upr) %>% 
-  ## Remove all the taxonomy columns
-  dplyr::select(-species_id, -domain:-species) %>% 
+  dplyr::filter(!is.na(biomass_col)) %>% 
+  ## Remove all the taxonomy and estimation columns
+  dplyr::select(-class, -subclass, -ord, -subord, -family,
+                -subfamily, -tribe, -genus, -species, -biomass_lower, -biomass_upper,
+                -stage, -size_category, -size_level, -size_taxon_name, -model,
+                -model_level, -model_taxon_name, -biomass_col) %>% 
+  ## Add visit ID
+  dplyr::left_join(fw_database %>% 
+                     purrr::pluck("bromeliads") %>% 
+                     dplyr::select(visit_id, bromeliad_id) %>% 
+                     dplyr::mutate(bromeliad_id = as.numeric(bromeliad_id),
+                                   visit_id = as.numeric(visit_id)),
+                   by = "bromeliad_id") %>% 
+  ## Add site codes
+  dplyr::left_join(codes %>% 
+                     dplyr::select(-replicate, -location, -bio01) %>% 
+                     dplyr::distinct(),
+                   by = "visit_id") %>%
+  ## Remove location
+  dplyr::select(-visit_id) %>% 
   ## Sum Coleoptera.48 and Coleoptera.15
-  dplyr::group_by(bwg_name, bromeliad_id, location) %>% 
+  dplyr::group_by(bwg_name, bromeliad_id, site_code) %>% 
   dplyr::summarise(dplyr::across(c(abundance, biomass_g),
                                  ~sum(.))) %>% 
   dplyr::ungroup() %>% 
   ## Get average body mass
   dplyr::mutate(avg_bodymass_g = biomass_g/abundance) %>% 
   ## Rename biomass with total
-  dplyr::rename(tot_biomass_g = biomass_g) %>% 
-  ## Add site codes
-  dplyr::left_join(codes %>% 
-                     dplyr::select(-replicate, -visit_id, -bio01) %>% 
-                     dplyr::distinct(),
-                   by = "location") %>%
-  ## Remove location
-  dplyr::select(-location)
+  dplyr::rename(tot_biomass_g = biomass_g)
 
 # Make sure each row is unique combination of bromeliad id and bwg name
 stopifnot(biomass_clean %>% 
@@ -414,10 +391,6 @@ site_matrices <-
   make_binary_matrices(matrix_list = .,
                        cutoff = 0.02)
 
-# Load CPI and stoichimetry data
-traits_CPI <-
-  readr::read_csv(here::here("data",
-                             "traits_CPI.csv"))
 
 # Convert matrices to list
 fluxes_long <- 
@@ -442,7 +415,7 @@ fluxes_long <-
   ## Split web column in site and bromeliad
   tidyr::separate_wider_delim(cols = web,
                               delim = "_",
-                              names = c("site", "bromeliad_id")) %>% 
+                              names = c("site_code", "bromeliad_id")) %>% 
   ## Remove when consumer is resource
   dplyr::filter(consumer != resource)
 
@@ -451,7 +424,7 @@ fluxes_long_percons <-
   fluxes_long %>% 
   ## Pool per consumer
   dplyr::select(-resource) %>% 
-  dplyr::group_by(site, bromeliad_id, consumer) %>% 
+  dplyr::group_by(site_code, bromeliad_id, consumer) %>% 
   dplyr::summarise(dplyr::across(dplyr::everything(),
                                  ~sum(.))) %>%
   dplyr::ungroup() %>% 
@@ -463,14 +436,13 @@ fluxes_long_percons <-
                    by = "consumer") %>% 
   ## Add biomass data relative to consumers
   dplyr::left_join(readr::read_csv(here::here("data",
-                                              "biomass_stoich.csv")) %>% 
-                     dplyr::select(consumer = bwg_name, site = site_code ,bromeliad_id,
-                                   tot_biomass_g, avg_bodymass_g, abundance, 
-                                   cons_C = C, cons_N = N, cons_P = P) %>% 
+                                              "biomass_clean.csv")) %>% 
+                     dplyr::select(consumer = bwg_name ,bromeliad_id,
+                                   tot_biomass_g, avg_bodymass_g, abundance) %>% 
                      dplyr::mutate(bromeliad_id = as.character(bromeliad_id)),
-                   by = c("site", "bromeliad_id", "consumer")) 
+                   by = c("bromeliad_id", "consumer")) 
 
-# Get distance between consumer/resource pairs
+# Get flux between consumer/resource pairs
 fluxes_long_perpair <- 
   fluxes_long %>% 
   ## Remove forbidden links (see Srivastava et al. (Scalewebs))
@@ -479,72 +451,39 @@ fluxes_long_perpair <-
                                "forbidden_links.csv")) %>% 
       dplyr::filter(is == 0) %>% 
       tidyr::separate(col = interaction_id,
-                      into = c("site", "n"),
+                      into = c("site_code", "n"),
                       sep = "\\.") %>% 
-      dplyr::select(site, consumer, resource),
-    by = c("site", "consumer", "resource")) %>% 
+      dplyr::select(site_code, consumer, resource),
+    by = c("site_code", "consumer", "resource")) %>% 
   ## Remove interactions where we have basal species
   dplyr::filter(resource %notin% basal & consumer %notin% basal) %>% 
-  ## Add the composition of consumer
+  ## Add traits of consumer
   dplyr::left_join(traits_CPI %>% 
-                     dplyr::select(bwg_name, functional_group, CPI_crisp) %>% 
+                     dplyr::select(bwg_name, functional_group, CPI_defuzzified) %>% 
                      dplyr::rename_with(~paste0("cons_",.x )) %>% 
                      dplyr::rename(consumer = cons_bwg_name),
                    by = "consumer") %>% 
-  ## Add the composition of resource
+  ## Add traits of resource
   dplyr::left_join(traits_CPI %>% 
-                     dplyr::select(bwg_name, functional_group, CPI_crisp) %>% 
+                     dplyr::select(bwg_name, functional_group, CPI_defuzzified) %>% 
                      dplyr::rename_with(~paste0("res_",.x )) %>% 
                      dplyr::rename(resource = res_bwg_name),
                    by = "resource") %>% 
-  ## Add nutrient content for consumer
-  dplyr::left_join(readr::read_csv(here::here("data",
-                                              "biomass_stoich.csv")) %>% 
-                     dplyr::select(consumer = bwg_name, site = site_code, bromeliad_id,
-                                   cons_C = C, cons_N = N, cons_P = P) %>% 
-                     dplyr::mutate(bromeliad_id = as.character(bromeliad_id)),
-                   by = c("site", "bromeliad_id", "consumer")) %>% 
-  ## Add nutrient content for resource
-  dplyr::left_join(readr::read_csv(here::here("data",
-                                              "biomass_stoich.csv")) %>% 
-                     dplyr::select(resource = bwg_name, site = site_code, bromeliad_id,
-                                   res_C = C, res_N = N, res_P = P) %>% 
-                     dplyr::mutate(bromeliad_id = as.character(bromeliad_id)),
-                   by = c("site", "bromeliad_id", "resource")) %>% 
-  ## Get CN distance
-  dplyr::mutate(CN_dist = sqrt((cons_C - res_C)^2 + (cons_N - res_N)^2)) %>% 
-  ## Get CP distance
-  dplyr::mutate(CP_dist = sqrt((cons_C - res_C)^2 + (cons_P - res_P)^2)) %>% 
-  ## Get CNP distance
-  dplyr::mutate(CNP_dist = sqrt((cons_C - res_C)^2 + (cons_N - res_N)^2 + (cons_P - res_P)^2)) %>% 
   ## Rename flux_prop column
   dplyr::rename(flux_prop_pair = flux_prop,
-                flux_raw_pair = flux_raw) %>% 
-  ## Remove cannibalism
-  dplyr::filter(CN_dist !=0 & CP_dist !=0 & CNP_dist !=0) %>% 
-  ## Get ratios
-  dplyr::mutate(cons_CN = cons_C/cons_N,
-                cons_CP = cons_C/cons_P,
-                cons_NP = cons_N/cons_P,
-                res_CN = res_C/res_N,
-                res_CP = res_C/res_P,
-                res_NP = res_N/res_P) %>% 
-  ## Do comparisons
-  dplyr::mutate(lower_cons_CN = ifelse(cons_CN < res_CN, "yes", "no"),
-                lower_cons_CP = ifelse(cons_CP < res_CP, "yes", "no"),
-                lower_cons_NP = ifelse(cons_NP < res_NP, "yes", "no"))  
+                flux_raw_pair = flux_raw) 
 
 
-# Get total energy flux for each bromeliad, 
+# Get total energy flux and Gini index for each bromeliad, 
 # based on all the fluxes (i.e. not pooled per consumer, excluding zooplankton)
 fluxes_long_perbrom <- 
   fluxes_long_percons %>% 
   ## Remove zooplankton
   dplyr::filter(!stringr::str_detect(string = consumer,
                                      pattern = "plankton")) %>% 
-  dplyr::select(site, bromeliad_id, flux_raw, cons_C, cons_N, cons_P) %>%
+  dplyr::select(site_code, bromeliad_id, flux_raw) %>%
   ## Group by site and bromeliad id
-  dplyr::group_by(site, bromeliad_id) %>%
+  dplyr::group_by(site_code, bromeliad_id) %>%
   ## Summarise
   dplyr::summarise(dplyr::across(flux_raw,
                                  ~ DescTools::Gini(.),
@@ -557,35 +496,23 @@ fluxes_long_perbrom <-
   dplyr::left_join(fluxes_long_percons %>% 
                      ## Keep just predators
                      dplyr::filter(cons_functional_group %in% c("piercer", "engulfer")) %>%
-                     dplyr::select(site, bromeliad_id, flux_raw) %>%
+                     dplyr::select(site_code, bromeliad_id, flux_raw) %>%
                      ## Group by site and bromeliad id
-                     dplyr::group_by(site, bromeliad_id) %>%
+                     dplyr::group_by(site_code, bromeliad_id) %>%
                      ## Summarise
                      dplyr::summarise(dplyr::across(flux_raw,
                                                     ~ sum(.),
                                                     .names = "predflow_Jy")),
-                   by = c("site", "bromeliad_id")) %>% 
-  ## Add average CN and CNP stoichiometric distance
-  dplyr::left_join(fluxes_long_percons %>% 
-                     ## Remove zooplankton
-                     dplyr::filter(!stringr::str_detect(string = consumer,
-                                                        pattern = "plankton")) %>% 
-                     dplyr::select(site, bromeliad_id, flux_raw, cons_C, cons_N, cons_P) %>%
-                     ## Group by site and bromeliad id
-                     dplyr::nest_by(site, bromeliad_id) %>% 
-                     ## Get average
-                     dplyr::mutate(avg_CN_dist = average_dist(data, CN = TRUE),
-                                   avg_CP_dist = average_dist(data, CP = TRUE),
-                                   avg_CNP_dist = average_dist(data, CNP = TRUE)) %>% 
-                     ## Select columns
-                     dplyr::select(-data),
-                   by = c("site", "bromeliad_id")) %>% 
-  ## Remove NaN and 0 
-  dplyr::filter(!is.nan(avg_CN_dist) & !is.nan(avg_CNP_dist)) %>% 
-  dplyr::filter(avg_CN_dist !=0 & avg_CNP_dist !=0)
+                   by = c("site_code", "bromeliad_id")) %>% 
+  ## Mutate predator flow to 0 if NA (no predators)
+  dplyr::mutate(predflow_Jy = ifelse(is.na(predflow_Jy),
+                                 0, predflow_Jy))
 
 
 # Write data
+readr::write_csv(fluxes_long,
+                 here::here("data",
+                            "fluxes_long.csv"))
 readr::write_csv(fluxes_long_perbrom,
                  here::here("data",
                             "fluxes_long_perbrom.csv"))
@@ -595,6 +522,3 @@ readr::write_csv(fluxes_long_perpair,
 readr::write_csv(fluxes_long_percons,
                  here::here("data",
                             "fluxes_long_percons.csv"))
-
-
-

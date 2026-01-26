@@ -5,125 +5,10 @@
 library(tidyverse)
 library(curl)
 library(here)
-library(raster)
-library(sp)
 library(cheddar)
 library(viridis)
 library(brms)
 library(latex2exp)
-
-# Download data from chelsa -----------------------------------------------
-get_chelsa <- function(txt_file, output_folder){
-  # First read list of files from txt file
-  files <- 
-    readr::read_table(txt_file,
-                      col_names = F) %>% 
-    dplyr::select(X1) %>% 
-    dplyr::pull()
-  
-  # Download files
-  for(i in files){
-    # Increase download limit
-    options(timeout = max(NA, getOption("timeout")))
-    curl::curl_download(url = i,
-                        mode = "wb",
-                        destfile = paste0(output_folder,
-                                    "/",
-                                    ## Here just keep text after the last / as file name
-                                    stringr::str_match(string = i,  
-                                                       pattern = "([^/]+$)")[1]))
-  }
-  }
-
-# Load the raster files and extract the information of the raster -------------------------------------------------------------------------
-get_bio_data <- function(raster_files, sites_coords){
-  
-  # Rename supplied data
-  ret <- 
-    sites_coords
-  
-  # Convert coords to spatial points
-  coords <- 
-    sp::SpatialPoints(ret[,2:3])
-  
-  # Make vector of variable names
-  var_names <- 
-    c("site", "lon", "lat")
-  
-  # For each raster file
-  for(i in raster_files){
-  
-  # Load raster file
-  ras <- 
-    raster::raster(i)
-  
-  # Get name of variable
-  ras_name <- 
-    names(ras) %>% 
-    stringr::str_split(pattern = "_") %>% 
-    purrr::flatten_chr() %>% 
-    dplyr::nth(2)
-  
-  # Add name to list of names
-  var_names <- 
-    c(var_names,
-      ras_name)
-  
-  # Extract values
-  ret <-
-    ret %>% 
-    dplyr::bind_cols(raster::extract(ras,
-                                     coords))
-  
-  }
-  
-  # Give correct column names
-  colnames(ret) <- 
-    var_names
-  
-  
-  # Return
-  return(ret)
-}
-
-
-# Add environmental variables to dataframe --------------------------------
-add_env <- function(dats, raster_folder){
-  # Get list of raster files
-  raster_files <- 
-    paste0(raster_folder, 
-           "/",
-           list.files(raster_folder))
-  
-  # Extract site info
-  sites_coords <- 
-    dats %>% 
-    dplyr::select(site, lon, lat) %>% 
-    dplyr::distinct()
-  
-  # Extract chelsa values and attach to coordinates
-  env_values <- 
-    get_bio_data(raster_files = raster_files, 
-                 sites_coords = sites_coords)
-  
-  # Stick to original data
-  ret <- 
-    dats %>% 
-    dplyr::left_join(env_values,
-                     by = c("site", "lat", "lon"))
-  
-  # Return
-  return(ret)
-  
-}
-
-
-
-# not in ------------------------------------------------------------------
-'%notin%' <- 
-  Negate('%in%')
-
-
 
 # Get equivalent models from loo output-------------------------------------------------------------------------
 get_eq_models <- function(loo_output){
@@ -193,7 +78,7 @@ make_food_webs <- function(taxon_names, basal_species, binary_matrices, biomass_
     
     # Make vector of bromeliads in site
     brom_list <- 
-      biomass_clean %>%
+      biomass_data %>%
       dplyr::filter(site_code == sitename) %>% 
       dplyr::select(bromeliad_id) %>% 
       unique() %>% 
@@ -203,7 +88,7 @@ make_food_webs <- function(taxon_names, basal_species, binary_matrices, biomass_
     for(j in brom_list){
       ## Filter biomass data by bromeliad
       brom_biomass <- 
-        biomass_clean %>% 
+        biomass_data %>% 
         dplyr::filter(bromeliad_id == j)
       ## Get species list
       speclist <- 
@@ -228,8 +113,6 @@ make_food_webs <- function(taxon_names, basal_species, binary_matrices, biomass_
       
       ## Now if we only have the two zooplankton consumers make empty
       if(length(unique(trophic_links$consumer)) == 2){
-        ### Print to check
-        print(unique(trophic_links$consumer))
         ### make empty
         trophic_links <- 
           tibble::tibble()
@@ -305,14 +188,14 @@ load_matrices <- function(folder, ending){
 }
 
 
-# Convert matrices to long ------------------------------------------------
+# Convert matrices to long format ------------------------------------------------
 make_mat_long <- function(matrix, unit){
   
   # Convert
   ret <-
     matrix %>% 
     ## Convert to tibble
-    tibble() %>% 
+    tibble::tibble() %>% 
     ## Create resource column
     dplyr::mutate(resource = colnames(.)) %>% 
     ## Make data long format
@@ -431,7 +314,7 @@ plot_food_web <- function(bromtoplot,
   # Filter bromeliad in web
   web <- 
     fluxes_long_format %>% 
-    dplyr::filter(site == sitetoplot & bromeliad_id == bromtoplot) %>% 
+    dplyr::filter(site_code == sitetoplot & bromeliad_id == bromtoplot) %>% 
     ## Remove cannibalism
     dplyr::filter(consumer != resource)
     
@@ -452,8 +335,9 @@ plot_food_web <- function(bromtoplot,
              colnames(site_mat) %in% speclist] %>% 
     ## Use function to get trophic levels
     TL() %>% 
-    tibble::as_tibble(rownames = "species") %>% 
-    dplyr::rename(TL = V1) %>% 
+    tibble::as_tibble(rownames = "species",
+                      .name_repair = "minimal") %>% 
+    dplyr::rename(TL = 2) %>% 
     ## Give random x axis position for organisms
     ## MODIFY WHEN I GET TIME
     dplyr::mutate(pos = runif(n = nrow(.), min = -1, max = 1)) %>% 
@@ -595,9 +479,6 @@ plot_food_web <- function(bromtoplot,
 # Labels for plots --------------------------------------------------------
 full_label <- function(var, scale = "none"){
   
-  if(var == "cons_P")
-    ret <- 
-      "P content of consumer"
   
   if(var == "flux_prop")
     ret <- 
@@ -615,37 +496,21 @@ full_label <- function(var, scale = "none"){
     ret <- 
       expression(paste("Energy flux between a \nconsumer-resource pair (log J.y"^"-1"*")"))
   
-  if(var == "cons_CPI_crisp")
+  if(var == "cons_CPI_defuzzified")
     ret <- 
-      "Crisp CPI value of consumer"
+      "Defuzzified CPI value of consumer"
+  
+  if(var == "avg_bodymass_g")
+    ret <- 
+      "Average body mass of consumer (g)"
+  
+  if(var == "func_dist")
+    ret <- 
+      "Euclidean distance in fuctional hypervolume"
   
   if(var == "gini")
     ret <- 
-      "Gini index for consumers"
-  
-  if(var == "CN_dist")
-    ret <- 
-      "Euclidean distance in CN plane\n of a consumer-resource pair"
-  
-  if(var == "CP_dist")
-    ret <- 
-      "Euclidean distance in CP plane\n of a consumer-resource pair"
-  
-  if(var == "CNP_dist")
-    ret <- 
-      "Euclidean distance in CNP space\n of a consumer-resource pair"
-  
-  if(var == "avg_CN_dist")
-    ret <- 
-      "Mean Euclidean distance between \nconsumers in CN plane"
-  
-  if(var == "avg_CP_dist")
-    ret <- 
-      "Mean Euclidean distance between \nconsumers in CP plane"
-  
-  if(var == "avg_CNP_dist")
-    ret <- 
-      "Mean Euclidean distance between \nconsumers in CNP space"
+      "Gini index of energy fluxes"
   
   if(var == "totalflow_Jy")
     ret <- 
@@ -654,6 +519,14 @@ full_label <- function(var, scale = "none"){
   if(var == "predflow_Jy")
     ret <- 
       expression(paste("Energy flow to \npredators (log J.y"^"-1"*")"))
+  
+  if(var == "prop_hull")
+    ret <- 
+      expression(paste("Proportion of overall functional \nhull covered by bromeliad"))
+  
+  if(var == "avg_func_dist")
+    ret <- 
+      "Average Euclidean distance \nin fuctional hypervolume"
   
   if(var == "n_removed")
     ret <- 
@@ -702,20 +575,62 @@ basic_line <- function(model, dats, x_var, y_var, index = 1, colour = NA, scale 
     brms::conditional_effects(model,
                               method = "fitted")[[index]]
 
-  # Make plot, depending on if we want the interaction or not
+  # x axis not logged
   if(scale == "x_original"){
-    if(index !=3){
+    ret <- 
+      ggplot(data = model_effect,
+           aes(x = .data[[x_var]],
+               y = estimate__)) +
+      ## Add raw data points
+      geom_jitter(data = dats,
+                 aes(x = .data[[x_var]],
+                     y = log(.data[[y_var]])),
+                 width = 0.001,
+                 alpha = 0.4)} 
+  
+  # y axis not logged
+  if(scale == "y_original"){
+    ret <- 
+      ggplot(data = model_effect,
+             aes(x = log(.data[[x_var]]),
+                 y = estimate__)) +
+      ## Add raw data points
+      geom_jitter(data = dats,
+                  aes(x = log(.data[[x_var]]),
+                      y = .data[[y_var]]),
+                  width = 0.001,
+                  alpha = 0.4)} 
+  
+  # Everything was logged
+  if(scale == "none"){ 
+    ret <- 
+      ggplot(data = model_effect,
+             aes(x = log(.data[[x_var]]),
+                 y = estimate__)) +
+      ## Add raw data points
+      geom_jitter(data = dats,
+                  aes(x = log(.data[[x_var]]),
+                      y = log(.data[[y_var]])),
+                  width = 0.001,
+                  alpha = 0.4)}
+  
+  # Nothing was logged
+  if(scale == "both_original"){ 
+    ret <- 
+      ggplot(data = model_effect,
+             aes(x = .data[[x_var]],
+                 y = estimate__)) +
+      ## Add raw data points
+      geom_jitter(data = dats,
+                  aes(x = .data[[x_var]],
+                      y = .data[[y_var]]),
+                  width = 0.001,
+                  alpha = 0.4)}
+  
+  # Common elements to plots
   ret <- 
-    ggplot(data = model_effect,
-         aes(x = .data[[x_var]],
-             y = estimate__)) +
-    ## Add raw data points
-    geom_jitter(data = dats,
-               aes(x = .data[[x_var]],
-                   y = log(.data[[y_var]])),
-               width = 0.001,
-               alpha = 0.4) +
-    ## Line
+    ret +
+    ## Lines
     geom_line(linewidth = 1.2,
               colour = "steelblue") +
     ## Confidence interval
@@ -729,131 +644,8 @@ basic_line <- function(model, dats, x_var, y_var, index = 1, colour = NA, scale 
     ylab(full_label(y_var)) + 
     theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(),
-          panel.background = element_blank(), 
-          axis.line = element_line(colour = "black"))} else
-            {## Modify data so that lines only show in the original point range
-              model_effect <- 
-                get_point_range(x_var = x_var,
-                                model_effect = model_effect,
-                                dats = dats)
-              
-              ## Plot
-              ret <- 
-                ggplot(data = model_effect,
-                       aes(x = .data[[x_var]],
-                           y = estimate__,
-                           colour = effect2__)) +
-                ## Add raw data points
-                geom_jitter(data = dats,
-                            aes(x = .data[[x_var]],
-                                y = log(.data[[y_var]]),
-                                colour = .data[[colour]]),
-                            width = 0.001,
-                            alpha = 0.4) +
-                ## Line
-                geom_line(aes(group = .data[[colour]]),
-                          colour = "black",
-                          linewidth = 1.2) +
-                ## Confidence interval
-                geom_ribbon(aes(ymin = lower__,
-                                ymax = upper__,
-                                group = .data[[colour]],
-                                fill = .data[[colour]]),
-                            alpha = 0.5) +
-                ## Styling
-                xlab(full_label(x_var)) +
-                ylab(full_label(y_var)) + 
-                scale_colour_manual(paste(stringr::str_remove(string = colour,
-                                                                       pattern = "lower_cons_"),
-                                                   "ratio of\nconsumer\nvs. resource"),
-                                    values = c("burlywood4", "cadetblue4"),
-                                    labels = c("Higher", "Lower")) +
-                scale_fill_manual(paste(stringr::str_remove(string = colour,
-                                                              pattern = "lower_cons_"),
-                                          "ratio of\nconsumer\nvs. resource"),
-                                    values = c("burlywood4", "cadetblue4"),
-                                    labels = c("Higher", "Lower")) +
-                theme(panel.grid.major = element_blank(), 
-                      panel.grid.minor = element_blank(),
-                      panel.background = element_blank(), 
-                      axis.line = element_line(colour = "black"))}} 
-  else{ 
-    if(index == 3) 
-      {## Modify data so that lines only show in the original point range
-      model_effect <- 
-        get_point_range(x_var = x_var,
-                        model_effect = model_effect,
-                        dats = dats)
-      
-      
-      ## Plot
-      ret <- 
-      ggplot(data = model_effect,
-             aes(x = log(.data[[x_var]]),
-                 y = estimate__,
-                 colour = effect2__)) +
-      ## Add raw data points
-      geom_jitter(data = dats,
-                  aes(x = log(.data[[x_var]]),
-                      y = log(.data[[y_var]]),
-                      colour = .data[[colour]]),
-                  width = 0.3,
-                  alpha = 0.4) +
-      ## Line
-      geom_line(aes(group = .data[[colour]]),
-                linewidth = 1.2) +
-      ## Confidence interval
-      geom_ribbon(aes(ymin = lower__,
-                      ymax = upper__,
-                      group = .data[[colour]],
-                      fill = .data[[colour]]),
-                  alpha = 0.5) +
-      ## Styling
-      xlab(full_label(x_var)) +
-      ylab(full_label(y_var)) + 
-      scale_colour_manual(paste(stringr::str_remove(string = colour,
-                                                    pattern = "lower_cons_"),
-                                "ratio of\nconsumer\nvs. resource"),
-                          values = c("burlywood4", "cadetblue4"),
-                          labels = c("Higher", "Lower")) +
-      scale_fill_manual(paste(stringr::str_remove(string = colour,
-                                                  pattern = "lower_cons_"),
-                              "ratio of\nconsumer\nvs. resource"),
-                        values = c("burlywood4", "cadetblue4"),
-                        labels = c("Higher", "Lower")) +
-        theme(panel.grid.major = element_blank(), 
-              panel.grid.minor = element_blank(),
-              panel.border = element_rect(colour = "black", 
-                                          fill = NA))} else
-             {
-                ret <- 
-                  ggplot(data = model_effect,
-                         aes(x = log(.data[[x_var]]),
-                             y = estimate__)) +
-                  ## Add raw data points
-                  geom_jitter(data = dats,
-                              aes(x = log(.data[[x_var]]),
-                                  y = log(.data[[y_var]])),
-                              width = 0.001,
-                              alpha = 0.4) +
-                  ## Line
-                  geom_line(linewidth = 1.2,
-                            colour = "steelblue") +
-                  ## Confidence interval
-                  geom_ribbon(aes(ymin = lower__,
-                                  ymax = upper__),
-                              alpha = 0.5,
-                              colour = NA,
-                              fill = "steelblue") +
-                  ## Styling
-                  xlab(full_label(x_var)) +
-                  ylab(full_label(y_var)) + 
-                  theme(panel.grid.major = element_blank(), 
-                        panel.grid.minor = element_blank(),
-                        panel.border = element_rect(colour = "black", 
-                                                    fill = NA))
-              }
-                    
+          axis.line = element_line(colour = "black"),
+          panel.background = element_rect(fill = "white"))                
   
   # Return plot
   return(ret)
@@ -861,7 +653,7 @@ basic_line <- function(model, dats, x_var, y_var, index = 1, colour = NA, scale 
   
   
   
-}}
+}
 
 
 # Subsetted line plot ---------------------------------------------------------
@@ -1102,88 +894,6 @@ explo_line <- function(model, dats, x_var, y_var, scale = "none"){
 
 
 
-# Get euclidean distance between two points -----------
-get_euclidean_distance <- function(a, b){
-  
-  # Get square root of sum of squares
-  ret <- 
-    sqrt(sum((a-b)^2))
-  
-  # Return
-  return(ret)
-}
-
-# Get average distance between all points in a dataframe ------------------
-average_dist <- function(data, CN = FALSE, CNP = FALSE, CP = FALSE){
-  
-  ## Remove all NAs
-  data <- 
-    data %>%
-    dplyr::filter(!is.na(cons_C) & !is.na(cons_N) & !is.na(cons_P)) 
-  
-  # Get average distance
-  ret <- 
-    ## Get all unique, non-identical pair of points
-    tidyr::crossing(id.x = 1:nrow(data), 
-                    id.y = 1:nrow(data)) %>% 
-    dplyr::filter(id.x != id.y) %>% 
-    dplyr::filter(id.x < id.y) %>%
-    ## For each one of these rows with unique combinations
-    dplyr::rowwise()
-  
-  # Get average CN distance
-  if(CN == TRUE){
-    ret <- 
-      ret %>% 
-      ## Get the euclidean distance between the correspoding pair of points
-      mutate(distance = get_euclidean_distance(c(data$cons_C[id.x], data$cons_N[id.x]),
-                                               c(data$cons_C[id.y], data$cons_N[id.y]))) %>% 
-      ## Ungroup to remove the rowwise
-      dplyr::ungroup() %>% 
-      ## Keep the distances, get mean and extract
-      dplyr::select(distance) %>%
-      dplyr::summarise_all(mean) %>% 
-      dplyr::pull()
-    
-  }
-  
-  # Get average CP distance
-  if(CP == TRUE){
-    ret <- 
-      ret %>% 
-      ## Get the euclidean distance between the correspoding pair of points
-      mutate(distance = get_euclidean_distance(c(data$cons_C[id.x], data$cons_P[id.x]),
-                                               c(data$cons_C[id.y], data$cons_P[id.y]))) %>% 
-      ## Ungroup to remove the rowwise
-      dplyr::ungroup() %>% 
-      ## Keep the distances, get mean and extract
-      dplyr::select(distance) %>%
-      dplyr::summarise_all(mean) %>% 
-      dplyr::pull()
-    
-  }
-  
-  # Get average CNP distance
-  if(CNP == TRUE){
-    ret <- 
-      ret %>% 
-      ## Get the euclidean distance between the correspoding pair of points
-      mutate(distance = get_euclidean_distance(c(data$cons_C[id.x], data$cons_N[id.x], data$cons_P[id.x]),
-                                               c(data$cons_C[id.y], data$cons_N[id.y], data$cons_P[id.y]))) %>% 
-      ## Ungroup to remove the rowwise
-      dplyr::ungroup() %>% 
-      ## Keep the distances, get mean and extract
-      dplyr::select(distance) %>%
-      dplyr::summarise_all(mean) %>% 
-      dplyr::pull()
-    
-  }
-
-  # Return
-  return(ret)
-
-}
-
 # Functions to return list of species to remove or add ----------------------------
 remove_add_specs <- function(data, number, mock_nspecs, action){
   
@@ -1217,178 +927,6 @@ remove_add_specs <- function(data, number, mock_nspecs, action){
   # Return
   return(ret)
 }
-
-
-# Do predictions from model from CNP --------------------------------------
-do_predictions <- function(data, model_list){
-  
-  # Save data
-  ret <- 
-    tibble::tibble()
-  
-  
-  
-  # Do row by row
-  for(index in 1:nrow(data)){
-    print(index)
-    # Get row
-    row <- 
-      data[index,]
-    
-    # Extract model
-    thismodel <- 
-      model_list %>% 
-      dplyr::filter(taxon == row$taxon) %>% 
-      dplyr::select(model)[[1]]
-    
-    # Blank prediction
-    prediction <- 
-      NA
-  # No model
-    if(is.na(row$nsites))
-      # No model
-    {
-      
-      prediction <- 
-        tibble::tibble(Estimate = NA,
-                       Est.Error = NA,
-                       Q2.5 = NA,
-                       Q97.5 = NA)
-    } else
-    
-  # Model with random effect
-  if(row$nsites > 1){
-    prediction <- 
-      row %>% 
-      predict(object = thismod,
-              allow_new_levels = TRUE, ### new random effects
-              sample_new_levels = "gaussian") %>% 
-      tibble::as_tibble()
-    
-  } else if (row$nsites == 1)
-  # Model without random effect
-  {
-    prediction <- 
-      data %>% 
-      predict(object = thismod) %>% 
-      tibble::as_tibble()
-  }
-    # Extract values and credible intervals
-    ret <- 
-      ret %>% 
-      dplyr::bind_rows(dplyr::bind_cols(c(row %>% 
-                                            dplyr::select(-model, -nsites), prediction)))
-  }
-
-  
-  # Return
-  return(ret)
-  
-  
-  
-  
-}
-  
-
-# Average C, N, P values over a different taxonomic levels ----------------
-average_stoich_content <- function(data, stoich){
-  
-  # List of levels
-  levels <- 
-    c("bwg_name", "genus", "family")
-  
-  # Data to return
-  ret <- 
-    data %>% 
-    dplyr::mutate(C_mean = NA,
-                  N_mean = NA,
-                  P_mean = NA,
-                  C_sd = NA,
-                  N_sd = NA,
-                  P_sd = NA,
-                  level = NA)
-  
-  # Get all possible values for nutrients
-  temp <-  
-    tibble::tibble()
-  # Average over values for each column
-  for(i in levels){
-    # Select column of interest and remove NAs
-    temp <- 
-      temp %>% 
-      dplyr::bind_rows(
-        stoich %>% 
-        dplyr::select(do.call(paste, list(i)), C, N, P) %>% 
-        dplyr::rename(taxon = 1) %>% 
-        dplyr::filter(!is.na(taxon)) %>% 
-        ## Now summarise
-        dplyr::group_by(taxon) %>% 
-        dplyr::summarise(dplyr::across(c(C, N, P),
-                                       ~mean(.x, na.rm = T),
-                                       .names = "{.col}_mean"),
-                         dplyr::across(c(C, N, P),
-                                       ~sd(.x, na.rm = T),
-                                       .names = "{.col}_sd")) %>% 
-        ## ungroup
-        dplyr::ungroup() %>% 
-        ## In case some Nan got their way in
-        dplyr::mutate(dplyr::across(c(C_mean, N_mean, P_mean),
-                                    ~ifelse(is.nan(.x), NA, .x))))
-  }
-  
-  # Now go row by row, look where we have NAs, and add values
-  for(i in 1:nrow(data)){
-    row <- 
-      data[i,]
-    check <- 
-      NA
-    print(paste("row", i))
-    ## As long as we do not have the check
-    while(is.na(check)){
-      for(j in levels){
-        ## Extract level for which to find elemental content
-        target <- 
-          dplyr::pull(row[,j])
-        ### In case is NA
-        if(is.na(target)) {next}
-        ### If not 
-        val <- 
-          temp %>% 
-          dplyr::filter(taxon == target)
-        ## Now check if exists
-          ### If nothing found just leave
-          if(nrow(val) == 0 & j == "ord") 
-            {check <-  "y" 
-             break} else
-              ### If exists
-              if(nrow(val) == 1){
-                #### Add values to row
-                ret[i,26:31] <- 
-                  val[,2:7]
-                ret[i,32] <- 
-                  j
-                #### First check is done
-                check <- 
-                  "y"
-                break
-                } else 
-                  check <- 
-                      "y"
-      }
-      
-      
-    }
-    
-    
-    
-    
-    
-  }
-  
-  # Return
-  return(ret)
-}
-
 
 
 # Get title for significant relationships ---------------------------------
@@ -1451,4 +989,49 @@ title_sig <- function(sitename, model, index){
   
   
 }
+
+
+
+# Run elemental content models safely (i.e. ignores inputs with NA) --------
+safe_lm <- function(nutrient, dats, mode = "lm") {
+  
+  # Remove NAs from rows of biomass and nutrient column
+  dats <- 
+    dats %>% 
+    ## !! dynamically evaluates the y argument
+    dplyr::select(bodymass_g, nutrient = !!nutrient) %>% 
+    na.omit()
+  
+ # If we have less than two rows
+  if (nrow(dats) < 3) {
+    ## Return NA
+    return(NA)} else {
+      # Otherwise just fit the model
+      # With lm
+      if(mode == "lm")
+      {ret <- 
+         lm(log10(nutrient) ~ 
+              log(bodymass_g),
+            data = dats)}
+      
+      # or lm2
+      if(mode == "lm2")
+      {ret <- 
+        lmodel2(nutrient ~
+                  log(bodymass_g),
+              "interval", "interval",
+              data = dats,
+              nperm = 500)}
+      
+      # or brms
+      if(mode == "brms")
+      {ret <- 
+        brms::brm(nutrient ~
+                    log(bodymass_g),
+                  iter = 2000,
+                  family = gaussian(),
+                  data = dats)}
+      ## and return the model fit
+      return(ret)}}
+
 
