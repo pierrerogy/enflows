@@ -27,7 +27,7 @@
      showgrid="false"
      showguides="true"
      inkscape:zoom="1.8847266"
-     inkscape:cx="731.14053"
+     inkscape:cx="725.03885"
      inkscape:cy="235.57793"
      inkscape:window-width="1920"
      inkscape:window-height="1094"
@@ -12673,12 +12673,12 @@
      inkscape:label="Contenu">
     <path
        style="opacity:0.3;fill:#5f5f5f;fill-opacity:1;stroke:#0b0a08;stroke-width:0.499999;stroke-linejoin:round;paint-order:stroke markers fill"
-       d="m 212.56662,157.07006 c 0.36983,0.27738 -6.7495,3.79081 -6.7495,3.79081 l -1.20196,7.67408 2.0341,13.59144 3.69835,8.32129 26.62813,-1.38688 0.18492,-5.27015 -2.86622,-10.63276 -3.1436,-4.43802 -3.01725,-4.94099 z"
+       d="m 213.5493,149.91053 c 0.36983,0.27738 -6.7495,3.79081 -6.7495,3.79081 l -1.20196,7.67408 2.0341,13.59144 3.69835,8.32129 26.62813,-1.38688 0.18492,-5.27015 -2.86622,-10.63276 -3.1436,-4.43802 -3.01725,-4.94099 z"
        id="path6257"
        sodipodi:nodetypes="ccccccccccc" />
     <path
        style="fill:#999999;fill-opacity:1;stroke:#080b07;stroke-width:0.15;stroke-linejoin:round;stroke-dasharray:0.6, 0.15;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill"
-       d="m 219.41843,172.81132 7.86144,-4.91341 0.56153,5.7557 -11.23063,10.52872 z"
+       d="m 220.40111,165.65179 7.86144,-4.91341 0.56153,5.7557 -11.23063,10.52872 z"
        id="path6209"
        sodipodi:nodetypes="ccccc" />
     <path
@@ -18020,7 +18020,7 @@
        transform="matrix(1.0738115,0,0,1.0738115,257.68606,-13.108116)"><tspan
          x="4.5361366"
          y="82.766876"
-         id="tspan22621">Hypothesis 2: species pair scale</tspan></text>
+         id="tspan12006">Hypothesis 2: species pair scale</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:5.64444px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';white-space:pre;inline-size:71.1483;display:inline;fill:#1a1a1a;stroke-width:0.4"
@@ -18030,7 +18030,7 @@
        transform="matrix(1.0133886,0,0,1.0133886,258.62788,65.575147)"><tspan
          x="4.5361366"
          y="82.766876"
-         id="tspan22623">Hypothesis 3: food web scale</tspan></text>
+         id="tspan12008">Hypothesis 3: food web scale</tspan></text>
     <path
        d="m 118.12816,129.15913 0.002,-0.0129 0.0141,-0.0869 0.0353,-0.20796 0.0576,-0.34307 0.0775,-0.46408 0.0917,-0.54515 0.0963,-0.57923 0.0963,-0.57217 0.0905,-0.54633 0.0858,-0.5193 0.0787,-0.49346 0.0728,-0.47231 0.0681,-0.45821 0.0646,-0.45116 0.0517,-0.37831 0.0588,-0.44999 0.0552,-0.44763 0.0517,-0.43824 0.0482,-0.42414 0.0447,-0.40651 0.04,-0.38889 0.0388,-0.37362 0.0364,-0.36892 0.0376,-0.37714 0.0364,-0.39124 0.0376,-0.41121 0.0364,-0.42766 0.0352,-0.44177 0.0341,-0.44998 0.0258,-0.37949 0.0294,-0.45351 0.0258,-0.44999 0.0223,-0.44058 0.02,-0.42649 0.0176,-0.40769 0.0141,-0.39124 0.0129,-0.37597 0.0129,-0.37009 0.0118,-0.37831 0.0106,-0.39359 0.0106,-0.41239 0.008,-0.42884 0.006,-0.44294 0.004,-0.45233 10e-4,-0.37949 -10e-4,-0.45469 -0.005,-0.44998 -0.006,-0.44176 -0.008,-0.42649 -0.0106,-0.40886 -0.0118,-0.39124 -0.0117,-0.37597 -0.0129,-0.37009 -0.0129,-0.37832 -0.0141,-0.39359 -0.0176,-0.41121 -0.0211,-0.43002 -0.0235,-0.44176 -0.0258,-0.45116 -0.0247,-0.37949 -0.0317,-0.45351 -0.0329,-0.44881 -0.0364,-0.43941 -0.0364,-0.42531 -0.0376,-0.40769 -0.0376,-0.38889 -0.0364,-0.37479 -0.0376,-0.36892 -0.0376,-0.37597 -0.0411,-0.39124 -0.0446,-0.410036 -0.0493,-0.426488 -0.0517,-0.440586 -0.0564,-0.447635 -0.0494,-0.377142 -0.0623,-0.449985 -0.0646,-0.452335 -0.0693,-0.459384 -0.074,-0.475833 -0.0799,-0.496981 -0.0858,-0.524003 -0.0917,-0.551027 -0.0963,-0.574524 -0.0963,-0.576874 -0.0905,-0.535752 -0.074,-0.446461 -0.0541,-0.321921 -0.0317,-0.185634 -0.0118,-0.07167 -0.001,-0.0082"
        style="fill:none;stroke:#fca50a;stroke-width:0.375967;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
@@ -23598,46 +23598,72 @@
     <text
        xml:space="preserve"
        style="font-size:4.23326px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.479992"
-       x="197.42264"
-       y="131.99454"
+       x="199.52838"
+       y="131.29262"
        id="text18138-7-6"><tspan
          sodipodi:role="line"
          id="tspan18136-1-2"
          style="font-size:4.23326px;fill:#000000;stroke-width:0.479992"
-         x="197.42264"
-         y="131.99454">Get Euclidean distance in</tspan><tspan
+         x="199.52838"
+         y="131.29262">Get Euclidean distance in</tspan><tspan
          sodipodi:role="line"
          style="font-size:4.23326px;fill:#000000;stroke-width:0.479992"
-         x="197.42264"
-         y="137.28612"
+         x="199.52838"
+         y="136.5842"
          id="tspan6094">trait hypervolume</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:4.23326px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.479992"
+       x="206.98514"
+       y="57.749012"
+       id="text18138-7-6-6"><tspan
+         sodipodi:role="line"
+         style="font-size:4.23326px;fill:#000000;stroke-width:0.479992"
+         x="206.98514"
+         y="57.749012"
+         id="tspan6094-2">Defuzzify trait modalities</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:4.23326px;fill:#000000;stroke-width:0.479992"
+         x="206.98514"
+         y="63.040588"
+         id="tspan6302">from database</tspan></text>
     <path
        style="fill:#000000;fill-opacity:1;stroke:#1b0a02;stroke-width:0.674269;stroke-opacity:0.839"
        d="M 206.79558,200.18708 Z"
        id="path33797-6" />
     <path
        style="fill:none;fill-opacity:1;stroke:#1b0a02;stroke-width:0.520698;stroke-opacity:0.839"
-       d="m 240.21193,195.38809 h -39.07391 v -39.80428 l 39.05708,-0.0396 z"
+       d="M 241.19461,188.22856 H 202.1207 v -39.80428 l 39.05708,-0.0396 z"
        id="path33799-4" />
     <text
        xml:space="preserve"
        style="font-size:4.23535px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.480227"
-       x="191.46935"
-       y="203.98631"
+       x="190.34628"
+       y="193.03645"
        id="text18138-7-6-7"><tspan
          sodipodi:role="line"
          style="font-size:4.23535px;fill:#000000;stroke-width:0.480227"
-         x="191.46935"
-         y="203.98631"
-         id="tspan34661">Get proportion of overall functional</tspan><tspan
+         x="190.34628"
+         y="193.03645"
+         id="tspan34661">Get average Euclidean distance</tspan><tspan
          sodipodi:role="line"
          style="font-size:4.23535px;fill:#000000;stroke-width:0.480227"
-         x="191.46935"
-         y="209.2805"
+         x="190.34628"
+         y="198.33064"
+         id="tspan6075">between consumer-resource pairs, </tspan><tspan
+         sodipodi:role="line"
+         style="font-size:4.23535px;fill:#000000;stroke-width:0.480227"
+         x="190.34628"
+         y="203.62483"
+         id="tspan6077">and proportion of overall functional</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:4.23535px;fill:#000000;stroke-width:0.480227"
+         x="190.34628"
+         y="208.91902"
          id="tspan6102">hull covered by bromeliad</tspan></text>
     <g
        id="g38006"
-       transform="matrix(0.75447895,0,0,0.75447895,60.620128,54.297019)">
+       transform="matrix(0.75447895,0,0,0.75447895,61.602808,47.137493)">
       <path
          d="m 78.457486,84.996214 h 7.878852 -0.0094 l 0.03995,-0.0012 0.03995,-0.0082 0.03877,-0.01527 0.03525,-0.01997 0.03172,-0.02585 0.02702,-0.03055 0.02232,-0.03407 0.01527,-0.0376 0.0094,-0.03995 0.0035,-0.04112 v 0 -1.285336 0 l -0.0035,-0.04112 -0.0094,-0.03877 -0.01527,-0.0376 -0.02232,-0.03525 -0.02702,-0.03055 -0.03172,-0.02585 -0.03525,-0.01997 -0.03877,-0.01527 -0.03995,-0.0082 -0.03055,-0.0012 h -7.878852 l 0.03055,0.0012 -0.03995,-0.0012 -0.04112,0.0047 -0.03877,0.01175 -0.0376,0.01762 -0.0329,0.0235 -0.02937,0.0282 -0.02467,0.03172 -0.0188,0.03642 -0.01292,0.03877 -0.0071,0.04112 -0.0012,0.01997 v 1.285336 l 0.0012,-0.01997 v 0.04112 l 0.0071,0.03995 0.01292,0.03877 0.0188,0.03642 0.02467,0.03172 0.02937,0.02937 0.0329,0.02232 0.0376,0.01762 0.03877,0.01175 0.04112,0.0047 z"
          style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.0622695;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
@@ -23658,7 +23684,7 @@
     </g>
     <g
        id="g38006-2"
-       transform="matrix(0.75447895,0,0,0.75447895,69.270391,49.389881)">
+       transform="matrix(0.75447895,0,0,0.75447895,70.253071,42.230355)">
       <path
          d="m 78.457486,84.996214 h 7.878852 -0.0094 l 0.03995,-0.0012 0.03995,-0.0082 0.03877,-0.01527 0.03525,-0.01997 0.03172,-0.02585 0.02702,-0.03055 0.02232,-0.03407 0.01527,-0.0376 0.0094,-0.03995 0.0035,-0.04112 v 0 -1.285336 0 l -0.0035,-0.04112 -0.0094,-0.03877 -0.01527,-0.0376 -0.02232,-0.03525 -0.02702,-0.03055 -0.03172,-0.02585 -0.03525,-0.01997 -0.03877,-0.01527 -0.03995,-0.0082 -0.03055,-0.0012 h -7.878852 l 0.03055,0.0012 -0.03995,-0.0012 -0.04112,0.0047 -0.03877,0.01175 -0.0376,0.01762 -0.0329,0.0235 -0.02937,0.0282 -0.02467,0.03172 -0.0188,0.03642 -0.01292,0.03877 -0.0071,0.04112 -0.0012,0.01997 v 1.285336 l 0.0012,-0.01997 v 0.04112 l 0.0071,0.03995 0.01292,0.03877 0.0188,0.03642 0.02467,0.03172 0.02937,0.02937 0.0329,0.02232 0.0376,0.01762 0.03877,0.01175 0.04112,0.0047 z"
          style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.0622695;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
@@ -23679,7 +23705,7 @@
     </g>
     <g
        id="g38006-3"
-       transform="matrix(0.75447895,0,0,0.75447895,69.921777,55.264311)">
+       transform="matrix(0.75447895,0,0,0.75447895,70.904457,48.104785)">
       <path
          d="m 78.457486,84.996214 h 7.878852 -0.0094 l 0.03995,-0.0012 0.03995,-0.0082 0.03877,-0.01527 0.03525,-0.01997 0.03172,-0.02585 0.02702,-0.03055 0.02232,-0.03407 0.01527,-0.0376 0.0094,-0.03995 0.0035,-0.04112 v 0 -1.285336 0 l -0.0035,-0.04112 -0.0094,-0.03877 -0.01527,-0.0376 -0.02232,-0.03525 -0.02702,-0.03055 -0.03172,-0.02585 -0.03525,-0.01997 -0.03877,-0.01527 -0.03995,-0.0082 -0.03055,-0.0012 h -7.878852 l 0.03055,0.0012 -0.03995,-0.0012 -0.04112,0.0047 -0.03877,0.01175 -0.0376,0.01762 -0.0329,0.0235 -0.02937,0.0282 -0.02467,0.03172 -0.0188,0.03642 -0.01292,0.03877 -0.0071,0.04112 -0.0012,0.01997 v 1.285336 l 0.0012,-0.01997 v 0.04112 l 0.0071,0.03995 0.01292,0.03877 0.0188,0.03642 0.02467,0.03172 0.02937,0.02937 0.0329,0.02232 0.0376,0.01762 0.03877,0.01175 0.04112,0.0047 z"
          style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.0622695;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
@@ -23700,7 +23726,7 @@
     </g>
     <g
        id="g38006-4"
-       transform="matrix(0.75447895,0,0,0.75447895,58.7377,65.997462)">
+       transform="matrix(0.75447895,0,0,0.75447895,59.72038,58.837936)">
       <path
          d="m 78.457486,84.996214 h 7.878852 -0.0094 l 0.03995,-0.0012 0.03995,-0.0082 0.03877,-0.01527 0.03525,-0.01997 0.03172,-0.02585 0.02702,-0.03055 0.02232,-0.03407 0.01527,-0.0376 0.0094,-0.03995 0.0035,-0.04112 v 0 -1.285336 0 l -0.0035,-0.04112 -0.0094,-0.03877 -0.01527,-0.0376 -0.02232,-0.03525 -0.02702,-0.03055 -0.03172,-0.02585 -0.03525,-0.01997 -0.03877,-0.01527 -0.03995,-0.0082 -0.03055,-0.0012 h -7.878852 l 0.03055,0.0012 -0.03995,-0.0012 -0.04112,0.0047 -0.03877,0.01175 -0.0376,0.01762 -0.0329,0.0235 -0.02937,0.0282 -0.02467,0.03172 -0.0188,0.03642 -0.01292,0.03877 -0.0071,0.04112 -0.0012,0.01997 v 1.285336 l 0.0012,-0.01997 v 0.04112 l 0.0071,0.03995 0.01292,0.03877 0.0188,0.03642 0.02467,0.03172 0.02937,0.02937 0.0329,0.02232 0.0376,0.01762 0.03877,0.01175 0.04112,0.0047 z"
          style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.0622695;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
@@ -23728,8 +23754,8 @@
        d="m 274.96754,82.251614 v 48.878476 h 47.98161"
        id="path33799-3-4" />
     <path
-       style="fill:none;fill-opacity:1;stroke:#1b0a02;stroke-width:0.603423;stroke-opacity:0.839"
-       d="m 274.13579,153.59826 v 46.12811 h 45.28171"
+       style="fill:none;fill-opacity:1;stroke:#1b0a02;stroke-width:0.487409;stroke-opacity:0.839"
+       d="m 304.50749,157.01491 v 37.25944 h 36.57578"
        id="path33799-3-0" />
     <text
        xml:space="preserve"
@@ -23767,19 +23793,19 @@
          y="138.01236">Euclidean distance in trait hypervolume</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:3.57501px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.405355"
-       x="275.67786"
-       y="203.38408"
+       style="font-size:2.88767px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.32742"
+       x="305.75308"
+       y="197.22882"
        id="text18138-7-5-0-3"><tspan
          sodipodi:role="line"
-         style="font-size:3.57501px;fill:#000000;stroke-width:0.405355"
-         x="275.67786"
-         y="203.38408"
+         style="font-size:2.88767px;fill:#000000;stroke-width:0.32742"
+         x="305.75308"
+         y="197.22882"
          id="tspan7746">Proportion of overall functional</tspan><tspan
          sodipodi:role="line"
-         style="font-size:3.57501px;fill:#000000;stroke-width:0.405355"
-         x="275.67786"
-         y="207.85284"
+         style="font-size:2.88767px;fill:#000000;stroke-width:0.32742"
+         x="305.75308"
+         y="200.83841"
          id="tspan7943">hull covered by bromeliad</tspan></text>
     <text
        xml:space="preserve"
@@ -23795,15 +23821,15 @@
          sodipodi:role="line">Energy flux between two nodes</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:3.57501px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.405355"
-       x="-199.30899"
-       y="271.4473"
+       style="font-size:2.88767px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.32742"
+       x="-193.91235"
+       y="302.34576"
        id="text18138-9-9-2"
        transform="rotate(-89.982838)"><tspan
          id="tspan18136-0-1-5"
-         style="font-size:3.57501px;fill:#000000;stroke-width:0.405355"
-         x="-199.30899"
-         y="271.4473"
+         style="font-size:2.88767px;fill:#000000;stroke-width:0.32742"
+         x="-193.91235"
+         y="302.34576"
          sodipodi:role="line">Total energy flow in bromeliad</tspan></text>
     <path
        style="fill:none;stroke:#08186e;stroke-width:0.620974;stroke-dasharray:none;stroke-opacity:0.839"
@@ -23816,8 +23842,8 @@
        id="path9802-1"
        sodipodi:nodetypes="cc" />
     <path
-       style="fill:none;stroke:#08186e;stroke-width:0.608033;stroke-dasharray:none;stroke-opacity:0.839"
-       d="M 277.97596,194.94792 318.2921,161.5948"
+       style="fill:none;stroke:#08186e;stroke-width:0.491132;stroke-dasharray:none;stroke-opacity:0.839"
+       d="m 307.60936,190.41462 32.56488,-26.94059"
        id="path9802-18"
        sodipodi:nodetypes="cc" />
     <g
@@ -23984,5 +24010,42 @@
          style="stroke-width:4"
          x="222.57664"
          y="59.128143">  </tspan></text>
+    <path
+       style="fill:none;fill-opacity:1;stroke:#1b0a02;stroke-width:0.487409;stroke-opacity:0.839"
+       d="m 258.53331,157.26623 v 37.25944 h 36.57578"
+       id="path33799-3-0-4" />
+    <text
+       xml:space="preserve"
+       style="font-size:2.88767px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.32742"
+       x="259.7789"
+       y="197.48016"
+       id="text18138-7-5-0-3-8"><tspan
+         sodipodi:role="line"
+         style="font-size:2.88767px;fill:#000000;stroke-width:0.32742"
+         x="259.7789"
+         y="197.48016"
+         id="tspan7943-4">Average euclidean distance in</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:2.88767px;fill:#000000;stroke-width:0.32742"
+         x="259.7789"
+         y="201.08975"
+         id="tspan6170">trait hypervolume</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:2.88767px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke-width:0.32742"
+       x="-194.17744"
+       y="256.37164"
+       id="text18138-9-9-2-8"
+       transform="rotate(-89.982838)"><tspan
+         id="tspan18136-0-1-5-2"
+         style="font-size:2.88767px;fill:#000000;stroke-width:0.32742"
+         x="-194.17744"
+         y="256.37164"
+         sodipodi:role="line">Total energy flow in bromeliad</tspan></text>
+    <path
+       style="fill:none;stroke:#08186e;stroke-width:0.491132;stroke-dasharray:none;stroke-opacity:0.839"
+       d="M 262.55642,158.39199 289.497,190.95687"
+       id="path9802-18-6"
+       sodipodi:nodetypes="cc" />
   </g>
 </svg>

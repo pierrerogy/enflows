@@ -307,8 +307,8 @@ fig2 <-
 ggplot2::ggsave(filename = here::here("plots",
                                       "fig2.pdf"),
                 fig2,
-                height = 6,
-                width = 10)
+                height = 4,
+                width = 8)
 
   
 
@@ -343,8 +343,8 @@ fig3 <-
 ggplot2::ggsave(filename = here::here("plots",
                                       "fig3.pdf"),
                 fig3,
-                height = 10,
-                width = 10)
+                height = 6,
+                width = 6)
 
 # Figure 4 (run script 04)  ------------------------------------------------
 # Fig 4a

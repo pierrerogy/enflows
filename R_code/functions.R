@@ -9,6 +9,7 @@ library(cheddar)
 library(viridis)
 library(brms)
 library(latex2exp)
+library(ggrepel)
 
 # Get equivalent models from loo output-------------------------------------------------------------------------
 get_eq_models <- function(loo_output){
@@ -235,6 +236,216 @@ match_CP3 <- function(ord, subord, family, genus, cp3_search){
   
   }
   
+
+
+# Plot PCA outputs --------------------------------------------------------
+plz_plot_my_pca <- function(PCA, axes, cor_min = 0.5, type, dats){
+  
+
+  
+  # Get proportion explained for each axis and convert to %
+  per_inertia <- 
+    (PCA$eigenvalues[axes,2]) * 100
+  
+  if(type == "points"){
+    # Make a taxon vector to make color points
+    taxa_name <-
+      ## Get fw data
+      dats %>% 
+      ## Make new column
+      dplyr::mutate(taxa_name = ord) %>% 
+      ## Fill in the blanks
+      dplyr::mutate(taxa_name = ifelse(is.na(taxa_name) & !is.na(subclass),
+                                       subclass, 
+                                       ifelse(is.na(taxa_name) & !is.na(class),
+                                              class, 
+                                              ifelse(is.na(taxa_name) & !is.na(phylum),
+                                                     phylum, 
+                                                     taxa_name)))) %>% 
+      ## Get main Diptera families in
+      dplyr::mutate(taxa_name = ifelse(family == "Chironomidae"& !is.na(family),
+                                       "Chironomidae",
+                                       ifelse(family == "Culicidae" & !is.na(family),
+                                              "Culicidae",
+                                              taxa_name))) %>%
+      ## Get other Diptera families in, and other taxonomic groups
+      dplyr::mutate(taxa_name = ifelse(taxa_name == "Diptera",
+                                       "Other_Diptera", 
+                                       ifelse(taxa_name == "Trombidiformes", 
+                                              "Acari",
+                                              ifelse(taxa_name == "Rhynchobdellida", 
+                                                     "Hirudinea",
+                                                     ifelse(taxa_name == "Turbellaria", 
+                                                            "Platyhelminthes",
+                                                            ifelse(taxa_name %in% c("Harpacticoida", "Cyclopoida"),
+                                                                   "Copepoda",
+                                                                   ifelse(taxa_name == "Haplotaxida", 
+                                                                          "Oligochaeta",
+                                                                          ifelse(taxa_name == "Nematomorpha", 
+                                                                                 "Nematoda", taxa_name)))))))) 
+    
+    
+    # Select axes 
+    ind_scores <-
+      RES_pca$individuals[,axes] %>% 
+      tibble::as_tibble() %>% 
+      dplyr::rename("first" = 1,
+                    "second" = 2) %>% 
+      ## add taxa name
+      dplyr::bind_cols(taxa_name %>% 
+                         dplyr::select(taxa_name)) %>% 
+      ## Add colours
+      dplyr::mutate(col = ifelse(taxa_name == "Chironomidae",
+                                 "black",
+                                 ifelse(taxa_name == "Culicidae",
+                                        "grey70",
+                                        ifelse(taxa_name == "Other_Diptera",
+                                               "grey30",
+                                               ifelse(taxa_name %in% c("Opisthophora", "Oligochaeta",
+                                                                       "Hirudinea","Platyhelminthes"),
+                                                      "skyblue",
+                                                      ifelse(taxa_name %in% c("Odonata", "Coleoptera"),
+                                                             "firebrick",
+                                                             ifelse(taxa_name %in% c("Lepidoptera", "Trichoptera"),
+                                                                    "darkgreen",
+                                                                    ifelse(taxa_name %in% c("Hemiptera", "Acari", "Panpulmonata"),
+                                                                           "yellowgreen",
+                                                                           ifelse(taxa_name %in% c("Diplostraca", "Copepoda", "Podocopida"),
+                                                                                  "steelblue4", NA)))))))),
+                    pch = ifelse(taxa_name %in% c("Opisthophora", "Oligochaeta",
+                                                  "Hirudinea","Platyhelminthes"),
+                                 17,
+                                 ifelse(taxa_name %in% c("Chironomidae", "Culicidae", "Other_Diptera"),
+                                        15,
+                                        ifelse(taxa_name %in% c("Odonata",  "Coleoptera", "Lepidoptera", "Trichoptera"),
+                                               19,
+                                               ifelse(taxa_name %in% c("Hemiptera", "Acari", "Panpulmonata"),
+                                                      4, 
+                                                      ifelse(taxa_name %in% c("Diplostraca", "Copepoda", "Podocopida"),
+                                                             18,
+                                                             NA))))))
+    
+    # Get limits for plot
+    axis_limits <- 
+      c(min(ind_scores[,1:2]), 
+        max(ind_scores[,1:2]))
+    
+    # Make plot
+    ret <-
+    ## Set plot
+    ggplot(aes(x = first,
+               y = second, 
+               colour = col,
+               shape = pch),
+           data = ind_scores)+
+      ## Styling
+      theme(axis.text = element_blank(),
+            axis.ticks = element_blank(),
+            legend.title=element_blank(),
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            panel.background = element_blank(),
+            panel.border = element_rect(fill = NA)) +
+      ## Add points
+      geom_point(size = 3) +
+      ## Colour is exactly what we are giving it
+      scale_shape_identity(guide = "legend",
+                           labels = c("Diptera", 
+                                      "Worms", 
+                                      "Other insects", 
+                                      "Terrestrials", 
+                                      "Crustaceans"),
+                           breaks = c(15, 17, 19, 4, 18)) +
+      scale_colour_identity(guide = "legend",
+                            labels = c("Chironomidae",
+                                       "Culicidae",
+                                       "Other Diptera",
+                                       "Worms",
+                                       "Beetles, Odonates",
+                                       "Other insects",
+                                       "Terrestrials",
+                                       "Crustaceans",
+                                       ""),
+                            breaks = c("black", 
+                                       "grey70", 
+                                       "grey30", 
+                                       "skyblue",
+                                       "firebrick", 
+                                       "darkgreen",  
+                                       "yellowgreen",
+                                       "steelblue4",  
+                                       NA))}
+  
+  if(type == "arrows"){
+    # Get scores of variables
+    var_scores <- 
+      PCA$variables[,axes]
+    
+    # Keep variables above correlation cutoff
+    var_scores <-
+      var_scores[apply(abs(var_scores) >= cor_min, 
+                       1, sum ) >0 ,]  
+    
+    # Define circle
+    circle <- 
+      tibble::tibble(x = cos(seq(0, 2*pi, length = 200)),
+                     y = sin(seq(0, 2*pi, length = 200)))
+  
+    # Plot!
+    ret <-
+      ## Set circle
+      ggplot(aes(x = x,
+                 y = y),
+             data = circle) +
+      ## Add circle line
+      geom_path() +
+      ## Styling
+      theme(legend.justification = NULL,
+            axis.text = element_blank(),
+            axis.ticks = element_blank(),
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            panel.background = element_blank(),
+            axis.line =  element_blank()) +
+      ## Add all arrows to circle plot
+      geom_segment(aes(x = 0, 
+                       y = 0, 
+                       xend = var_scores[,1]*1, 
+                       yend = var_scores[,2]*1),
+                   data = var_scores,
+                   arrow = arrow()) +
+      ## add arrow labels based on row names
+      ggrepel::geom_text_repel(aes(x = (var_scores[,1]*1.1),
+                                   y = (var_scores[,2]*1.1),
+                                   label = rownames(var_scores)),
+                               data = var_scores,
+                               size = 3)}
+  
+  # Last customisation of plot
+  ret <- 
+    ret +
+    ## Dotted x axis
+    geom_hline(yintercept = 0,
+               linetype = "dashed",
+               color = "gray") +
+    ## Dotted x axis
+    geom_vline(xintercept = 0,
+               linetype = "dashed",
+               color = "gray") +
+    ## X axis label based on % explained
+    xlab(paste0("PC ", 
+                axes[1], 
+                " (", round(per_inertia[1], 2), 
+                "%)")) +
+    ## Y axis label based on % explained
+    ylab(paste0("PC ", 
+                axes[2], 
+                " (", 
+                round(per_inertia[2], 2), 
+                "%)")) 
+  # Return
+  return(ret)
+}
 
 # Food web functions ------------------------------------------------------
 ## Trophic level by Benoît Gauzens

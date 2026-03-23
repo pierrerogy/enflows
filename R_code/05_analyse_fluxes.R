@@ -20,20 +20,22 @@ fluxes_long_perbrom <-
                              "fluxes_long_perbrom.csv"))
 
 
-# Hypothesis 1 - more energy flow to species with rapid life cycles (low CPI) ------------------------------------------------------------
-# Relation between P and CPI
+# Hypothesis 1 - models at the scale of consumers ------------------------------------------------------------
 ## Histograms
-hist(log(fluxes_long_percons$cons_CPI_defuzzified))
+hist(fluxes_long_percons$Axis.1)
+hist(fluxes_long_percons$Axis.2)
+hist(fluxes_long_percons$Axis.3)
+hist(fluxes_long_percons$Axis.4)
 hist(log(fluxes_long_percons$flux_raw + 1e-3))
 
 
-# Linear model of raw energy flow entering consumer node ~ CPI score 
+# Linear model of raw energy flow entering consumer node ~ Axis.1
 ## Model
-consflow_model <- 
+consflow_model_axis1 <- 
   brms::brm(log(flux_raw + 0.001) ~
-              scale(log(cons_CPI_defuzzified), 
+              scale(Axis.1, 
                     scale = FALSE, center = TRUE) + 
-              (1 + scale(log(cons_CPI_defuzzified),
+              (1 + scale(Axis.1,
                          scale = FALSE, center = TRUE)|site_code) +
               (1|site_code:bromeliad_id),
             iter = 20000,
@@ -42,49 +44,99 @@ consflow_model <-
                            max_treedepth = 15),
             data = fluxes_long_percons)
 ## Check assumptions
-plot(consflow_model)
+plot(consflow_model_axis1)
 ## Look at the effect
-bayestestR::describe_posterior(consflow_model)
-brms::bayes_R2(consflow_model)
+bayestestR::describe_posterior(consflow_model_axis1)
+brms::bayes_R2(consflow_model_axis1)
 
-
-# Linear model of CPI score ~ average body mass 
+# Linear model of raw energy flow entering consumer node ~ Axis.2
 ## Model
-cpi_model <- 
-  brms::brm(log(cons_CPI_defuzzified) ~
-              scale(log(avg_bodymass_g), 
-                    scale = FALSE, center = TRUE),
+consflow_model_axis2 <- 
+  brms::brm(log(flux_raw + 0.001) ~
+              scale(Axis.2, 
+                    scale = FALSE, center = TRUE) + 
+             (1 + scale(Axis.2,
+                       scale = FALSE, center = TRUE)|site_code) +
+            (1|site_code:bromeliad_id),
             iter = 20000,
             family = gaussian(),   
             control = list(adapt_delta = 0.99,
                            max_treedepth = 15),
-            data = fluxes_long_percons %>% 
-              dplyr::select(consumer, avg_bodymass_g, cons_CPI_defuzzified) %>% 
-              dplyr::distinct())
+            data = fluxes_long_percons)
 ## Check assumptions
-plot(cpi_model)
+plot(consflow_model_axis2)
 ## Look at the effect
-bayestestR::describe_posterior(cpi_model)
-brms::bayes_R2(cpi_model)
- 
+bayestestR::describe_posterior(consflow_model_axis2)
+brms::bayes_R2(consflow_model_axis2)
+
+# Linear model of raw energy flow entering consumer node ~ Axis.3
+## Model
+consflow_model_axis3 <- 
+  brms::brm(log(flux_raw + 0.001) ~
+              scale(Axis.3, 
+                    scale = FALSE, center = TRUE) + 
+             (1 + scale(Axis.3,
+                       scale = FALSE, center = TRUE)|site_code) +
+            (1|site_code:bromeliad_id),
+            iter = 20000,
+            family = gaussian(),   
+            control = list(adapt_delta = 0.99,
+                           max_treedepth = 15),
+            data = fluxes_long_percons)
+## Check assumptions
+plot(consflow_model_axis3)
+## Look at the effect
+bayestestR::describe_posterior(consflow_model_axis3)
+brms::bayes_R2(consflow_model_axis3)
+
+# Linear model of raw energy flow entering consumer node ~ Axis.4
+## Model
+consflow_model_axis4 <- 
+  brms::brm(log(flux_raw + 0.001) ~
+              scale(Axis.4, 
+                    scale = FALSE, center = TRUE) + 
+             (1 + scale(Axis.4,
+                       scale = FALSE, center = TRUE)|site_code) +
+            (1|site_code:bromeliad_id),
+            iter = 20000,
+            family = gaussian(),   
+            control = list(adapt_delta = 0.99,
+                           max_treedepth = 15),
+            data = fluxes_long_percons)
+## Check assumptions
+plot(consflow_model_axis4)
+## Look at the effect
+bayestestR::describe_posterior(consflow_model_axis4)
+brms::bayes_R2(consflow_model_axis4)
+
+
 # Save models
-readr::write_rds(x = consflow_model,
+readr::write_rds(x = consflow_model_axis1,
                  file = here::here("data",
-                                   "consflow_model.RDS"))
-readr::write_rds(x = cpi_model,
+                                   "consflow_model_axis1.RDS"))
+readr::write_rds(x = consflow_model_axis2,
                  file = here::here("data",
-                                   "cpi_model.RDS"))
+                                   "consflow_model_axis2.RDS"))
+readr::write_rds(x = consflow_model_axis3,
+                 file = here::here("data",
+                                   "consflow_model_axis3.RDS"))
+readr::write_rds(x = consflow_model_axis4,
+                 file = here::here("data",
+                                   "consflow_model_axis4.RDS"))
 # Hypothesis 2 - more functional dissimilarity in a pair means less energy flow ------------------------------------------------------------
 # Histogram
 hist(log(fluxes_long_perpair$flux_raw_pair + 0.001))
-hist(fluxes_long_perpair$func_dist )
+hist(fluxes_long_perpair$func_dist)
+hist(fluxes_long_perpair$dist_axis1)
+hist(fluxes_long_perpair$dist_axis2)
+hist(fluxes_long_perpair$dist_axis3)
+hist(fluxes_long_perpair$dist_axis4)
 
-
-# Model
-pairflow_model <- 
+# Overall functional distance
+pairflow_model_overall <- 
   brms::brm(log(flux_raw_pair + 0.001) ~
               scale(func_dist,
-                    center = TRUE, scale = FALSE)+ 
+                    center = TRUE, scale = FALSE), + 
               (1 + scale(func_dist,
                          center = TRUE, scale = FALSE)|site_code) +
               (1|site_code:bromeliad_id),
@@ -99,10 +151,99 @@ plot(pairflow_model)
 bayestestR::describe_posterior(pairflow_model)
 brms::bayes_R2(pairflow_model)
 
+# Distance for Axis 1
+pairflow_model_axis1 <- 
+  brms::brm(log(flux_raw_pair + 0.001) ~
+              scale(dist_axis1,
+                    center = TRUE, scale = FALSE) + 
+            (1 + scale(dist_axis1,
+                       center = TRUE, scale = FALSE)|site_code) +
+            (1|site_code:bromeliad_id),
+            iter = 20000,
+            family = gaussian(),      
+            control = list(adapt_delta = 0.95,
+                           max_treedepth = 15),
+            data = fluxes_long_perpair)
+## Check assumptions
+plot(pairflow_model_axis1)
+## Look at the effect
+bayestestR::describe_posterior(pairflow_model_axis1)
+brms::bayes_R2(pairflow_model_axis1)
+
+# Distance for Axis 2
+pairflow_model_axis2 <- 
+  brms::brm(log(flux_raw_pair + 0.001) ~
+              scale(dist_axis2,
+                    center = TRUE, scale = FALSE) + 
+            (1 + scale(dist_axis2,
+                       center = TRUE, scale = FALSE)|site_code) +
+            (1|site_code:bromeliad_id),
+            iter = 20000,
+            family = gaussian(),      
+            control = list(adapt_delta = 0.95,
+                           max_treedepth = 15),
+            data = fluxes_long_perpair)
+## Check assumptions
+plot(pairflow_model_axis2)
+## Look at the effect
+bayestestR::describe_posterior(pairflow_model_axis2)
+brms::bayes_R2(pairflow_model_axis2)
+
+# Distance for Axis 3
+pairflow_model_axis3 <- 
+  brms::brm(log(flux_raw_pair + 0.001) ~
+              scale(dist_axis3,
+                    center = TRUE, scale = FALSE) + 
+            (1 + scale(dist_axis3,
+                       center = TRUE, scale = FALSE)|site_code) +
+            (1|site_code:bromeliad_id),
+            iter = 20000,
+            family = gaussian(),      
+            control = list(adapt_delta = 0.95,
+                           max_treedepth = 15),
+            data = fluxes_long_perpair)
+## Check assumptions
+plot(pairflow_model_axis3)
+## Look at the effect
+bayestestR::describe_posterior(pairflow_model_axis3)
+brms::bayes_R2(pairflow_model_axis3)
+
+# Distance for Axis 4
+pairflow_model_axis4 <- 
+  brms::brm(log(flux_raw_pair + 0.001) ~
+              scale(dist_axis4,
+                    center = TRUE, scale = FALSE) + 
+            (1 + scale(dist_axis4,
+                       center = TRUE, scale = FALSE)|site_code) +
+            (1|site_code:bromeliad_id),
+            iter = 20000,
+            family = gaussian(),      
+            control = list(adapt_delta = 0.95,
+                           max_treedepth = 15),
+            data = fluxes_long_perpair)
+## Check assumptions
+plot(pairflow_model_axis4)
+## Look at the effect
+bayestestR::describe_posterior(pairflow_model_axis4)
+brms::bayes_R2(pairflow_model_axis4)
+
 # Save model
 readr::write_rds(x = pairflow_model,
                  file = here::here("data",
-                                   "pairflow_model.RDS"))
+                                   "pairflow_model_overall.RDS"))
+readr::write_rds(x = pairflow_model,
+                 file = here::here("data",
+                                   "pairflow_model_axis1.RDS"))
+readr::write_rds(x = pairflow_model,
+                 file = here::here("data",
+                                   "pairflow_model_axis2.RDS"))
+readr::write_rds(x = pairflow_model,
+                 file = here::here("data",
+                                   "pairflow_model_axis3.RDS"))
+readr::write_rds(x = pairflow_model,
+                 file = here::here("data",
+                                   "pairflow_model_axis4.RDS"))
+
 
 # Hypothesis 3 - more and less imbalanced flow if less functional distances in whole food web --------------------------------
 # Histograms
