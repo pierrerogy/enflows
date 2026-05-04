@@ -11,22 +11,6 @@ library(brms)
 library(latex2exp)
 library(ggrepel)
 
-# Get equivalent models from loo output-------------------------------------------------------------------------
-get_eq_models <- function(loo_output){
-  ret <- 
-    ## Extract diff table values
-    tibble::tibble(model = attr(loo_output, "dimnames")[[1]],
-                   elpd_diff = loo_output[,1],
-                   se_diff = loo_output[,2]) %>% 
-    ## Get ratio of elpd/se to get equivalent models
-    dplyr::mutate(ratio = abs(elpd_diff/se_diff)) %>% 
-    ## Keep best and equivalent models
-    dplyr::filter(ratio < 2 | is.nan(ratio))
-  
-  # Return
-  return(ret)
-}
-
 # Make matrices binary ----------------------------------------------------
 make_binary_matrices <- function(matrix_list,
                                  cutoff){
@@ -304,14 +288,16 @@ plz_plot_my_pca <- function(PCA, axes, cor_min = 0.5, type, dats){
                                                ifelse(taxa_name %in% c("Opisthophora", "Oligochaeta",
                                                                        "Hirudinea","Platyhelminthes"),
                                                       "skyblue",
-                                                      ifelse(taxa_name %in% c("Odonata", "Coleoptera"),
+                                                      ifelse(taxa_name == "Coleoptera",
                                                              "firebrick",
-                                                             ifelse(taxa_name %in% c("Lepidoptera", "Trichoptera"),
-                                                                    "darkgreen",
-                                                                    ifelse(taxa_name %in% c("Hemiptera", "Acari", "Panpulmonata"),
-                                                                           "yellowgreen",
-                                                                           ifelse(taxa_name %in% c("Diplostraca", "Copepoda", "Podocopida"),
-                                                                                  "steelblue4", NA)))))))),
+                                                             ifelse(taxa_name == "Odonata",
+                                                                    "mediumorchid4",
+                                                               ifelse(taxa_name %in% c("Lepidoptera", "Trichoptera"),
+                                                                      "darkgreen",
+                                                                      ifelse(taxa_name %in% c("Hemiptera", "Acari", "Panpulmonata"),
+                                                                             "yellowgreen",
+                                                                             ifelse(taxa_name %in% c("Diplostraca", "Copepoda", "Podocopida"),
+                                                                                    "steelblue4", NA))))))))),
                     pch = ifelse(taxa_name %in% c("Opisthophora", "Oligochaeta",
                                                   "Hirudinea","Platyhelminthes"),
                                  17,
@@ -351,7 +337,7 @@ plz_plot_my_pca <- function(PCA, axes, cor_min = 0.5, type, dats){
       ## Colour is exactly what we are giving it
       scale_shape_identity(guide = "legend",
                            labels = c("Diptera", 
-                                      "Worms", 
+                                      "Oligochaetea, Nematoda,\nHirudinea", 
                                       "Other insects", 
                                       "Terrestrials", 
                                       "Crustaceans"),
@@ -360,8 +346,9 @@ plz_plot_my_pca <- function(PCA, axes, cor_min = 0.5, type, dats){
                             labels = c("Chironomidae",
                                        "Culicidae",
                                        "Other Diptera",
-                                       "Worms",
-                                       "Beetles, Odonates",
+                                       "Oligochaetea, Nematoda,\nHirudinea",
+                                       "Coleoptera",
+                                       "Odonata",
                                        "Other insects",
                                        "Terrestrials",
                                        "Crustaceans",
@@ -371,6 +358,7 @@ plz_plot_my_pca <- function(PCA, axes, cor_min = 0.5, type, dats){
                                        "grey30", 
                                        "skyblue",
                                        "firebrick", 
+                                       "mediumorchid4",
                                        "darkgreen",  
                                        "yellowgreen",
                                        "steelblue4",  
@@ -691,22 +679,63 @@ plot_food_web <- function(bromtoplot,
 full_label <- function(var, scale = "none"){
   
   
-  if(var == "flux_prop")
-    ret <- 
-      "Prop. of total energy flux \nentering consumer node"
-  
+  # First set of hypotheses
   if(var == "flux_raw")
     ret <- 
       expression(paste("Energy flux entering a \nconsumer node (log J.y"^"-1"*")"))
-  
-  if(var == "flux_prop_pair")
+  if(var == "Axis.1")
     ret <- 
-      "Prop. of total energy flux \nbetween a consumer-resource pair"
+      "Length of life cycle (PC1 score)"
+  if(var == "Axis.2")
+    ret <- 
+      "Pelagicity (PC2 score)"
+  if(var == "Axis.3")
+    ret <- 
+      "Lack of morphological defense (PC3 score)"
+  if(var == "Axis.4")
+    ret <- 
+      "Complexity of life cycle (PC4 score)"
   
+  # Second set of hypotheses
   if(var == "flux_raw_pair")
     ret <- 
       expression(paste("Energy flux between a \nconsumer-resource pair (log J.y"^"-1"*")"))
+  if(var == "dist_axis1")
+    ret <- 
+      "Difference in length of life cycle \n(PC1 scores)"
+  if(var == "dist_axis2")
+    ret <- 
+      "Difference in pelagicity \n(PC2 scores)"
+  if(var == "dist_axis3")
+    ret <- 
+      "Difference in moprhological defense \n(PC3 scores)"
+  if(var == "dist_axis4")
+    ret <- 
+      "Difference in complexity of life cycle \n(PC4 scores)"
+  if(var == "func_dist")
+    ret <- 
+      "Euclidean distance in fuctional hypervolume"
   
+  
+  # Third set of hypotheses
+  if(var == "gini")
+    ret <- 
+      "Gini index of energy fluxes"
+  if(var == "totalflow_Jy")
+    ret <- 
+      expression(paste("Total energy flow (log J.y"^"-1"*")"))
+  if(var == "predflow_Jy")
+    ret <- 
+      expression(paste("Energy flow to \npredators (log J.y"^"-1"*")"))
+  if(var == "prop_hull")
+    ret <- 
+      expression(paste("Proportion of overall functional \nhull covered by food web"))
+  if(var == "avg_func_dist")
+    ret <- 
+      "Average Euclidean distance \nin fuctional hypervolume"
+  
+  
+  # Misc (DELETE?)
   if(var == "cons_CPI_defuzzified")
     ret <- 
       "Defuzzified CPI value of consumer"
@@ -714,30 +743,6 @@ full_label <- function(var, scale = "none"){
   if(var == "avg_bodymass_g")
     ret <- 
       "Average body mass of consumer (g)"
-  
-  if(var == "func_dist")
-    ret <- 
-      "Euclidean distance in fuctional hypervolume"
-  
-  if(var == "gini")
-    ret <- 
-      "Gini index of energy fluxes"
-  
-  if(var == "totalflow_Jy")
-    ret <- 
-      expression(paste("Total energy flow (log J.y"^"-1"*")"))
-  
-  if(var == "predflow_Jy")
-    ret <- 
-      expression(paste("Energy flow to \npredators (log J.y"^"-1"*")"))
-  
-  if(var == "prop_hull")
-    ret <- 
-      expression(paste("Proportion of overall functional \nhull covered by bromeliad"))
-  
-  if(var == "avg_func_dist")
-    ret <- 
-      "Average Euclidean distance \nin fuctional hypervolume"
   
   if(var == "n_removed")
     ret <- 
@@ -780,14 +785,14 @@ full_label <- function(var, scale = "none"){
 }
 
 # Basic line plot ---------------------------------------------------------
-basic_line <- function(model, dats, x_var, y_var, index = 1, colour = NA, scale = "none"){
+basic_line <- function(model, dats, x_var, y_var, index = 1, colour = NA, scale = NA){
   # Get effect
   model_effect <- 
     brms::conditional_effects(model,
                               method = "fitted")[[index]]
 
   # x axis not logged
-  if(scale == "x_original"){
+  if(scale == "x_scale"){
     ret <- 
       ggplot(data = model_effect,
            aes(x = .data[[x_var]],

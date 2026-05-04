@@ -7,6 +7,7 @@ source(here::here("R_code",
                   "functions.R"))
 library(brms)
 library(bayestestR)
+library(performance)
 
 # Load data
 fluxes_long_percons <- 
@@ -18,6 +19,34 @@ fluxes_long_perpair <-
 fluxes_long_perbrom <-
   readr::read_csv(here::here("data",
                              "fluxes_long_perbrom.csv"))
+
+# Load models from the cloud ----------------------------------------------
+# List of models
+model_list <- 
+  c(
+    "consflow_model_axis1",
+    "consflow_model_axis2",
+    "consflow_model_axis3",
+    "consflow_model_axis4",
+    "pairflow_model_overall",
+    "pairflow_model_axis1",
+    "pairflow_model_axis2",
+    "pairflow_model_axis3",
+    "pairflow_model_axis4",
+    "totalflow_model_vol",
+    "predflow_model_vol",
+    "gini_model_vol",
+    "totalflow_model_dist",
+    "predflow_model_dist",
+    "gini_model_dist"
+    )
+
+#  Check if model present in environment, and if not load it
+for (model in model_list) {
+  if (!exists(model)) {
+    assign(model, 
+           readr::read_rds(here::here("data",
+                                       paste0(model, ".RDS"))))}}
 
 
 # Hypothesis 1 - models at the scale of consumers ------------------------------------------------------------
@@ -47,7 +76,7 @@ consflow_model_axis1 <-
 plot(consflow_model_axis1)
 ## Look at the effect
 bayestestR::describe_posterior(consflow_model_axis1)
-brms::bayes_R2(consflow_model_axis1)
+performance::r2_bayes(consflow_model_axis1)
 
 # Linear model of raw energy flow entering consumer node ~ Axis.2
 ## Model
@@ -67,7 +96,7 @@ consflow_model_axis2 <-
 plot(consflow_model_axis2)
 ## Look at the effect
 bayestestR::describe_posterior(consflow_model_axis2)
-brms::bayes_R2(consflow_model_axis2)
+performance::r2_bayes(consflow_model_axis2)
 
 # Linear model of raw energy flow entering consumer node ~ Axis.3
 ## Model
@@ -87,7 +116,7 @@ consflow_model_axis3 <-
 plot(consflow_model_axis3)
 ## Look at the effect
 bayestestR::describe_posterior(consflow_model_axis3)
-brms::bayes_R2(consflow_model_axis3)
+performance::r2_bayes(consflow_model_axis3)
 
 # Linear model of raw energy flow entering consumer node ~ Axis.4
 ## Model
@@ -107,7 +136,7 @@ consflow_model_axis4 <-
 plot(consflow_model_axis4)
 ## Look at the effect
 bayestestR::describe_posterior(consflow_model_axis4)
-brms::bayes_R2(consflow_model_axis4)
+performance::r2_bayes(consflow_model_axis4)
 
 
 # Save models
@@ -123,6 +152,7 @@ readr::write_rds(x = consflow_model_axis3,
 readr::write_rds(x = consflow_model_axis4,
                  file = here::here("data",
                                    "consflow_model_axis4.RDS"))
+
 # Hypothesis 2 - more functional dissimilarity in a pair means less energy flow ------------------------------------------------------------
 # Histogram
 hist(log(fluxes_long_perpair$flux_raw_pair + 0.001))
@@ -136,7 +166,7 @@ hist(fluxes_long_perpair$dist_axis4)
 pairflow_model_overall <- 
   brms::brm(log(flux_raw_pair + 0.001) ~
               scale(func_dist,
-                    center = TRUE, scale = FALSE), + 
+                    center = TRUE, scale = FALSE) + 
               (1 + scale(func_dist,
                          center = TRUE, scale = FALSE)|site_code) +
               (1|site_code:bromeliad_id),
@@ -146,10 +176,10 @@ pairflow_model_overall <-
                            max_treedepth = 15),
             data = fluxes_long_perpair)
 ## Check assumptions
-plot(pairflow_model)
+plot(pairflow_model_overall)
 ## Look at the effect
-bayestestR::describe_posterior(pairflow_model)
-brms::bayes_R2(pairflow_model)
+bayestestR::describe_posterior(pairflow_model_overall)
+performance::r2_bayes(pairflow_model_overall)
 
 # Distance for Axis 1
 pairflow_model_axis1 <- 
@@ -168,7 +198,7 @@ pairflow_model_axis1 <-
 plot(pairflow_model_axis1)
 ## Look at the effect
 bayestestR::describe_posterior(pairflow_model_axis1)
-brms::bayes_R2(pairflow_model_axis1)
+performance::r2_bayes(pairflow_model_axis1)
 
 # Distance for Axis 2
 pairflow_model_axis2 <- 
@@ -187,8 +217,7 @@ pairflow_model_axis2 <-
 plot(pairflow_model_axis2)
 ## Look at the effect
 bayestestR::describe_posterior(pairflow_model_axis2)
-brms::bayes_R2(pairflow_model_axis2)
-
+performance::r2_bayes(pairflow_model_axis2)
 # Distance for Axis 3
 pairflow_model_axis3 <- 
   brms::brm(log(flux_raw_pair + 0.001) ~
@@ -206,8 +235,7 @@ pairflow_model_axis3 <-
 plot(pairflow_model_axis3)
 ## Look at the effect
 bayestestR::describe_posterior(pairflow_model_axis3)
-brms::bayes_R2(pairflow_model_axis3)
-
+performance::r2_bayes(pairflow_model_axis3)
 # Distance for Axis 4
 pairflow_model_axis4 <- 
   brms::brm(log(flux_raw_pair + 0.001) ~
@@ -225,22 +253,22 @@ pairflow_model_axis4 <-
 plot(pairflow_model_axis4)
 ## Look at the effect
 bayestestR::describe_posterior(pairflow_model_axis4)
-brms::bayes_R2(pairflow_model_axis4)
+performance::r2_bayes(pairflow_model_axis4)
 
 # Save model
-readr::write_rds(x = pairflow_model,
+readr::write_rds(x = pairflow_model_overall,
                  file = here::here("data",
                                    "pairflow_model_overall.RDS"))
-readr::write_rds(x = pairflow_model,
+readr::write_rds(x = pairflow_model_axis1,
                  file = here::here("data",
                                    "pairflow_model_axis1.RDS"))
-readr::write_rds(x = pairflow_model,
+readr::write_rds(x = pairflow_model_axis2,
                  file = here::here("data",
                                    "pairflow_model_axis2.RDS"))
-readr::write_rds(x = pairflow_model,
+readr::write_rds(x = pairflow_model_axis3,
                  file = here::here("data",
                                    "pairflow_model_axis3.RDS"))
-readr::write_rds(x = pairflow_model,
+readr::write_rds(x = pairflow_model_axis4,
                  file = here::here("data",
                                    "pairflow_model_axis4.RDS"))
 
@@ -270,7 +298,7 @@ totalflow_model_vol <-
 plot(totalflow_model_vol)
 ## Look at the effect
 bayestestR::describe_posterior(totalflow_model_vol)
-brms::bayes_R2(totalflow_model_vol)
+performance::r2_bayes(totalflow_model_vol)
 ## Distance
 totalflow_model_dist <- 
   brms::brm(log(totalflow_Jy) ~
@@ -287,7 +315,7 @@ totalflow_model_dist <-
 plot(totalflow_model_dist)
 ## Look at the effect
 bayestestR::describe_posterior(totalflow_model_dist)
-brms::bayes_R2(totalflow_model_dist)
+performance::r2_bayes(totalflow_model_dist)
 
 # Flow to predators
 ## Volume
@@ -306,7 +334,7 @@ predflow_model_vol <-
 plot(predflow_model_vol)
 ## Look at the effect
 bayestestR::describe_posterior(predflow_model_vol)
-brms::bayes_R2(predflow_model_vol)
+performance::r2_bayes(predflow_model_vol)
 ## Distance
 predflow_model_dist <- 
   brms::brm(log(predflow_Jy + 0.01) ~
@@ -323,7 +351,7 @@ predflow_model_dist <-
 plot(predflow_model_dist)
 ## Look at the effect
 bayestestR::describe_posterior(predflow_model_dist)
-brms::bayes_R2(predflow_model_dist)
+performance::r2_bayes(predflow_model_dist)
 
 # Flow to predators
 ## Volume
@@ -342,7 +370,7 @@ gini_model_vol <-
 plot(gini_model_vol)
 ## Look at the effect
 bayestestR::describe_posterior(gini_model_vol)
-brms::bayes_R2(gini_model_vol)
+performance::r2_bayes(gini_model_vol)
 ## Distance
 gini_model_dist <- 
   brms::brm(gini ~
@@ -359,7 +387,7 @@ gini_model_dist <-
 plot(gini_model_dist)
 ## Look at the effect
 bayestestR::describe_posterior(gini_model_dist)
-brms::bayes_R2(gini_model_dist)
+performance::r2_bayes(gini_model_dist)
 
 # Save models
 readr::write_rds(x = totalflow_model_vol,

@@ -326,7 +326,7 @@ for (web in webs){
     dplyr::mutate(met = met.rates) %>% 
     ## Convert to metabolism to get J.y-1
     dplyr::mutate(biomass_lost = ifelse(prop_biomass_lost != 0,
-                                        met.rates + met.rates * 2 * prop_biomass_lost, prop_biomass_lost)) %>% 
+                                        met.rates + biomass * prop_biomass_lost * (22 * 10e3), prop_biomass_lost)) %>% 
     ## Get vector and pull
     dplyr::select(biomass_lost) %>% 
     dplyr::pull()

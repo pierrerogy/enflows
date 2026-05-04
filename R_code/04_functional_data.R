@@ -106,10 +106,41 @@ plot_grid <-
 
 # Save plot
 ggplot2::ggsave(here::here("plots",
-                           "pcas2.pdf"),
+                           "figs1.pdf"),
                 plot_grid,
                 width = 13,
                 height = 13.5)
+
+# Plot axes differently
+cowplot::plot_grid(plotlist = c(plz_plot_my_pca(PCA = RES_pca,
+                                                axes = c(2,3),
+                                                type = "points",
+                                                dats = fw_traits),
+                                plz_plot_my_pca(PCA = RES_pca,
+                                                axes = c(2,3),
+                                                type = "arrows",
+                                                dats = fw_traits),
+                                plz_plot_my_pca(PCA = RES_pca,
+                                                axes = c(2,4),
+                                                type = "points",
+                                                dats = fw_traits),
+                                plz_plot_my_pca(PCA = RES_pca,
+                                                axes = c(2,4),
+                                                type = "arrows",
+                                                dats = fw_traits),
+                                plz_plot_my_pca(PCA = RES_pca,
+                                                axes = c(3,4),
+                                                type = "points",
+                                                dats = fw_traits),
+                                plz_plot_my_pca(PCA = RES_pca,
+                                                axes = c(3,4),
+                                                type = "arrows",
+                                                dats = fw_traits)),
+                   ncol = 2,
+                   nrow = 3,
+                   rel_widths = c (1.2, 1))
+
+
 
 
 # Get PCA scores for all species

@@ -23,35 +23,48 @@ fluxes_long_perbrom <-
   readr::read_csv(here::here("data",
                              "fluxes_long_perbrom.csv"))
 
-# Load models
-consflow_model <- 
-  readr::read_rds(here::here("data",
-                             "consflow_model.RDS"))
-cpi_model <- 
-  readr::read_rds(here::here("data",
-                             "cpi_model.RDS"))
-pairflow_model <- 
-  readr::read_rds(here::here("data",
-                             "pairflow_model.RDS"))
-totalflow_model_vol <- 
-  readr::read_rds(here::here("data",
-                             "totalflow_model_vol.RDS"))
-totalflow_model_dist <- 
-  readr::read_rds(here::here("data",
-                             "totalflow_model_dist.RDS"))
-predflow_model_vol <- 
-  readr::read_rds(here::here("data",
-                             "predflow_model_vol.RDS"))
-predflow_model_dist <- 
-  readr::read_rds(here::here("data",
-                             "predflow_model_dist.RDS"))
-gini_model_vol <- 
-  readr::read_rds(here::here("data",
-                             "gini_model_vol.RDS"))
-gini_model_dist <- 
-  readr::read_rds(here::here("data",
-                             "gini_model_dist.RDS"))
+# Load binary site matrices
+site_matrices <- 
+  load_matrices(folder = here::here("data",
+                                    "matrices"),
+                ending = "_PM.txt") %>% 
+  make_binary_matrices(matrix_list = .,
+                       cutoff = 0.02)
 
+# Load biomass data
+biomass_clean <- 
+  readr::read_csv(here::here("data",
+                             "biomass_clean.csv"))
+
+
+
+# Load models
+## List of models
+model_list <- 
+  c(
+    "consflow_model_axis1",
+    "consflow_model_axis2",
+    "consflow_model_axis3",
+    "consflow_model_axis4",
+    "pairflow_model_overall",
+    "pairflow_model_axis1",
+    "pairflow_model_axis2",
+    "pairflow_model_axis3",
+    "pairflow_model_axis4",
+    "totalflow_model_vol",
+    "predflow_model_vol",
+    "gini_model_vol",
+    "totalflow_model_dist",
+    "predflow_model_dist",
+    "gini_model_dist"
+    )
+
+##  Check if model present in environment, and if not load it
+for (model in model_list) {
+  if (!exists(model)) {
+    assign(model, 
+           readr::read_rds(here::here("data",
+                                      paste0(model, ".RDS"))))}}
 
 
 
@@ -141,7 +154,7 @@ speclist <-
 
 # Get site interaction matrix
 site_mat <- 
-  binary_matrices[[which(names(binary_matrices) == "PTL")]]
+  site_matrices[[which(names(site_matrices) == "PTL")]]
 
 # Get trophic levels within this bromeliad
 levels <- 
@@ -162,7 +175,7 @@ levels <-
   ## Assign x value to each species based on trophic level
   dplyr::mutate(pos = get_TL_pos(dats = .)) %>%
    ## Add biomass
-  dplyr::left_join(clean_biomass_data %>% 
+  dplyr::left_join(biomass_clean %>% 
                      dplyr::filter(site_code == "PTL" & bromeliad_id == "346") %>% 
                      dplyr::select(biomass = tot_biomass_g,
                                    species = bwg_name),
@@ -241,33 +254,32 @@ pitiweb <-
 
 ## Save 
 ggplot2::ggsave(here::here("plots",
-                           "fig1.pdf"),
+                           "pitiweb.pdf"),
                 pitiweb,
                 height = 10,
                 width = 10)
 ggplot2::ggsave(here::here("plots",
-                           "fig1.jpeg"),
+                           "pitiweb.jpeg"),
                 pitiweb,
                 height = 10,
                 width = 10)
 
-# Figure 2 (run script 04) ------------------------------------------------
+# Figure 2 (run script 05) ------------------------------------------------
 # Fig 2a
-## Plot
 fig2a <- 
-  basic_line(model = consflow_model, 
+  basic_line(model = consflow_model_axis1, 
              index = 1,
              dats = fluxes_long_percons %>% 
                dplyr::mutate(flux_raw = flux_raw + 1e-3), 
-             x_var = "cons_CPI_defuzzified", 
-             y_var= "flux_raw") +
-  scale_x_continuous(breaks = c(3, 4, 5, 6),
-                     labels= c(20, 50, 150, 400)) +
-  scale_y_continuous(limits = c(-10, 10),
-                     breaks = seq(from = -10, 
-                                  to = 10,
-                                  by = 5),
-                     labels= c(expression(paste("10"^{-5})),
+             x_var = "Axis.1", 
+             y_var= "flux_raw",
+             scale = "x_scale") +
+  scale_y_continuous(limits = c(-7, 10),
+                     breaks = c(-7,
+                                seq(from = -5, 
+                                    to = 10,
+                                    by = 5)),
+                     labels= c(0,
                                0.001,
                                1,
                                150,
@@ -275,96 +287,272 @@ fig2a <-
   theme(axis.title.y = element_text(margin = margin(r = 0, l = 5)))
 
 # Fig 2b
-## Plot
 fig2b <- 
-  basic_line(model = cpi_model, 
+  basic_line(model = consflow_model_axis2, 
              index = 1,
              dats = fluxes_long_percons %>% 
                dplyr::mutate(flux_raw = flux_raw + 1e-3), 
-             x_var = "avg_bodymass_g", 
-             y_var= "cons_CPI_defuzzified") +
-  scale_x_continuous(limits = c(-15, 0),
-                     breaks = seq(from = -15, 
-                                  to = 0,
-                                  by = 5),
-                     labels= c(expression(paste("10"^{-5})),
-                               expression(paste("10"^{-5})),
-                               0.006,
-                               1)) +
-  scale_y_continuous(breaks = c(3, 4, 5, 6),
-                     labels= c(20, 50, 150, 400)) +
+             x_var = "Axis.2", 
+             y_var= "flux_raw",
+             scale = "x_scale") +
+  scale_y_continuous(limits = c(-7, 10),
+                     breaks = c(-7,
+                                seq(from = -5, 
+                                    to = 10,
+                                    by = 5)),
+                     labels= c(0,
+                               0.001,
+                               1,
+                               150,
+                               2000)) +
   theme(axis.title.y = element_text(margin = margin(r = 0, l = 5)))
+
+# Fig 2c
+fig2c <- 
+  basic_line(model = consflow_model_axis3, 
+             index = 1,
+             dats = fluxes_long_percons %>% 
+               dplyr::mutate(flux_raw = flux_raw + 1e-3), 
+             x_var = "Axis.3", 
+             y_var= "flux_raw",
+             scale = "x_scale") +
+  scale_y_continuous(limits = c(-7, 10),
+                     breaks = c(-7,
+                                seq(from = -5, 
+                                    to = 10,
+                                    by = 5)),
+                     labels= c(0,
+                               0.001,
+                               1,
+                               150,
+                               2000)) +
+  theme(axis.title.y = element_text(margin = margin(r = 0, l = 5)))
+
+# Fig 2d
+fig2d <- 
+  basic_line(model = consflow_model_axis4, 
+             index = 1,
+             dats = fluxes_long_percons %>% 
+               dplyr::mutate(flux_raw = flux_raw + 1e-3), 
+             x_var = "Axis.4", 
+             y_var= "flux_raw",
+             scale = "x_scale") +
+  scale_y_continuous(limits = c(-7, 10),
+                     breaks = c(-7,
+                                seq(from = -5, 
+                                    to = 10,
+                                    by = 5)),
+                     labels= c(0,
+                               0.001,
+                               1,
+                               150,
+                               2000)) +
+  theme(axis.title.y = element_text(margin = margin(r = 0, l = 5)))
+
+
  
 # Compile
 fig2 <- 
   cowplot::plot_grid(plotlist = list(fig2a +
                                        ggtitle("(a)"), 
                                      fig2b +
-                                       ggtitle("(b)")),
-                     nrow = 1)
+                                       ggtitle("(b)"),
+                                     fig2c +
+                                       ggtitle("(c)"), 
+                                     fig2d +
+                                       ggtitle("(d)")),
+                     nrow = 2,
+                     ncol = 2)
 
 # Save
 ggplot2::ggsave(filename = here::here("plots",
                                       "fig2.pdf"),
                 fig2,
-                height = 4,
-                width = 8)
+                height = 8,
+                width = 9)
 
   
 
 
 
-# Figure 3 (run script 04) ------------------------------------------------
-# Plot
-fig3 <- 
-  basic_line(model = pairflow_model, 
+# Figure 3 (run script 05) ------------------------------------------------
+# Fig 3a
+fig3a <- 
+  basic_line(model = pairflow_model_axis1, 
+             index = 1,
+             dats = fluxes_long_perpair %>% 
+               dplyr::mutate(flux_raw_pair = flux_raw_pair + 1e-3), 
+             x_var = "dist_axis1",
+             y_var = "flux_raw_pair",
+             scale = "x_scale") +
+  scale_y_continuous(breaks = c(-7,
+                                -5,
+                                -2.5,
+                                0,
+                                2.5,
+                                5),
+                     labels = c(0,
+                                0.005,
+                                0.1,
+                                1,
+                                10, 150),
+                     limits = c(NA, 5)) +
+  theme(axis.title.y = element_text(margin = margin(r = 2,  l = 10)),
+        axis.title.x = element_text(margin = margin(t = 5)),
+        axis.title = element_text(size = rel(1.2)),
+        legend.title = element_text(size = rel(1.2)),
+        legend.text = element_text(size = rel(1.2))) 
+
+# Fig 3b
+fig3b <- 
+  basic_line(model = pairflow_model_axis2, 
+             index = 1,
+             dats = fluxes_long_perpair %>% 
+               dplyr::mutate(flux_raw_pair = flux_raw_pair + 1e-3), 
+             x_var = "dist_axis2",
+             y_var = "flux_raw_pair",
+             scale = "x_scale") +
+  scale_y_continuous(breaks = c(-7,
+                                -5,
+                                -2.5,
+                                0,
+                                2.5,
+                                5),
+                     labels = c(0,
+                                0.005,
+                                0.1,
+                                1,
+                                10, 150),
+                     limits = c(NA, 5)) +
+  theme(axis.title.y = element_text(margin = margin(r = 2,  l = 10)),
+        axis.title.x = element_text(margin = margin(t = 5)),
+        axis.title = element_text(size = rel(1.2)),
+        legend.title = element_text(size = rel(1.2)),
+        legend.text = element_text(size = rel(1.2))) 
+
+# Fig 3c
+fig3c <- 
+  basic_line(model = pairflow_model_axis3, 
+             index = 1,
+             dats = fluxes_long_perpair %>% 
+               dplyr::mutate(flux_raw_pair = flux_raw_pair + 1e-3), 
+             x_var = "dist_axis3",
+             y_var = "flux_raw_pair",
+             scale = "x_scale") +
+  scale_y_continuous(breaks = c(-7,
+                                -5,
+                                -2.5,
+                                0,
+                                2.5,
+                                5),
+                     labels = c(0,
+                                0.005,
+                                0.1,
+                                1,
+                                10, 150),
+                     limits = c(NA, 5)) +
+  theme(axis.title.y = element_text(margin = margin(r = 2,  l = 10)),
+        axis.title.x = element_text(margin = margin(t = 5)),
+        axis.title = element_text(size = rel(1.2)),
+        legend.title = element_text(size = rel(1.2)),
+        legend.text = element_text(size = rel(1.2))) 
+
+# Fig 3d
+fig3d <- 
+  basic_line(model = pairflow_model_axis4, 
+             index = 1,
+             dats = fluxes_long_perpair %>% 
+               dplyr::mutate(flux_raw_pair = flux_raw_pair + 1e-3), 
+             x_var = "dist_axis4",
+             y_var = "flux_raw_pair",
+             scale = "x_scale") +
+  scale_y_continuous(breaks = c(-7,
+                                -5,
+                                -2.5,
+                                0,
+                                2.5,
+                                5),
+                     labels = c(0,
+                                0.005,
+                                0.1,
+                                1,
+                                10, 150),
+                     limits = c(NA, 5)) +
+  theme(axis.title.y = element_text(margin = margin(r = 2,  l = 10)),
+        axis.title.x = element_text(margin = margin(t = 5)),
+        axis.title = element_text(size = rel(1.2)),
+        legend.title = element_text(size = rel(1.2)),
+        legend.text = element_text(size = rel(1.2))) 
+
+# Fig 3e
+fig3e <- 
+  basic_line(model = pairflow_model_overall, 
              index = 1,
              dats = fluxes_long_perpair %>% 
                dplyr::mutate(flux_raw_pair = flux_raw_pair + 1e-3), 
              x_var = "func_dist",
-             y_var= "flux_raw_pair",
-             scale = "x_original") +
-  scale_y_continuous(breaks = c(-5,
+             y_var = "flux_raw_pair",
+             scale = "x_scale") +
+  scale_y_continuous(breaks = c(-7,
+                                -5,
                                 -2.5,
                                 0,
-                                2.5),
-                     labels = c(0.005,
+                                2.5,
+                                5),
+                     labels = c(0,
+                                0.005,
                                 0.1,
                                 1,
-                                10),
+                                10, 150),
                      limits = c(NA, 5)) +
-  theme(axis.title.y = element_text(margin = margin(r = 0,  l = 7)),
-        axis.title = element_text(size = rel(1.4)),
-        axis.text = element_text(size = rel(1.4)),
+  theme(axis.title.y = element_text(margin = margin(r = 2,  l = 10)),
+        axis.title.x = element_text(margin = margin(t = 5)),
+        axis.title = element_text(size = rel(1.2)),
         legend.title = element_text(size = rel(1.2)),
         legend.text = element_text(size = rel(1.2))) 
+
+# Compile
+fig3 <- 
+  cowplot::plot_grid(plotlist = list(fig3a +
+                                       ggtitle("(a)"), 
+                                     fig3b +
+                                       ggtitle("(b)"),
+                                     fig3c +
+                                       ggtitle("(c)"), 
+                                     fig3d +
+                                       ggtitle("(d)"),
+                                     fig3e +
+                                       ggtitle("(e)")),
+                     nrow = 3,
+                     ncol = 2)
 
 # Save
 ggplot2::ggsave(filename = here::here("plots",
                                       "fig3.pdf"),
                 fig3,
-                height = 6,
-                width = 6)
+                height = 12,
+                width = 9)
 
-# Figure 4 (run script 04)  ------------------------------------------------
+# Figure 4 (run script 05)  ------------------------------------------------
 # Fig 4a
 fig4a <- 
   basic_line(model = totalflow_model_vol, 
-              index = 1,
-              dats = fluxes_long_perbrom, 
-              x_var = "prop_hull",
-              y_var= "totalflow_Jy") +
-  scale_y_continuous(breaks = c(-2.5,
+             index = 1,
+             dats = fluxes_long_perbrom, 
+             x_var = "prop_hull",
+             y_var= "totalflow_Jy",
+             scale = "none") +
+  scale_y_continuous(breaks = c(-3,
                                 0,
                                 2.5,
                                 5,
                                 7),
-                     labels = c(0.1,
+                     labels = c(0,
                                 1,
                                 10,
                                 100,
                                 1000),
-                     limits = c(-2.5, 7.2)) +
+                     limits = c(-6, 7.2)) +
   scale_x_continuous(breaks = c(seq(from = -15,
                                     to = 0,
                                     by = 3)),
@@ -374,7 +562,7 @@ fig4a <-
                                 0.002,
                                 0.05,
                                 1)) +
-  theme(axis.title.y = element_text(margin = margin(r = 0,  l = 5)),
+  theme(axis.title.y = element_text(margin = margin(r = 2,  l = 5)),
         axis.title.x = element_text(margin = margin(t = 15)),
         axis.title = element_text(size = rel(1.2)),
         legend.title = element_text(size = rel(1.2)),
@@ -387,7 +575,8 @@ fig4b <-
              dats = fluxes_long_perbrom %>% 
                dplyr::mutate(predflow_Jy = predflow_Jy + 0.001), 
              x_var = "prop_hull",
-             y_var= "predflow_Jy") +
+             y_var= "predflow_Jy",
+             scale = "none") +
   scale_y_continuous(breaks = c(-6.9,
                                 -5,
                                 -2.5,
@@ -402,7 +591,7 @@ fig4b <-
                                 10,
                                 150,
                                 1000),
-                     limits = c(-9.8, 7.2)) +
+                     limits = c(-13, 7.2)) +
   scale_x_continuous(breaks = c(seq(from = -15,
                                     to = 0,
                                     by = 3)),
@@ -412,7 +601,7 @@ fig4b <-
                                 0.002,
                                 0.05,
                                 1)) +
-  theme(axis.title.y = element_text(margin = margin(r = 0,  l = 5)),
+  theme(axis.title.y = element_text(margin = margin(r = 2,  l = 5)),
         axis.title.x = element_text(margin = margin(t = 15)),
         axis.title = element_text(size = rel(1.2)),
         legend.title = element_text(size = rel(1.2)),
@@ -435,7 +624,7 @@ fig4c <-
                                 0.002,
                                 0.05,
                                 1)) +
-  theme(axis.title.y = element_text(margin = margin(r = 0,  l = 5)),
+  theme(axis.title.y = element_text(margin = margin(r = 2,  l = 5)),
         axis.title.x = element_text(margin = margin(t = 15)),
         axis.title = element_text(size = rel(1.2)),
         legend.title = element_text(size = rel(1.2)),
@@ -448,23 +637,23 @@ fig4d <-
              dats = fluxes_long_perbrom, 
              x_var = "avg_func_dist",
              y_var= "totalflow_Jy",
-             scale = "x_original") +
-  scale_y_continuous(breaks = c(-2.5,
+             scale = "x_scale") +
+  scale_y_continuous(breaks = c(-3,
                                 0,
                                 2.5,
                                 5,
                                 7),
-                     labels = c(0.1,
+                     labels = c(0,
                                 1,
                                 10,
                                 100,
                                 1000),
-                     limits = c(-2.5, 7.2)) +
-  theme(axis.title.y = element_text(margin = margin(r = 0,  l = 5)),
+                     limits = c(-3.1, 7.2)) +
+  theme(axis.title.y = element_text(margin = margin(r = 2,  l = 5)),
+        axis.title.x = element_text(margin = margin(t = 15)),
         axis.title = element_text(size = rel(1.2)),
         legend.title = element_text(size = rel(1.2)),
         legend.text = element_text(size = rel(1.2))) 
-
 # Fig 4e
 fig4e <- 
   basic_line(model = predflow_model_dist, 
@@ -473,7 +662,7 @@ fig4e <-
                dplyr::mutate(predflow_Jy = predflow_Jy + 0.001), 
              x_var = "avg_func_dist",
              y_var= "predflow_Jy",
-             scale = "x_original") +
+             scale = "x_scale") +
   scale_y_continuous(breaks = c(-6.9,
                                 -5,
                                 -2.5,
@@ -488,12 +677,12 @@ fig4e <-
                                 10,
                                 150,
                                 1000),
-                     limits = c(-7.2, 7.2)) +
-  theme(axis.title.y = element_text(margin = margin(r = 0,  l = 5)),
+                     limits = c(-7, 7.2)) +
+  theme(axis.title.y = element_text(margin = margin(r = 2,  l = 5)),
+        axis.title.x = element_text(margin = margin(t = 15)),
         axis.title = element_text(size = rel(1.2)),
         legend.title = element_text(size = rel(1.2)),
         legend.text = element_text(size = rel(1.2))) 
-
 # Fig 4f
 fig4f <- 
   basic_line(model = gini_model_dist, 
@@ -502,11 +691,11 @@ fig4f <-
              x_var = "avg_func_dist",
              y_var= "gini",
              scale = "both_original") +
-  theme(axis.title.y = element_text(margin = margin(r = 0,  l = 5)),
+  theme(axis.title.y = element_text(margin = margin(r = 2,  l = 5)),
+        axis.title.x = element_text(margin = margin(t = 15)),
         axis.title = element_text(size = rel(1.2)),
         legend.title = element_text(size = rel(1.2)),
         legend.text = element_text(size = rel(1.2))) 
-
 
 # Compile
 fig4 <- 
@@ -533,7 +722,7 @@ ggplot2::ggsave(filename = here::here("plots",
 
 
 
-# Figures S1 - s10 (run script 04)----------------------------------------------
+# Figures S2 - s10 (run script 04) FIXXXXXXXXXXXXXXXX----------------------------------------------
 # Load site matrices
 site_matrices <- 
   load_matrices(folder = here::here("data",
