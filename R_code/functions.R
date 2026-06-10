@@ -11,6 +11,10 @@ library(brms)
 library(latex2exp)
 library(ggrepel)
 
+# Negate operator
+`%notin%` <- 
+  Negate(`%in%`)
+
 # Make matrices binary ----------------------------------------------------
 make_binary_matrices <- function(matrix_list,
                                  cutoff){
@@ -271,7 +275,7 @@ plz_plot_my_pca <- function(PCA, axes, cor_min = 0.5, type, dats){
     
     # Select axes 
     ind_scores <-
-      RES_pca$individuals[,axes] %>% 
+      PCA$individuals[,axes] %>%
       tibble::as_tibble() %>% 
       dplyr::rename("first" = 1,
                     "second" = 2) %>% 
@@ -801,6 +805,7 @@ basic_line <- function(model, dats, x_var, y_var, index = 1, colour = NA, scale 
       geom_jitter(data = dats,
                  aes(x = .data[[x_var]],
                      y = log(.data[[y_var]])),
+                 size = 0.5,
                  width = 0.001,
                  alpha = 0.4)} 
   
@@ -814,6 +819,7 @@ basic_line <- function(model, dats, x_var, y_var, index = 1, colour = NA, scale 
       geom_jitter(data = dats,
                   aes(x = log(.data[[x_var]]),
                       y = .data[[y_var]]),
+                  size = 0.5,
                   width = 0.001,
                   alpha = 0.4)} 
   
@@ -827,6 +833,7 @@ basic_line <- function(model, dats, x_var, y_var, index = 1, colour = NA, scale 
       geom_jitter(data = dats,
                   aes(x = log(.data[[x_var]]),
                       y = log(.data[[y_var]])),
+                  size = 0.5,
                   width = 0.001,
                   alpha = 0.4)}
   
@@ -840,6 +847,7 @@ basic_line <- function(model, dats, x_var, y_var, index = 1, colour = NA, scale 
       geom_jitter(data = dats,
                   aes(x = .data[[x_var]],
                       y = .data[[y_var]]),
+                  size = 0.5,
                   width = 0.001,
                   alpha = 0.4)}
   
@@ -1249,5 +1257,197 @@ safe_lm <- function(nutrient, dats, mode = "lm") {
                   data = dats)}
       ## and return the model fit
       return(ret)}}
+
+
+# Fit the whole suite of models for a single site -------------------------
+# Fits, for one site, the same suite of models as the main analysis.
+# Because site_code is constant within a site, the site-level random effects
+# are dropped: only a random intercept for bromeliad_id is kept for the per-
+# consumer and per-pair models, and none for the per-bromeliad models (which
+# only have one row per bromeliad). Returns a named list of fitted models.
+fit_site_suite <- function(site, percons, perpair, perbrom){
+  # Print site name as a sanity check while the suite runs
+  print(site)
+
+  # Subset the per-consumer data to the focal site
+  dats_percons <-
+    percons %>%
+    dplyr::filter(site_code == site)
+  # Subset the per-pair data to the focal site
+  dats_perpair <-
+    perpair %>%
+    dplyr::filter(site_code == site)
+  # Subset the per-bromeliad data to the focal site
+  dats_perbrom <-
+    perbrom %>%
+    dplyr::filter(site_code == site)
+
+  # Return the whole suite as a named list
+  list(
+    # Hypothesis 1 - raw flow entering a consumer node ~ each PC axis -----
+    ## Axis 1, with a random intercept per bromeliad
+    consflow_model_axis1 <- 
+      brms::brm(log(flux_raw + 0.001) ~
+                  scale(Axis.1,
+                        scale = FALSE, center = TRUE) +
+                  (1|bromeliad_id),
+                iter = 20000,
+                family = gaussian(),
+                control = list(adapt_delta = 0.99,
+                               max_treedepth = 15),
+                data = dats_percons),
+    ## Axis 2, with a random intercept per bromeliad
+    consflow_model_axis2 <- 
+      brms::brm(log(flux_raw + 0.001) ~
+                  scale(Axis.2,
+                        scale = FALSE, center = TRUE) +
+                  (1|bromeliad_id),
+                iter = 20000,
+                family = gaussian(),
+                control = list(adapt_delta = 0.99,
+                               max_treedepth = 15),
+                data = dats_percons),
+    ## Axis 3, with a random intercept per bromeliad
+    consflow_model_axis3 <- 
+      brms::brm(log(flux_raw + 0.001) ~
+                  scale(Axis.3,
+                        scale = FALSE, center = TRUE) +
+                  (1|bromeliad_id),
+                iter = 20000,
+                family = gaussian(),
+                control = list(adapt_delta = 0.99,
+                               max_treedepth = 15),
+                data = dats_percons),
+    ## Axis 4, with a random intercept per bromeliad
+    consflow_model_axis4 <- 
+      brms::brm(log(flux_raw + 0.001) ~
+                  scale(Axis.4,
+                        scale = FALSE, center = TRUE) +
+                  (1|bromeliad_id),
+                iter = 20000,
+                family = gaussian(),
+                control = list(adapt_delta = 0.99,
+                               max_treedepth = 15),
+                data = dats_percons),
+
+    # Hypothesis 2 - raw flow in a pair ~ functional distance ------------
+    ## Overall functional distance, with a random intercept per bromeliad
+    pairflow_model_overall <- 
+      brms::brm(log(flux_raw_pair + 0.001) ~
+                  scale(func_dist,
+                        center = TRUE, scale = FALSE) +
+                  (1|bromeliad_id),
+                iter = 20000,
+                family = gaussian(),
+                control = list(adapt_delta = 0.95,
+                               max_treedepth = 15),
+                data = dats_perpair),
+    ## Distance along Axis 1, with a random intercept per bromeliad
+    pairflow_model_axis1 <- 
+      brms::brm(log(flux_raw_pair + 0.001) ~
+                  scale(dist_axis1,
+                        center = TRUE, scale = FALSE) +
+                  (1|bromeliad_id),
+                iter = 20000,
+                family = gaussian(),
+                control = list(adapt_delta = 0.95,
+                               max_treedepth = 15),
+                data = dats_perpair),
+    ## Distance along Axis 2, with a random intercept per bromeliad
+    pairflow_model_axis2 <- 
+      brms::brm(log(flux_raw_pair + 0.001) ~
+                  scale(dist_axis2,
+                        center = TRUE, scale = FALSE) +
+                  (1|bromeliad_id),
+                iter = 20000,
+                family = gaussian(),
+                control = list(adapt_delta = 0.95,
+                               max_treedepth = 15),
+                data = dats_perpair),
+    ## Distance along Axis 3, with a random intercept per bromeliad
+    pairflow_model_axis3 <- 
+      brms::brm(log(flux_raw_pair + 0.001) ~
+                  scale(dist_axis3,
+                        center = TRUE, scale = FALSE) +
+                  (1|bromeliad_id),
+                iter = 20000,
+                family = gaussian(),
+                control = list(adapt_delta = 0.95,
+                               max_treedepth = 15),
+                data = dats_perpair),
+    ## Distance along Axis 4, with a random intercept per bromeliad
+    pairflow_model_axis4 <- 
+      brms::brm(log(flux_raw_pair + 0.001) ~
+                  scale(dist_axis4,
+                        center = TRUE, scale = FALSE) +
+                  (1|bromeliad_id),
+                iter = 20000,
+                family = gaussian(),
+                control = list(adapt_delta = 0.95,
+                               max_treedepth = 15),
+                data = dats_perpair),
+
+    # Hypothesis 3 - whole-web flow ~ functional volume and distance -----
+    ## Total flow against hull volume (no random effect left)
+    totalflow_model_vol <- 
+      brms::brm(log(totalflow_Jy) ~
+                  scale(log(prop_hull),
+                        center = TRUE, scale = FALSE),
+                iter = 20000,
+                family = gaussian(),
+                control = list(adapt_delta = 0.95,
+                               max_treedepth = 15),
+                data = dats_perbrom),
+    ## Total flow against average functional distance (no random effect left)
+    totalflow_model_dist <-
+      brms::brm(log(totalflow_Jy) ~
+                  scale(avg_func_dist,
+                        center = TRUE, scale = FALSE),
+                iter = 20000,
+                family = gaussian(),
+                control = list(adapt_delta = 0.95,
+                               max_treedepth = 15),
+                data = dats_perbrom),
+    ## Flow to predators against hull volume (no random effect left)
+    predflow_model_vol <-
+      brms::brm(log(predflow_Jy + 0.01) ~
+                  scale(log(prop_hull),
+                        center = TRUE, scale = FALSE),
+                iter = 20000,
+                family = gaussian(),
+                control = list(adapt_delta = 0.95,
+                               max_treedepth = 15),
+                data = dats_perbrom),
+    ## Flow to predators against average functional distance (no random effect left)
+    predflow_model_dist <- 
+      brms::brm(log(predflow_Jy + 0.01) ~
+                  scale(avg_func_dist,
+                        center = TRUE, scale = FALSE),
+                iter = 20000,
+                family = gaussian(),
+                control = list(adapt_delta = 0.95,
+                               max_treedepth = 15),
+                data = dats_perbrom),
+    ## Gini index of fluxes against hull volume (no random effect left)
+    gini_model_vol <- 
+      brms::brm(gini ~
+                  scale(log(prop_hull),
+                        center = TRUE, scale = FALSE),
+                iter = 20000,
+                family = gaussian(),
+                control = list(adapt_delta = 0.95,
+                               max_treedepth = 15),
+                data = dats_perbrom),
+    ## Gini index of fluxes against average functional distance (no random effect left)
+    gini_model_dist <- 
+      brms::brm(gini ~
+                  scale(log(avg_func_dist),
+                        center = TRUE, scale = FALSE),
+                iter = 20000,
+                family = gaussian(),
+                control = list(adapt_delta = 0.95,
+                               max_treedepth = 15),
+                data = dats_perbrom))
+}
 
 

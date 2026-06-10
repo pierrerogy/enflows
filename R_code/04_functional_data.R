@@ -44,7 +44,7 @@ species_names <-
 # Get traits
 fw_traits <- 
   ## Get fw data
-  readr::read_csv(here::here("misc", 
+  readr::read_csv(here::here("data", 
                              "traits_pca_ready.csv")) %>% 
   ## Use code from Céréghino et al. (2018) paper to remove species with more than 7 NAs in traits
   dplyr::filter(species_id %notin% c(4076, 4461, 4681, 5201, 5206, 5211, 5421, 6066, 6231, 

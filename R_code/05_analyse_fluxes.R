@@ -9,6 +9,11 @@ library(brms)
 library(bayestestR)
 library(performance)
 
+# Run the 4 MCMC chains of each model in parallel, one per allocated core
+# (reads the cores given by SLURM, defaults to 4 for interactive runs)
+options(mc.cores = as.integer(Sys.getenv("SLURM_CPUS_PER_TASK",
+                                         unset = "4")))
+
 # Load data
 fluxes_long_percons <- 
   readr::read_csv(here::here("data",
