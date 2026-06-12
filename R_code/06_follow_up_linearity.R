@@ -1,5 +1,5 @@
 # Follow up analyses - testing whether the relationships in script 05 are
-# better described by a non-linear (second-order polynomial) term.
+# better described by a linear term.
 
 # Load libraries
 library(tidyverse)
@@ -24,7 +24,7 @@ fluxes_long_perbrom <-
   readr::read_csv(here::here("data",
                              "fluxes_long_perbrom.csv"))
 
-# Load linear models from script 05 ---------------------------------------
+# Load non-linear models from script 05 ---------------------------------------
 # List of models
 model_list <-
   c(
@@ -52,15 +52,12 @@ for (model in model_list) {
            readr::read_rds(here::here("data",
                                        paste0(model, ".RDS"))))}}
 
-# Hypothesis 1 - non-linear models at the scale of consumers --------------
-# Same as script 05 but with a quadratic fixed effect (x + I(x^2));
-# a raw squared term is used rather than poly() so that brms drops rows with
-# missing predictor values (poly() errors on NAs), keeping the LOO comparison
-# valid because both models are then fit on the same observations
-# Non-linear flow ~ Axis.1
-consflow_model_axis1_nl <-
+# Hypothesis 1 - linear models at the scale of consumers --------------
+# Same as script 05 but with a linear fixed effect.
+# Linear flow ~ Axis.1
+consflow_model_axis1_linear <-
   brms::brm(log(flux_raw + 0.001) ~
-              Axis.1 + I(Axis.1^2) +
+              scale(Axis.1, scale = FALSE, center = TRUE) +
               (1 + scale(Axis.1,
                          scale = FALSE, center = TRUE)|site_code) +
               (1|site_code:bromeliad_id),
@@ -69,10 +66,10 @@ consflow_model_axis1_nl <-
             control = list(adapt_delta = 0.99,
                            max_treedepth = 15),
             data = fluxes_long_percons)
-# Non-linear flow ~ Axis.2
-consflow_model_axis2_nl <-
+# Linear flow ~ Axis.2
+consflow_model_axis2_linear <-
   brms::brm(log(flux_raw + 0.001) ~
-              Axis.2 + I(Axis.2^2) +
+              scale(Axis.2, scale = FALSE, center = TRUE) +
               (1 + scale(Axis.2,
                          scale = FALSE, center = TRUE)|site_code) +
               (1|site_code:bromeliad_id),
@@ -81,10 +78,10 @@ consflow_model_axis2_nl <-
             control = list(adapt_delta = 0.99,
                            max_treedepth = 15),
             data = fluxes_long_percons)
-# Non-linear flow ~ Axis.3
-consflow_model_axis3_nl <-
+# Linear flow ~ Axis.3
+consflow_model_axis3_linear <-
   brms::brm(log(flux_raw + 0.001) ~
-              Axis.3 + I(Axis.3^2) +
+              scale(Axis.3, scale = FALSE, center = TRUE) +
               (1 + scale(Axis.3,
                          scale = FALSE, center = TRUE)|site_code) +
               (1|site_code:bromeliad_id),
@@ -93,10 +90,10 @@ consflow_model_axis3_nl <-
             control = list(adapt_delta = 0.99,
                            max_treedepth = 15),
             data = fluxes_long_percons)
-# Non-linear flow ~ Axis.4
-consflow_model_axis4_nl <-
+# Linear flow ~ Axis.4
+consflow_model_axis4_linear <-
   brms::brm(log(flux_raw + 0.001) ~
-              Axis.4 + I(Axis.4^2) +
+              scale(Axis.4, scale = FALSE, center = TRUE) +
               (1 + scale(Axis.4,
                          scale = FALSE, center = TRUE)|site_code) +
               (1|site_code:bromeliad_id),
@@ -106,21 +103,21 @@ consflow_model_axis4_nl <-
                            max_treedepth = 15),
             data = fluxes_long_percons)
 
-# Compare each linear model with its non-linear equivalent (same response)
+# Compare each non-linear model with its linear equivalent (same response)
 brms::loo(consflow_model_axis1, 
-          consflow_model_axis1_nl)
+          consflow_model_axis1_linear)
 brms::loo(consflow_model_axis2, 
-          consflow_model_axis2_nl)
+          consflow_model_axis2_linear)
 brms::loo(consflow_model_axis3, 
-          consflow_model_axis3_nl)
+          consflow_model_axis3_linear)
 brms::loo(consflow_model_axis4, 
-          consflow_model_axis4_nl)
+          consflow_model_axis4_linear)
 
-# Hypothesis 2 - non-linear models at the scale of consumer-resource pairs ----
-# Non-linear flow ~ overall functional distance
-pairflow_model_overall_nl <-
+# Hypothesis 2 - linear models at the scale of consumer-resource pairs ----
+# Linear flow ~ overall functional distance
+pairflow_model_overall_linear <-
   brms::brm(log(flux_raw_pair + 0.001) ~
-              func_dist + I(func_dist^2) +
+              scale(func_dist, center = TRUE, scale = FALSE) +
               (1 + scale(func_dist,
                          center = TRUE, scale = FALSE)|site_code) +
               (1|site_code:bromeliad_id),
@@ -129,10 +126,10 @@ pairflow_model_overall_nl <-
             control = list(adapt_delta = 0.95,
                            max_treedepth = 15),
             data = fluxes_long_perpair)
-# Non-linear flow ~ distance for Axis 1
-pairflow_model_axis1_nl <-
+# Linear flow ~ distance for Axis 1
+pairflow_model_axis1_linear <-
   brms::brm(log(flux_raw_pair + 0.001) ~
-              dist_axis1 + I(dist_axis1^2) +
+              scale(dist_axis1, center = TRUE, scale = FALSE) +
               (1 + scale(dist_axis1,
                          center = TRUE, scale = FALSE)|site_code) +
               (1|site_code:bromeliad_id),
@@ -141,10 +138,10 @@ pairflow_model_axis1_nl <-
             control = list(adapt_delta = 0.95,
                            max_treedepth = 15),
             data = fluxes_long_perpair)
-# Non-linear flow ~ distance for Axis 2
-pairflow_model_axis2_nl <-
+# Linear flow ~ distance for Axis 2
+pairflow_model_axis2_linear <-
   brms::brm(log(flux_raw_pair + 0.001) ~
-              dist_axis2 + I(dist_axis2^2) +
+              scale(dist_axis2, center = TRUE, scale = FALSE) +
               (1 + scale(dist_axis2,
                          center = TRUE, scale = FALSE)|site_code) +
               (1|site_code:bromeliad_id),
@@ -153,10 +150,10 @@ pairflow_model_axis2_nl <-
             control = list(adapt_delta = 0.95,
                            max_treedepth = 15),
             data = fluxes_long_perpair)
-# Non-linear flow ~ distance for Axis 3
-pairflow_model_axis3_nl <-
+# Linear flow ~ distance for Axis 3
+pairflow_model_axis3_linear <-
   brms::brm(log(flux_raw_pair + 0.001) ~
-              dist_axis3 + I(dist_axis3^2) +
+              scale(dist_axis3, center = TRUE, scale = FALSE) +
               (1 + scale(dist_axis3,
                          center = TRUE, scale = FALSE)|site_code) +
               (1|site_code:bromeliad_id),
@@ -165,10 +162,10 @@ pairflow_model_axis3_nl <-
             control = list(adapt_delta = 0.95,
                            max_treedepth = 15),
             data = fluxes_long_perpair)
-# Non-linear flow ~ distance for Axis 4
-pairflow_model_axis4_nl <-
+# Linear flow ~ distance for Axis 4
+pairflow_model_axis4_linear <-
   brms::brm(log(flux_raw_pair + 0.001) ~
-              dist_axis4 + I(dist_axis4^2) +
+              scale(dist_axis4, center = TRUE, scale = FALSE) +
               (1 + scale(dist_axis4,
                          center = TRUE, scale = FALSE)|site_code) +
               (1|site_code:bromeliad_id),
@@ -178,23 +175,23 @@ pairflow_model_axis4_nl <-
                            max_treedepth = 15),
             data = fluxes_long_perpair)
 
-# Compare each linear model with its non-linear equivalent (same response)
+# Compare each non-linear model with its linear equivalent (same response)
 brms::loo(pairflow_model_overall, 
-          pairflow_model_overall_nl)
+          pairflow_model_overall_linear)
 brms::loo(pairflow_model_axis1, 
-          pairflow_model_axis1_nl)
+          pairflow_model_axis1_linear)
 brms::loo(pairflow_model_axis2, 
-          pairflow_model_axis2_nl)
+          pairflow_model_axis2_linear)
 brms::loo(pairflow_model_axis3, 
-          pairflow_model_axis3_nl)
+          pairflow_model_axis3_linear)
 brms::loo(pairflow_model_axis4, 
-          pairflow_model_axis4_nl)
+          pairflow_model_axis4_linear)
 
-# Hypothesis 3 - non-linear models at the scale of whole food webs --------
+# Hypothesis 3 - linear models at the scale of whole food webs --------
 # Total flow - volume
-totalflow_model_vol_nl <-
+totalflow_model_vol_linear <-
   brms::brm(log(totalflow_Jy) ~
-              log(prop_hull) + I(log(prop_hull)^2) +
+              scale(log(prop_hull), center = TRUE, scale = FALSE) +
               (1 + scale(log(prop_hull),
                          center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
@@ -203,9 +200,9 @@ totalflow_model_vol_nl <-
                            max_treedepth = 15),
             data = fluxes_long_perbrom)
 # Total flow - distance
-totalflow_model_dist_nl <-
+totalflow_model_dist_linear <-
   brms::brm(log(totalflow_Jy) ~
-              avg_func_dist + I(avg_func_dist^2) +
+              scale(avg_func_dist, center = TRUE, scale = FALSE) +
               (1 + scale(log(prop_hull),
                          center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
@@ -214,9 +211,9 @@ totalflow_model_dist_nl <-
                            max_treedepth = 15),
             data = fluxes_long_perbrom)
 # Flow to predators - volume
-predflow_model_vol_nl <-
+predflow_model_vol_linear <-
   brms::brm(log(predflow_Jy + 0.01) ~
-              log(prop_hull) + I(log(prop_hull)^2) +
+              scale(log(prop_hull), center = TRUE, scale = FALSE) +
               (1 + scale(log(prop_hull),
                          center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
@@ -225,9 +222,9 @@ predflow_model_vol_nl <-
                            max_treedepth = 15),
             data = fluxes_long_perbrom)
 # Flow to predators - distance
-predflow_model_dist_nl <-
+predflow_model_dist_linear <-
   brms::brm(log(predflow_Jy + 0.01) ~
-              avg_func_dist + I(avg_func_dist^2) +
+              scale(avg_func_dist, center = TRUE, scale = FALSE) +
               (1 + scale(log(prop_hull),
                          center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
@@ -236,9 +233,9 @@ predflow_model_dist_nl <-
                            max_treedepth = 15),
             data = fluxes_long_perbrom)
 # Gini index - volume
-gini_model_vol_nl <-
+gini_model_vol_linear <-
   brms::brm(gini ~
-              log(prop_hull) + I(log(prop_hull)^2) +
+              scale(log(prop_hull), center = TRUE, scale = FALSE) +
               (1 + scale(log(prop_hull),
                          center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
@@ -247,9 +244,9 @@ gini_model_vol_nl <-
                            max_treedepth = 15),
             data = fluxes_long_perbrom)
 # Gini index - distance
-gini_model_dist_nl <-
+gini_model_dist_linear <-
   brms::brm(gini ~
-              log(avg_func_dist) + I(log(avg_func_dist)^2) +
+              scale(log(avg_func_dist), center = TRUE, scale = FALSE) +
               (1 + scale(log(prop_hull),
                          center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
@@ -258,64 +255,64 @@ gini_model_dist_nl <-
                            max_treedepth = 15),
             data = fluxes_long_perbrom)
 
-# Compare each linear model with its non-linear equivalent (same response)
+# Compare each non-linear model with its linear equivalent (same response)
 brms::loo(totalflow_model_vol, 
-          totalflow_model_vol_nl)
+          totalflow_model_vol_linear)
 brms::loo(totalflow_model_dist, 
-          totalflow_model_dist_nl)
+          totalflow_model_dist_linear)
 brms::loo(predflow_model_vol, 
-          predflow_model_vol_nl)
+          predflow_model_vol_linear)
 brms::loo(predflow_model_dist, 
-          predflow_model_dist_nl)
+          predflow_model_dist_linear)
 brms::loo(gini_model_vol, 
-          gini_model_vol_nl)
+          gini_model_vol_linear)
 brms::loo(gini_model_dist, 
-          gini_model_dist_nl)
+          gini_model_dist_linear)
 
 
-# Save the non-linear models
-readr::write_rds(consflow_model_axis1_nl,
+# Save the linear models
+readr::write_rds(consflow_model_axis1_linear,
                  here::here("data",
-                            "consflow_model_axis1_nl.RDS"))
-readr::write_rds(consflow_model_axis2_nl,
+                            "consflow_model_axis1_linear.RDS"))
+readr::write_rds(consflow_model_axis2_linear,
                  here::here("data",
-                            "consflow_model_axis2_nl.RDS"))
-readr::write_rds(consflow_model_axis3_nl,
+                            "consflow_model_axis2_linear.RDS"))
+readr::write_rds(consflow_model_axis3_linear,
                  here::here("data",
-                            "consflow_model_axis3_nl.RDS"))
-readr::write_rds(consflow_model_axis4_nl,
+                            "consflow_model_axis3_linear.RDS"))
+readr::write_rds(consflow_model_axis4_linear,
                  here::here("data",
-                            "consflow_model_axis4_nl.RDS"))
-readr::write_rds(pairflow_model_overall_nl,
+                            "consflow_model_axis4_linear.RDS"))
+readr::write_rds(pairflow_model_overall_linear,
                  here::here("data",
-                            "pairflow_model_overall_nl.RDS"))
-readr::write_rds(pairflow_model_axis1_nl,
+                            "pairflow_model_overall_linear.RDS"))
+readr::write_rds(pairflow_model_axis1_linear,
                  here::here("data",
-                            "pairflow_model_axis1_nl.RDS"))
-readr::write_rds(pairflow_model_axis2_nl,
+                            "pairflow_model_axis1_linear.RDS"))
+readr::write_rds(pairflow_model_axis2_linear,
                  here::here("data",
-                            "pairflow_model_axis2_nl.RDS"))
-readr::write_rds(pairflow_model_axis3_nl,
+                            "pairflow_model_axis2_linear.RDS"))
+readr::write_rds(pairflow_model_axis3_linear,
                  here::here("data",
-                            "pairflow_model_axis3_nl.RDS"))
-readr::write_rds(pairflow_model_axis4_nl,
+                            "pairflow_model_axis3_linear.RDS"))
+readr::write_rds(pairflow_model_axis4_linear,
                  here::here("data",
-                            "pairflow_model_axis4_nl.RDS"))
-readr::write_rds(totalflow_model_vol_nl,
+                            "pairflow_model_axis4_linear.RDS"))
+readr::write_rds(totalflow_model_vol_linear,
                  here::here("data",
-                            "totalflow_model_vol_nl.RDS"))
-readr::write_rds(totalflow_model_dist_nl,
+                            "totalflow_model_vol_linear.RDS"))
+readr::write_rds(totalflow_model_dist_linear,
                  here::here("data",
-                            "totalflow_model_dist_nl.RDS"))
-readr::write_rds(predflow_model_vol_nl,
+                            "totalflow_model_dist_linear.RDS"))
+readr::write_rds(predflow_model_vol_linear,
                  here::here("data",
-                            "predflow_model_vol_nl.RDS"))
-readr::write_rds(predflow_model_dist_nl,
+                            "predflow_model_vol_linear.RDS"))
+readr::write_rds(predflow_model_dist_linear,
                  here::here("data",
-                            "predflow_model_dist_nl.RDS"))
-readr::write_rds(gini_model_vol_nl,
+                            "predflow_model_dist_linear.RDS"))
+readr::write_rds(gini_model_vol_linear,
                  here::here("data",
-                            "gini_model_vol_nl.RDS"))
-readr::write_rds(gini_model_dist_nl,
+                            "gini_model_vol_linear.RDS"))
+readr::write_rds(gini_model_dist_linear,
                  here::here("data",
-                            "gini_model_dist_nl.RDS"))
+                            "gini_model_dist_linear.RDS"))

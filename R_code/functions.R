@@ -879,184 +879,6 @@ basic_line <- function(model, dats, x_var, y_var, index = 1, colour = NA, scale 
   
 }
 
-
-# Subsetted line plot ---------------------------------------------------------
-subset_line <- function(model, dats, x_var, y_var, index = 1, colour = NA){
-  
-  # Get effect
-  model_effect <- 
-    brms::conditional_effects(model,
-                              method = "fitted")[[index]] 
-  
-  # Subset model effect data with point range
-  if(index == 3)
-    model_effect <- 
-      get_point_range(x_var = x_var,
-                      model_effect = model_effect,
-                      dats = dats)
-  
-  # Subset depending on y variable
-  if(x_var == "CN_dist"){
-    ## Filter in model effect
-    model_effect <-
-      model_effect %>% 
-      dplyr::filter(log(CN_dist) > -10) %>% 
-      dplyr::filter(estimate__ < 3)
-    
-    ## Filter in data
-    dats <-
-      dats %>% 
-      dplyr::filter(log(CN_dist) > -10) %>% 
-      dplyr::filter(log(flux_raw_pair)< 3)
-    
-  } else if(x_var == "CP_dist"){
-    ## Filter in model effect
-    model_effect <-
-      model_effect %>% 
-      dplyr::filter(log(CP_dist) > -6) %>% 
-      dplyr::filter(estimate__ < 3)
-    
-    ## Filter in data
-    dats <-
-      dats %>% 
-      dplyr::filter(log(CP_dist) > -6) %>% 
-      dplyr::filter(log(flux_raw_pair)< 3)
-    
-  } else if(x_var == "CNP_dist"){
-  ## Filter in model effect
-  model_effect <-
-    model_effect %>% 
-    dplyr::filter(log(CNP_dist) > -6) %>% 
-    dplyr::filter(estimate__ < 3)
-  
-  ## Filter in data
-  dats <-
-    dats %>% 
-    dplyr::filter(log(CNP_dist) > -6) %>% 
-    dplyr::filter(log(flux_raw_pair)< 3)
-  }
-  else if(x_var == "avg_CN_dist" ){
-    ## Filter in model effect
-    model_effect <-
-      model_effect %>% 
-      dplyr::filter(log(avg_CN_dist) > -7) %>% 
-      dplyr::filter(estimate__ < 5)
-    
-    ## Filter in data
-    dats <-
-      dats %>% 
-      dplyr::filter(log(avg_CN_dist) > -7) %>% 
-      dplyr::filter(log(totalflow_Jy)< 5)
-    
-  } else if(x_var == "avg_CP_dist" ){
-    ## Filter in model effect
-    model_effect <-
-      model_effect %>% 
-      dplyr::filter(log(avg_CP_dist) > -7) %>% 
-      dplyr::filter(estimate__ < 5)
-    
-    ## Filter in data
-    dats <-
-      dats %>% 
-      dplyr::filter(log(avg_CP_dist) > -7) %>% 
-      dplyr::filter(log(totalflow_Jy)< 5)
-    
-  } else if(x_var == "avg_CNP_dist" ){
-    ## Filter in model effect
-    model_effect <-
-      model_effect %>% 
-      dplyr::filter(log(avg_CNP_dist) > -7) %>% 
-      dplyr::filter(estimate__ < 5)
-    
-    ## Filter in data
-    dats <-
-      dats %>% 
-      dplyr::filter(log(avg_CNP_dist) > -7) %>% 
-      dplyr::filter(log(totalflow_Jy)< 5)
-    
-  }
-  
-  # Make plot with colours
-  if(index == 3){
-  ret <- 
-    ggplot(data = model_effect,
-           aes(x = log(.data[[x_var]]),
-               y = estimate__,
-               colour = effect2__)) +
-    ## Add raw data points
-    geom_jitter(data = dats,
-                aes(x = log(.data[[x_var]]),
-                    y = log(.data[[y_var]]),
-                    colour = .data[[colour]]),
-                width = 0.2,
-                alpha = 0.4) +
-    ## Line
-    geom_line(aes(group = .data[[colour]]),
-              linewidth = 1.2) +
-    ## Confidence interval
-    geom_ribbon(aes(ymin = lower__,
-                    ymax = upper__,
-                    group = .data[[colour]],
-                    fill = .data[[colour]]),
-                alpha = 0.5) +
-    ## Styling
-    xlab(full_label(x_var)) +
-    ylab(full_label(y_var)) + 
-    scale_colour_manual(paste(stringr::str_remove(string = colour,
-                                                  pattern = "lower_cons_"),
-                              "ratio of\nconsumer\nvs. resource"),
-                        values = c("burlywood4", "cadetblue4"),
-                        labels = c("Higher", "Lower")) +
-    scale_fill_manual(paste(stringr::str_remove(string = colour,
-                                                pattern = "lower_cons_"),
-                            "ratio of\nconsumer\nvs. resource"),
-                      values = c("burlywood4", "cadetblue4"),
-                      labels = c("Higher", "Lower")) +
-    theme(panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          panel.background = element_blank(), 
-          axis.line = element_line(colour = "black"))
-  
-  } else 
-    # Make plot without colours
-    if(index == 1){
-      ret <- 
-        ggplot(data = model_effect,
-               aes(x = log(.data[[x_var]]),
-                   y = estimate__)) +
-        ## Add raw data points
-        geom_jitter(data = dats,
-                    aes(x = log(.data[[x_var]]),
-                        y = log(.data[[y_var]])),
-                    width = 0.03,
-                    alpha = 0.4) +
-        ## Line
-        geom_line(linewidth = 1.2,
-                  colour = "steelblue") +
-        ## Confidence interval
-        geom_ribbon(aes(ymin = lower__,
-                        ymax = upper__),
-                    alpha = 0.5,
-                    colour = NA,
-                    fill = "steelblue") +
-        ## Styling
-        xlab(full_label(x_var)) +
-        ylab(full_label(y_var)) + 
-        theme(panel.grid.major = element_blank(), 
-              panel.grid.minor = element_blank(),
-              panel.background = element_blank(), 
-              axis.line = element_line(colour = "black"))
-      
-    }
-  
-  
-  # Return plot
-  return(ret)
-  
-}
-
-
-
 # Get point range to plot -------------------------------------------------
 get_point_range <- function(x_var, model_effect, dats){
   # Get max
@@ -1088,71 +910,6 @@ get_point_range <- function(x_var, model_effect, dats){
   
   
 }
-
-# Power and artifact line plot ---------------------------------------------------------
-explo_line <- function(model, dats, x_var, y_var, scale = "none"){
- 
-  # Make plot
-  ret <- 
-    ggplot(data = dats,
-           aes(x = .data[[x_var]],
-               y = .data[[y_var]])) +
-    geom_jitter(col = "seagreen3") +
-    geom_smooth(stat = "smooth",
-                col = "seagreen") +
-    xlab(full_label(x_var)) +
-    ylab(full_label(y_var)) +
-    theme(panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          panel.background = element_blank(),
-          axis.line.x = element_line(colour = "black"),
-          axis.line.y = element_line(colour = "black"))
-  
-  # Return plot
-  return(ret)
-  
-  
-  
-  
-}
-
-
-
-# Functions to return list of species to remove or add ----------------------------
-remove_add_specs <- function(data, number, mock_nspecs, action){
-  
-  
-  # Select species in each
-  selection <- 
-    data %>% 
-    dplyr::select(site, consumer) %>% 
-    dplyr::distinct() %>% 
-    dplyr::group_by(site) %>% 
-    ## Either pick number given, or maximum number of species in species pool if lower
-    slice_sample(n = ifelse(number < nrow(.), 
-                            number, nrow(.)),
-                 replace = F) %>% 
-    dplyr::ungroup() %>% 
-    dplyr::select(consumer) %>% 
-    dplyr::pull()
-  
-  
-  # Remove species from data
-  if(action == "remove"){
-    ret <- 
-      data %>% 
-      dplyr::filter(consumer %notin% selection)} else
-        # Select species from data
-        if(action == "keep"){
-          ret <- 
-            data %>% 
-            dplyr::filter(consumer %in% selection)}
-  
-  # Return
-  return(ret)
-}
-
-
 # Get title for significant relationships ---------------------------------
 title_sig <- function(sitename, model, index){
   # In cases where there is no interaction to plot
@@ -1214,57 +971,7 @@ title_sig <- function(sitename, model, index){
   
 }
 
-
-
-# Run elemental content models safely (i.e. ignores inputs with NA) --------
-safe_lm <- function(nutrient, dats, mode = "lm") {
-  
-  # Remove NAs from rows of biomass and nutrient column
-  dats <- 
-    dats %>% 
-    ## !! dynamically evaluates the y argument
-    dplyr::select(bodymass_g, nutrient = !!nutrient) %>% 
-    na.omit()
-  
- # If we have less than two rows
-  if (nrow(dats) < 3) {
-    ## Return NA
-    return(NA)} else {
-      # Otherwise just fit the model
-      # With lm
-      if(mode == "lm")
-      {ret <- 
-         lm(log10(nutrient) ~ 
-              log(bodymass_g),
-            data = dats)}
-      
-      # or lm2
-      if(mode == "lm2")
-      {ret <- 
-        lmodel2(nutrient ~
-                  log(bodymass_g),
-              "interval", "interval",
-              data = dats,
-              nperm = 500)}
-      
-      # or brms
-      if(mode == "brms")
-      {ret <- 
-        brms::brm(nutrient ~
-                    log(bodymass_g),
-                  iter = 2000,
-                  family = gaussian(),
-                  data = dats)}
-      ## and return the model fit
-      return(ret)}}
-
-
 # Fit the whole suite of models for a single site -------------------------
-# Fits, for one site, the same suite of models as the main analysis.
-# Because site_code is constant within a site, the site-level random effects
-# are dropped: only a random intercept for bromeliad_id is kept for the per-
-# consumer and per-pair models, and none for the per-bromeliad models (which
-# only have one row per bromeliad). Returns a named list of fitted models.
 fit_site_suite <- function(site, percons, perpair, perbrom){
   # Print site name as a sanity check while the suite runs
   print(site)
@@ -1285,44 +992,48 @@ fit_site_suite <- function(site, percons, perpair, perbrom){
   # Return the whole suite as a named list
   list(
     # Hypothesis 1 - raw flow entering a consumer node ~ each PC axis -----
-    ## Axis 1, with a random intercept per bromeliad
+    ## Axis 1
     consflow_model_axis1 <- 
       brms::brm(log(flux_raw + 0.001) ~
                   scale(Axis.1,
                         scale = FALSE, center = TRUE) +
+                  I(scale(Axis.1, scale = FALSE, center = TRUE)^2) +
                   (1|bromeliad_id),
                 iter = 20000,
                 family = gaussian(),
                 control = list(adapt_delta = 0.99,
                                max_treedepth = 15),
                 data = dats_percons),
-    ## Axis 2, with a random intercept per bromeliad
+    ## Axis 2
     consflow_model_axis2 <- 
       brms::brm(log(flux_raw + 0.001) ~
                   scale(Axis.2,
                         scale = FALSE, center = TRUE) +
+                  I(scale(Axis.2, scale = FALSE, center = TRUE)^2) +
                   (1|bromeliad_id),
                 iter = 20000,
                 family = gaussian(),
                 control = list(adapt_delta = 0.99,
                                max_treedepth = 15),
                 data = dats_percons),
-    ## Axis 3, with a random intercept per bromeliad
+    ## Axis 3
     consflow_model_axis3 <- 
       brms::brm(log(flux_raw + 0.001) ~
                   scale(Axis.3,
                         scale = FALSE, center = TRUE) +
+                  I(scale(Axis.3, scale = FALSE, center = TRUE)^2) +
                   (1|bromeliad_id),
                 iter = 20000,
                 family = gaussian(),
                 control = list(adapt_delta = 0.99,
                                max_treedepth = 15),
                 data = dats_percons),
-    ## Axis 4, with a random intercept per bromeliad
+    ## Axis 4
     consflow_model_axis4 <- 
       brms::brm(log(flux_raw + 0.001) ~
                   scale(Axis.4,
                         scale = FALSE, center = TRUE) +
+                  I(scale(Axis.4, scale = FALSE, center = TRUE)^2) +
                   (1|bromeliad_id),
                 iter = 20000,
                 family = gaussian(),
@@ -1331,55 +1042,60 @@ fit_site_suite <- function(site, percons, perpair, perbrom){
                 data = dats_percons),
 
     # Hypothesis 2 - raw flow in a pair ~ functional distance ------------
-    ## Overall functional distance, with a random intercept per bromeliad
+    ## Overall functional distance
     pairflow_model_overall <- 
       brms::brm(log(flux_raw_pair + 0.001) ~
                   scale(func_dist,
                         center = TRUE, scale = FALSE) +
+                  I(scale(func_dist, center = TRUE, scale = FALSE)^2) +
                   (1|bromeliad_id),
                 iter = 20000,
                 family = gaussian(),
                 control = list(adapt_delta = 0.95,
                                max_treedepth = 15),
                 data = dats_perpair),
-    ## Distance along Axis 1, with a random intercept per bromeliad
+    ## Distance along Axis 1
     pairflow_model_axis1 <- 
       brms::brm(log(flux_raw_pair + 0.001) ~
                   scale(dist_axis1,
                         center = TRUE, scale = FALSE) +
+                  I(scale(dist_axis1, center = TRUE, scale = FALSE)^2) +
                   (1|bromeliad_id),
                 iter = 20000,
                 family = gaussian(),
                 control = list(adapt_delta = 0.95,
                                max_treedepth = 15),
                 data = dats_perpair),
-    ## Distance along Axis 2, with a random intercept per bromeliad
+    ## Distance along Axis 2
     pairflow_model_axis2 <- 
       brms::brm(log(flux_raw_pair + 0.001) ~
                   scale(dist_axis2,
                         center = TRUE, scale = FALSE) +
+                  I(scale(dist_axis2, center = TRUE, scale = FALSE)^2) +
                   (1|bromeliad_id),
                 iter = 20000,
                 family = gaussian(),
                 control = list(adapt_delta = 0.95,
                                max_treedepth = 15),
                 data = dats_perpair),
-    ## Distance along Axis 3, with a random intercept per bromeliad
+    ## Distance along Axis 3
     pairflow_model_axis3 <- 
       brms::brm(log(flux_raw_pair + 0.001) ~
                   scale(dist_axis3,
                         center = TRUE, scale = FALSE) +
+                  I(scale(dist_axis3, center = TRUE, scale = FALSE)^2) +
                   (1|bromeliad_id),
                 iter = 20000,
                 family = gaussian(),
                 control = list(adapt_delta = 0.95,
                                max_treedepth = 15),
                 data = dats_perpair),
-    ## Distance along Axis 4, with a random intercept per bromeliad
+    ## Distance along Axis 4
     pairflow_model_axis4 <- 
       brms::brm(log(flux_raw_pair + 0.001) ~
                   scale(dist_axis4,
                         center = TRUE, scale = FALSE) +
+                  I(scale(dist_axis4, center = TRUE, scale = FALSE)^2) +
                   (1|bromeliad_id),
                 iter = 20000,
                 family = gaussian(),
@@ -1388,61 +1104,67 @@ fit_site_suite <- function(site, percons, perpair, perbrom){
                 data = dats_perpair),
 
     # Hypothesis 3 - whole-web flow ~ functional volume and distance -----
-    ## Total flow against hull volume (no random effect left)
+    ## Total flow against hull volume
     totalflow_model_vol <- 
       brms::brm(log(totalflow_Jy) ~
                   scale(log(prop_hull),
-                        center = TRUE, scale = FALSE),
+                        center = TRUE, scale = FALSE) +
+                  I(scale(log(prop_hull), center = TRUE, scale = FALSE)^2),
                 iter = 20000,
                 family = gaussian(),
                 control = list(adapt_delta = 0.95,
                                max_treedepth = 15),
                 data = dats_perbrom),
-    ## Total flow against average functional distance (no random effect left)
+    ## Total flow against average functional distance
     totalflow_model_dist <-
       brms::brm(log(totalflow_Jy) ~
                   scale(avg_func_dist,
-                        center = TRUE, scale = FALSE),
+                        center = TRUE, scale = FALSE) +
+                  I(scale(avg_func_dist, center = TRUE, scale = FALSE)^2),
                 iter = 20000,
                 family = gaussian(),
                 control = list(adapt_delta = 0.95,
                                max_treedepth = 15),
                 data = dats_perbrom),
-    ## Flow to predators against hull volume (no random effect left)
+    ## Flow to predators against hull volume
     predflow_model_vol <-
       brms::brm(log(predflow_Jy + 0.01) ~
                   scale(log(prop_hull),
-                        center = TRUE, scale = FALSE),
+                        center = TRUE, scale = FALSE) +
+                  I(scale(log(prop_hull), center = TRUE, scale = FALSE)^2),
                 iter = 20000,
                 family = gaussian(),
                 control = list(adapt_delta = 0.95,
                                max_treedepth = 15),
                 data = dats_perbrom),
-    ## Flow to predators against average functional distance (no random effect left)
+    ## Flow to predators against average functional distance
     predflow_model_dist <- 
       brms::brm(log(predflow_Jy + 0.01) ~
                   scale(avg_func_dist,
-                        center = TRUE, scale = FALSE),
+                        center = TRUE, scale = FALSE) +
+                  I(scale(avg_func_dist, center = TRUE, scale = FALSE)^2),
                 iter = 20000,
                 family = gaussian(),
                 control = list(adapt_delta = 0.95,
                                max_treedepth = 15),
                 data = dats_perbrom),
-    ## Gini index of fluxes against hull volume (no random effect left)
+    ## Gini index of fluxes against hull volume
     gini_model_vol <- 
       brms::brm(gini ~
                   scale(log(prop_hull),
-                        center = TRUE, scale = FALSE),
+                        center = TRUE, scale = FALSE) +
+                  I(scale(log(prop_hull), center = TRUE, scale = FALSE)^2),
                 iter = 20000,
                 family = gaussian(),
                 control = list(adapt_delta = 0.95,
                                max_treedepth = 15),
                 data = dats_perbrom),
-    ## Gini index of fluxes against average functional distance (no random effect left)
+    ## Gini index of fluxes against average functional distance
     gini_model_dist <- 
       brms::brm(gini ~
                   scale(log(avg_func_dist),
-                        center = TRUE, scale = FALSE),
+                        center = TRUE, scale = FALSE) +
+                  I(scale(log(avg_func_dist), center = TRUE, scale = FALSE)^2),
                 iter = 20000,
                 family = gaussian(),
                 control = list(adapt_delta = 0.95,

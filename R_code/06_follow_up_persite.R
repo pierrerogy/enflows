@@ -21,6 +21,8 @@ site_matrices <-
   make_binary_matrices(matrix_list = .,
                        cutoff = 0.02)
 
+site_matrices <-  site_matrices[18]
+
 # Load data
 fluxes_long_percons <-
   readr::read_csv(here::here("data",
@@ -33,18 +35,34 @@ fluxes_long_perbrom <-
                              "fluxes_long_perbrom.csv"))
 
 # Fit the suite for every site --------------------------------------------
-# Map over sites, returning a list of lists (one named list of models per site)
-models_persite <-
-  names(site_matrices) %>%
-  ## Keep site names so the output list is named
-  purrr::set_names() %>%
-  ## Fit the whole suite for each site
-  purrr::map(~ fit_site_suite(site = .x,
-                              percons = fluxes_long_percons,
-                              perpair = fluxes_long_perpair,
-                              perbrom = fluxes_long_perbrom))
+# Build the path to the output folder that will hold one RDS per site
+persite_folder <-
+  here::here("data",
+             "persite")
+# Check whether that folder already exists
+if (!dir.exists(persite_folder)) {
+  # Create it (and any missing parents) only if it is not there yet
+  dir.create(persite_folder,
+             recursive = TRUE)
+}
 
-# Save the list of lists
-readr::write_rds(models_persite,
-                 here::here("data",
-                            "models_persite.RDS"))
+# Map over sites, fitting the whole suite and saving each site as it completes
+names(site_matrices) %>%
+  # Keep site names so each fitted suite can be tied back to its site
+  purrr::set_names() %>%
+  # Walk (rather than map) since we save to disk for side effect, not in memory
+  purrr::walk(function(site){
+    # Fit the whole model suite for this one site
+    models_site <-
+      fit_site_suite(site = site,
+                     percons = fluxes_long_percons,
+                     perpair = fluxes_long_perpair,
+                     perbrom = fluxes_long_perbrom)
+    # Write this site's models to its own RDS file in the persite folder
+    readr::write_rds(models_site,
+                     file.path(persite_folder,
+                               # Name the file after the site, e.g. models_XXX.RDS
+                               paste0("models_",
+                                      site,
+                                      ".RDS")))
+  })

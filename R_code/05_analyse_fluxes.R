@@ -27,31 +27,31 @@ fluxes_long_perbrom <-
 
 # Load models from the cloud ----------------------------------------------
 # List of models
-model_list <- 
-  c(
-    "consflow_model_axis1",
-    "consflow_model_axis2",
-    "consflow_model_axis3",
-    "consflow_model_axis4",
-    "pairflow_model_overall",
-    "pairflow_model_axis1",
-    "pairflow_model_axis2",
-    "pairflow_model_axis3",
-    "pairflow_model_axis4",
-    "totalflow_model_vol",
-    "predflow_model_vol",
-    "gini_model_vol",
-    "totalflow_model_dist",
-    "predflow_model_dist",
-    "gini_model_dist"
-    )
+# model_list <- 
+#   c(
+#     "consflow_model_axis1",
+#     "consflow_model_axis2",
+#     "consflow_model_axis3",
+#     "consflow_model_axis4",
+#     "pairflow_model_overall",
+#     "pairflow_model_axis1",
+#     "pairflow_model_axis2",
+#     "pairflow_model_axis3",
+#     "pairflow_model_axis4",
+#     "totalflow_model_vol",
+#     "predflow_model_vol",
+#     "gini_model_vol",
+#     "totalflow_model_dist",
+#     "predflow_model_dist",
+#     "gini_model_dist"
+#     )
 
-#  Check if model present in environment, and if not load it
-for (model in model_list) {
-  if (!exists(model)) {
-    assign(model, 
-           readr::read_rds(here::here("data",
-                                       paste0(model, ".RDS"))))}}
+# #  Check if model present in environment, and if not load it
+# for (model in model_list) {
+#   if (!exists(model)) {
+#     assign(model, 
+#            readr::read_rds(here::here("data",
+#                                        paste0(model, ".RDS"))))}}
 
 
 # Hypothesis 1 - models at the scale of consumers ------------------------------------------------------------
@@ -63,12 +63,13 @@ hist(fluxes_long_percons$Axis.4)
 hist(log(fluxes_long_percons$flux_raw + 1e-3))
 
 
-# Linear model of raw energy flow entering consumer node ~ Axis.1
+# Non-linear model of raw energy flow entering consumer node ~ Axis.1
 ## Model
 consflow_model_axis1 <- 
   brms::brm(log(flux_raw + 0.001) ~
               scale(Axis.1, 
                     scale = FALSE, center = TRUE) + 
+              I(scale(Axis.1, scale = FALSE, center = TRUE)^2) +
               (1 + scale(Axis.1,
                          scale = FALSE, center = TRUE)|site_code) +
               (1|site_code:bromeliad_id),
@@ -83,12 +84,13 @@ plot(consflow_model_axis1)
 bayestestR::describe_posterior(consflow_model_axis1)
 performance::r2_bayes(consflow_model_axis1)
 
-# Linear model of raw energy flow entering consumer node ~ Axis.2
+# Non-linear model of raw energy flow entering consumer node ~ Axis.2
 ## Model
 consflow_model_axis2 <- 
   brms::brm(log(flux_raw + 0.001) ~
               scale(Axis.2, 
                     scale = FALSE, center = TRUE) + 
+             I(scale(Axis.2, scale = FALSE, center = TRUE)^2) +
              (1 + scale(Axis.2,
                        scale = FALSE, center = TRUE)|site_code) +
             (1|site_code:bromeliad_id),
@@ -103,12 +105,13 @@ plot(consflow_model_axis2)
 bayestestR::describe_posterior(consflow_model_axis2)
 performance::r2_bayes(consflow_model_axis2)
 
-# Linear model of raw energy flow entering consumer node ~ Axis.3
+# Non-linear model of raw energy flow entering consumer node ~ Axis.3
 ## Model
 consflow_model_axis3 <- 
   brms::brm(log(flux_raw + 0.001) ~
               scale(Axis.3, 
                     scale = FALSE, center = TRUE) + 
+             I(scale(Axis.3, scale = FALSE, center = TRUE)^2) +
              (1 + scale(Axis.3,
                        scale = FALSE, center = TRUE)|site_code) +
             (1|site_code:bromeliad_id),
@@ -123,12 +126,13 @@ plot(consflow_model_axis3)
 bayestestR::describe_posterior(consflow_model_axis3)
 performance::r2_bayes(consflow_model_axis3)
 
-# Linear model of raw energy flow entering consumer node ~ Axis.4
+# Non-linear model of raw energy flow entering consumer node ~ Axis.4
 ## Model
 consflow_model_axis4 <- 
   brms::brm(log(flux_raw + 0.001) ~
               scale(Axis.4, 
                     scale = FALSE, center = TRUE) + 
+             I(scale(Axis.4, scale = FALSE, center = TRUE)^2) +
              (1 + scale(Axis.4,
                        scale = FALSE, center = TRUE)|site_code) +
             (1|site_code:bromeliad_id),
@@ -172,6 +176,7 @@ pairflow_model_overall <-
   brms::brm(log(flux_raw_pair + 0.001) ~
               scale(func_dist,
                     center = TRUE, scale = FALSE) + 
+              I(scale(func_dist, center = TRUE, scale = FALSE)^2) +
               (1 + scale(func_dist,
                          center = TRUE, scale = FALSE)|site_code) +
               (1|site_code:bromeliad_id),
@@ -191,6 +196,7 @@ pairflow_model_axis1 <-
   brms::brm(log(flux_raw_pair + 0.001) ~
               scale(dist_axis1,
                     center = TRUE, scale = FALSE) + 
+            I(scale(dist_axis1, center = TRUE, scale = FALSE)^2) +
             (1 + scale(dist_axis1,
                        center = TRUE, scale = FALSE)|site_code) +
             (1|site_code:bromeliad_id),
@@ -210,6 +216,7 @@ pairflow_model_axis2 <-
   brms::brm(log(flux_raw_pair + 0.001) ~
               scale(dist_axis2,
                     center = TRUE, scale = FALSE) + 
+            I(scale(dist_axis2, center = TRUE, scale = FALSE)^2) +
             (1 + scale(dist_axis2,
                        center = TRUE, scale = FALSE)|site_code) +
             (1|site_code:bromeliad_id),
@@ -228,6 +235,7 @@ pairflow_model_axis3 <-
   brms::brm(log(flux_raw_pair + 0.001) ~
               scale(dist_axis3,
                     center = TRUE, scale = FALSE) + 
+            I(scale(dist_axis3, center = TRUE, scale = FALSE)^2) +
             (1 + scale(dist_axis3,
                        center = TRUE, scale = FALSE)|site_code) +
             (1|site_code:bromeliad_id),
@@ -246,6 +254,7 @@ pairflow_model_axis4 <-
   brms::brm(log(flux_raw_pair + 0.001) ~
               scale(dist_axis4,
                     center = TRUE, scale = FALSE) + 
+            I(scale(dist_axis4, center = TRUE, scale = FALSE)^2) +
             (1 + scale(dist_axis4,
                        center = TRUE, scale = FALSE)|site_code) +
             (1|site_code:bromeliad_id),
@@ -287,28 +296,12 @@ hist(log(fluxes_long_perbrom$prop_hull))
 hist(fluxes_long_perbrom$avg_func_dist)
 
 # Total flow
-## Volume
-totalflow_model_vol <- 
-  brms::brm(log(totalflow_Jy) ~
-              scale(log(prop_hull),
-                    center = TRUE, scale = FALSE) +
-              (1 + scale(log(prop_hull),
-                         center = TRUE, scale = FALSE) |site_code),
-            iter = 20000,
-            family = gaussian(),      
-            control = list(adapt_delta = 0.95,
-                           max_treedepth = 15),
-            data = fluxes_long_perbrom)
-## Check assumptions
-plot(totalflow_model_vol)
-## Look at the effect
-bayestestR::describe_posterior(totalflow_model_vol)
-performance::r2_bayes(totalflow_model_vol)
 ## Distance
 totalflow_model_dist <- 
   brms::brm(log(totalflow_Jy) ~
               scale(avg_func_dist,
                     center = TRUE, scale = FALSE) +
+            I(scale(avg_func_dist, center = TRUE, scale = FALSE)^2) +
             (1 + scale(log(prop_hull),
                       center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
@@ -321,30 +314,32 @@ plot(totalflow_model_dist)
 ## Look at the effect
 bayestestR::describe_posterior(totalflow_model_dist)
 performance::r2_bayes(totalflow_model_dist)
-
-# Flow to predators
 ## Volume
-predflow_model_vol <- 
-  brms::brm(log(predflow_Jy + 0.01) ~
+totalflow_model_vol <- 
+  brms::brm(log(totalflow_Jy) ~
               scale(log(prop_hull),
                     center = TRUE, scale = FALSE) +
-            (1 + scale(log(prop_hull),
-                      center = TRUE, scale = FALSE) |site_code),
+              I(scale(log(prop_hull), center = TRUE, scale = FALSE)^2) +
+              (1 + scale(log(prop_hull),
+                         center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
             family = gaussian(),      
             control = list(adapt_delta = 0.95,
                            max_treedepth = 15),
             data = fluxes_long_perbrom)
 ## Check assumptions
-plot(predflow_model_vol)
+plot(totalflow_model_vol)
 ## Look at the effect
-bayestestR::describe_posterior(predflow_model_vol)
-performance::r2_bayes(predflow_model_vol)
+bayestestR::describe_posterior(totalflow_model_vol)
+performance::r2_bayes(totalflow_model_vol)
+
+# Flow to predators
 ## Distance
 predflow_model_dist <- 
   brms::brm(log(predflow_Jy + 0.01) ~
               scale(avg_func_dist,
                     center = TRUE, scale = FALSE) +
+              I(scale(avg_func_dist, center = TRUE, scale = FALSE)^2) +
               (1 + scale(log(prop_hull),
                          center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
@@ -357,30 +352,32 @@ plot(predflow_model_dist)
 ## Look at the effect
 bayestestR::describe_posterior(predflow_model_dist)
 performance::r2_bayes(predflow_model_dist)
-
-# Flow to predators
 ## Volume
-gini_model_vol <- 
-  brms::brm(gini ~
+predflow_model_vol <- 
+  brms::brm(log(predflow_Jy + 0.01) ~
               scale(log(prop_hull),
                     center = TRUE, scale = FALSE) +
-               (1 + scale(log(prop_hull),
-                          center = TRUE, scale = FALSE) |site_code),
+            I(scale(log(prop_hull), center = TRUE, scale = FALSE)^2) +
+            (1 + scale(log(prop_hull),
+                      center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
             family = gaussian(),      
             control = list(adapt_delta = 0.95,
                            max_treedepth = 15),
             data = fluxes_long_perbrom)
 ## Check assumptions
-plot(gini_model_vol)
+plot(predflow_model_vol)
 ## Look at the effect
-bayestestR::describe_posterior(gini_model_vol)
-performance::r2_bayes(gini_model_vol)
+bayestestR::describe_posterior(predflow_model_vol)
+performance::r2_bayes(predflow_model_vol)
+
+# Flow to predators
 ## Distance
 gini_model_dist <- 
   brms::brm(gini ~
               scale(log(avg_func_dist),
                     center = TRUE, scale = FALSE) +
+              I(scale(log(avg_func_dist), center = TRUE, scale = FALSE)^2) +
               (1 + scale(log(prop_hull),
                          center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
@@ -393,24 +390,45 @@ plot(gini_model_dist)
 ## Look at the effect
 bayestestR::describe_posterior(gini_model_dist)
 performance::r2_bayes(gini_model_dist)
+## Volume
+gini_model_vol <- 
+  brms::brm(gini ~
+              scale(log(prop_hull),
+                    center = TRUE, scale = FALSE) +
+               I(scale(log(prop_hull), center = TRUE, scale = FALSE)^2) +
+               (1 + scale(log(prop_hull),
+                          center = TRUE, scale = FALSE) |site_code),
+            iter = 20000,
+            family = gaussian(),      
+            control = list(adapt_delta = 0.95,
+                           max_treedepth = 15),
+            data = fluxes_long_perbrom)
+## Check assumptions
+plot(gini_model_vol)
+## Look at the effect
+bayestestR::describe_posterior(gini_model_vol)
+performance::r2_bayes(gini_model_vol)
 
 # Save models
-readr::write_rds(x = totalflow_model_vol,
-                 file = here::here("data",
-                                   "totalflow_model_vol.RDS"))
-readr::write_rds(x = predflow_model_vol,
-                 file = here::here("data",
-                                   "predflow_model_vol.RDS"))
-readr::write_rds(x = gini_model_vol,
-                 file = here::here("data",
-                                   "gini_model_vol.RDS"))
 readr::write_rds(x = totalflow_model_dist,
                  file = here::here("data",
                                    "totalflow_model_dist.RDS"))
+readr::write_rds(x = totalflow_model_vol,
+                 file = here::here("data",
+                                   "totalflow_model_vol.RDS"))
 readr::write_rds(x = predflow_model_dist,
                  file = here::here("data",
                                    "predflow_model_dist.RDS"))
+readr::write_rds(x = predflow_model_vol,
+                 file = here::here("data",
+                                   "predflow_model_vol.RDS"))
 readr::write_rds(x = gini_model_dist,
                  file = here::here("data",
                                    "gini_model_dist.RDS"))
+readr::write_rds(x = gini_model_vol,
+                 file = here::here("data",
+                                   "gini_model_vol.RDS"))
+
+
+
 

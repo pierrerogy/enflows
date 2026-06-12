@@ -58,51 +58,51 @@ ranked_traits <-
 RES_pca_nobs <-
   SYNCSA::pca(ranked_traits)
 
-# Visualise the PCA axes --------------------------------------------------
-# Quick look at the variables
-RES_pca_nobs$eigenvalues
-head(RES_pca_nobs$individuals)
-RES_pca_nobs$variables
+# # Visualise the PCA axes --------------------------------------------------
+# # Quick look at the variables
+# RES_pca_nobs$eigenvalues
+# head(RES_pca_nobs$individuals)
+# RES_pca_nobs$variables
 
-# Plot the first four axes (points and arrows) in a grid, as in script 04
-plot_grid_nobs <-
-  cowplot::plot_grid(plotlist = c(plz_plot_my_pca(PCA = RES_pca_nobs,
-                                                  axes = c(1,2),
-                                                  type = "points",
-                                                  dats = fw_traits),
-                                  plz_plot_my_pca(PCA = RES_pca_nobs,
-                                                  axes = c(1,2),
-                                                  type = "arrows",
-                                                  dats = fw_traits),
-                                  plz_plot_my_pca(PCA = RES_pca_nobs,
-                                                  axes = c(1,3),
-                                                  type = "points",
-                                                  dats = fw_traits),
-                                  plz_plot_my_pca(PCA = RES_pca_nobs,
-                                                  axes = c(1,3),
-                                                  type = "arrows",
-                                                  dats = fw_traits),
-                                  plz_plot_my_pca(PCA = RES_pca_nobs,
-                                                  axes = c(1,4),
-                                                  type = "points",
-                                                  dats = fw_traits),
-                                  plz_plot_my_pca(PCA = RES_pca_nobs,
-                                                  axes = c(1,4),
-                                                  type = "arrows",
-                                                  dats = fw_traits)),
-                     ncol = 2,
-                     nrow = 3,
-                     rel_widths = c (1.2, 1))
+# # Plot the first four axes (points and arrows) in a grid, as in script 04
+# plot_grid_nobs <-
+#   cowplot::plot_grid(plotlist = c(plz_plot_my_pca(PCA = RES_pca_nobs,
+#                                                   axes = c(1,2),
+#                                                   type = "points",
+#                                                   dats = fw_traits),
+#                                   plz_plot_my_pca(PCA = RES_pca_nobs,
+#                                                   axes = c(1,2),
+#                                                   type = "arrows",
+#                                                   dats = fw_traits),
+#                                   plz_plot_my_pca(PCA = RES_pca_nobs,
+#                                                   axes = c(1,3),
+#                                                   type = "points",
+#                                                   dats = fw_traits),
+#                                   plz_plot_my_pca(PCA = RES_pca_nobs,
+#                                                   axes = c(1,3),
+#                                                   type = "arrows",
+#                                                   dats = fw_traits),
+#                                   plz_plot_my_pca(PCA = RES_pca_nobs,
+#                                                   axes = c(1,4),
+#                                                   type = "points",
+#                                                   dats = fw_traits),
+#                                   plz_plot_my_pca(PCA = RES_pca_nobs,
+#                                                   axes = c(1,4),
+#                                                   type = "arrows",
+#                                                   dats = fw_traits)),
+#                      ncol = 2,
+#                      nrow = 3,
+#                      rel_widths = c (1.2, 1))
 
-# Display the grid
-plot_grid_nobs
+# # Display the grid
+# plot_grid_nobs
 
-# Save the grid
-ggplot2::ggsave(here::here("plots",
-                           "figs2.pdf"),
-                plot_grid_nobs,
-                width = 13,
-                height = 13.5)
+# # Save the grid
+# ggplot2::ggsave(here::here("plots",
+#                            "figs2.pdf"),
+#                 plot_grid_nobs,
+#                 width = 13,
+#                 height = 13.5)
 
 # Prepare data with no-BS axes --------------------------------------------
 # Basal species
@@ -255,11 +255,12 @@ fluxes_long_perbrom_nobs <-
                    by = c("site_code", "bromeliad_id"))
 
 # Hypothesis 1 - models at the scale of consumers -------------------------
-# Linear model of raw energy flow entering consumer node ~ Axis.1
+# Non-linear model of raw energy flow entering consumer node ~ Axis.1
 consflow_model_axis1_nobs <-
   brms::brm(log(flux_raw + 0.001) ~
               scale(Axis.1,
                     scale = FALSE, center = TRUE) +
+              I(scale(Axis.1, scale = FALSE, center = TRUE)^2) +
               (1 + scale(Axis.1,
                          scale = FALSE, center = TRUE)|site_code) +
               (1|site_code:bromeliad_id),
@@ -274,11 +275,12 @@ plot(consflow_model_axis1_nobs)
 bayestestR::describe_posterior(consflow_model_axis1_nobs)
 performance::r2_bayes(consflow_model_axis1_nobs)
 
-# Linear model of raw energy flow entering consumer node ~ Axis.2
+# Non-linear model of raw energy flow entering consumer node ~ Axis.2
 consflow_model_axis2_nobs <-
   brms::brm(log(flux_raw + 0.001) ~
               scale(Axis.2,
                     scale = FALSE, center = TRUE) +
+              I(scale(Axis.2, scale = FALSE, center = TRUE)^2) +
               (1 + scale(Axis.2,
                          scale = FALSE, center = TRUE)|site_code) +
               (1|site_code:bromeliad_id),
@@ -293,11 +295,12 @@ plot(consflow_model_axis2_nobs)
 bayestestR::describe_posterior(consflow_model_axis2_nobs)
 performance::r2_bayes(consflow_model_axis2_nobs)
 
-# Linear model of raw energy flow entering consumer node ~ Axis.3
+# Non-linear model of raw energy flow entering consumer node ~ Axis.3
 consflow_model_axis3_nobs <-
   brms::brm(log(flux_raw + 0.001) ~
               scale(Axis.3,
                     scale = FALSE, center = TRUE) +
+              I(scale(Axis.3, scale = FALSE, center = TRUE)^2) +
               (1 + scale(Axis.3,
                          scale = FALSE, center = TRUE)|site_code) +
               (1|site_code:bromeliad_id),
@@ -312,11 +315,12 @@ plot(consflow_model_axis3_nobs)
 bayestestR::describe_posterior(consflow_model_axis3_nobs)
 performance::r2_bayes(consflow_model_axis3_nobs)
 
-# Linear model of raw energy flow entering consumer node ~ Axis.4
+# Non-linear model of raw energy flow entering consumer node ~ Axis.4
 consflow_model_axis4_nobs <-
   brms::brm(log(flux_raw + 0.001) ~
               scale(Axis.4,
                     scale = FALSE, center = TRUE) +
+              I(scale(Axis.4, scale = FALSE, center = TRUE)^2) +
               (1 + scale(Axis.4,
                          scale = FALSE, center = TRUE)|site_code) +
               (1|site_code:bromeliad_id),
@@ -351,6 +355,7 @@ pairflow_model_overall_nobs <-
   brms::brm(log(flux_raw_pair + 0.001) ~
               scale(func_dist,
                     center = TRUE, scale = FALSE) +
+              I(scale(func_dist, center = TRUE, scale = FALSE)^2) +
               (1 + scale(func_dist,
                          center = TRUE, scale = FALSE)|site_code) +
               (1|site_code:bromeliad_id),
@@ -370,6 +375,7 @@ pairflow_model_axis1_nobs <-
   brms::brm(log(flux_raw_pair + 0.001) ~
               scale(dist_axis1,
                     center = TRUE, scale = FALSE) +
+              I(scale(dist_axis1, center = TRUE, scale = FALSE)^2) +
               (1 + scale(dist_axis1,
                          center = TRUE, scale = FALSE)|site_code) +
               (1|site_code:bromeliad_id),
@@ -389,6 +395,7 @@ pairflow_model_axis2_nobs <-
   brms::brm(log(flux_raw_pair + 0.001) ~
               scale(dist_axis2,
                     center = TRUE, scale = FALSE) +
+              I(scale(dist_axis2, center = TRUE, scale = FALSE)^2) +
               (1 + scale(dist_axis2,
                          center = TRUE, scale = FALSE)|site_code) +
               (1|site_code:bromeliad_id),
@@ -408,6 +415,7 @@ pairflow_model_axis3_nobs <-
   brms::brm(log(flux_raw_pair + 0.001) ~
               scale(dist_axis3,
                     center = TRUE, scale = FALSE) +
+              I(scale(dist_axis3, center = TRUE, scale = FALSE)^2) +
               (1 + scale(dist_axis3,
                          center = TRUE, scale = FALSE)|site_code) +
               (1|site_code:bromeliad_id),
@@ -427,6 +435,7 @@ pairflow_model_axis4_nobs <-
   brms::brm(log(flux_raw_pair + 0.001) ~
               scale(dist_axis4,
                     center = TRUE, scale = FALSE) +
+              I(scale(dist_axis4, center = TRUE, scale = FALSE)^2) +
               (1 + scale(dist_axis4,
                          center = TRUE, scale = FALSE)|site_code) +
               (1|site_code:bromeliad_id),
@@ -465,6 +474,7 @@ totalflow_model_vol_nobs <-
   brms::brm(log(totalflow_Jy) ~
               scale(log(prop_hull),
                     center = TRUE, scale = FALSE) +
+              I(scale(log(prop_hull), center = TRUE, scale = FALSE)^2) +
               (1 + scale(log(prop_hull),
                          center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
@@ -482,6 +492,7 @@ totalflow_model_dist_nobs <-
   brms::brm(log(totalflow_Jy) ~
               scale(avg_func_dist,
                     center = TRUE, scale = FALSE) +
+              I(scale(avg_func_dist, center = TRUE, scale = FALSE)^2) +
               (1 + scale(log(prop_hull),
                          center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
@@ -501,6 +512,7 @@ predflow_model_vol_nobs <-
   brms::brm(log(predflow_Jy + 0.01) ~
               scale(log(prop_hull),
                     center = TRUE, scale = FALSE) +
+              I(scale(log(prop_hull), center = TRUE, scale = FALSE)^2) +
               (1 + scale(log(prop_hull),
                          center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
@@ -518,6 +530,7 @@ predflow_model_dist_nobs <-
   brms::brm(log(predflow_Jy + 0.01) ~
               scale(avg_func_dist,
                     center = TRUE, scale = FALSE) +
+              I(scale(avg_func_dist, center = TRUE, scale = FALSE)^2) +
               (1 + scale(log(prop_hull),
                          center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
@@ -538,6 +551,7 @@ gini_model_vol_nobs <-
   brms::brm(gini ~
               scale(log(prop_hull),
                     center = TRUE, scale = FALSE) +
+              I(scale(log(prop_hull), center = TRUE, scale = FALSE)^2) +
               (1 + scale(log(prop_hull),
                          center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
@@ -555,6 +569,7 @@ gini_model_dist_nobs <-
   brms::brm(gini ~
               scale(log(avg_func_dist),
                     center = TRUE, scale = FALSE) +
+              I(scale(log(avg_func_dist), center = TRUE, scale = FALSE)^2) +
               (1 + scale(log(prop_hull),
                          center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
@@ -587,60 +602,3 @@ readr::write_rds(x = predflow_model_dist_nobs,
 readr::write_rds(x = gini_model_dist_nobs,
                  file = here::here("data",
                                    "gini_model_dist_nobs.RDS"))
-
-
-
-
-
-
-
-
-
-# Quadratic term hypothesis 3 ---------------------------------------------
-# Prior checks
-fit_prior <- 
-  brms::brm(
-  bf(totalflow_Jy ~ a * exp(-0.5 * ((prop_hull - mu) / sigma)^2),
-     a ~ 1 + (1 | site_code), mu ~ 1 + (1 | site_code), sigma ~ 1, nl = TRUE),
-  prior = your_prior_object,
-  sample_prior = "only",
-  chains = 2, iter = 2000, cores = 2,
-  family = gaussian(),
-  data = fluxes_long_perbrom
-)
-pp_check(fit_prior, ndraws = 100)
-
-
-
-fluxes_long_perbrom <- fluxes_long_perbrom |>
-  dplyr::mutate(
-    log_totalflow  = log(totalflow_Jy + 0.001),
-    log_predflow   = log(predflow_Jy  + 0.001),
-    avg_func_dist2 = avg_func_dist^2,
-    prop_hull2     = prop_hull^2
-  )
-
-# Model 1
-predlow_nlmodel_vol<- 
-  brms::brm(
-    log_predflow ~ prop_hull + prop_hull2 + (1 + prop_hull + prop_hull2 | site_code),
-    prior = c(
-      prior(normal(-0.15, 4.5),   class = Intercept),
-      prior(normal(68.01, 50.0),  class = b, coef = prop_hull),
-      prior(normal(-168.33, 100.0),class = b, coef = prop_hull2),
-      prior(exponential(1),       class = sd),
-      prior(exponential(1),       class = sigma)
-    ),
-    chains = 4, iter = 20000,
-    family = gaussian(),
-    data = fluxes_long_perbrom
-  )
-
-
-
-# Compare with LOO
-brms::loo(predflow_model_vol, predlow_nlmodel_vol)
-
-
-
-
