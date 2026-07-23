@@ -149,9 +149,7 @@ taxon_bwg <-
   
 # Compute food webs
 foodwebs <- 
-  make_food_webs(taxon_names = taxon_bwg,
-                 basal = basal,
-                 binary_matrices = site_matrices,
+  make_food_webs(binary_matrices = site_matrices,
                  biomass_data = biomass_clean)
 
 # Get temperature data ----------------------------------------------------

@@ -203,7 +203,7 @@ totalflow_model_vol_linear <-
 totalflow_model_dist_linear <-
   brms::brm(log(totalflow_Jy) ~
               scale(avg_func_dist, center = TRUE, scale = FALSE) +
-              (1 + scale(log(prop_hull),
+              (1 + scale(avg_func_dist,
                          center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
             family = gaussian(),
@@ -225,7 +225,7 @@ predflow_model_vol_linear <-
 predflow_model_dist_linear <-
   brms::brm(log(predflow_Jy + 0.01) ~
               scale(avg_func_dist, center = TRUE, scale = FALSE) +
-              (1 + scale(log(prop_hull),
+              (1 + scale(avg_func_dist,
                          center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
             family = gaussian(),
@@ -247,7 +247,7 @@ gini_model_vol_linear <-
 gini_model_dist_linear <-
   brms::brm(gini ~
               scale(log(avg_func_dist), center = TRUE, scale = FALSE) +
-              (1 + scale(log(prop_hull),
+              (1 + scale(log(avg_func_dist),
                          center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
             family = gaussian(),

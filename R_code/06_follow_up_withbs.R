@@ -32,7 +32,7 @@ fluxes_long_perbrom <-
   readr::read_csv(here::here("data",
                              "fluxes_long_perbrom.csv"))
 
-# Recompute trait PCA without BS traits -----------------------------------
+# Recompute trait PCA with BS traits --------------------------------------
 # Get traits
 fw_traits <-
   ## Get fw data
@@ -46,8 +46,8 @@ fw_traits <-
 # Rank trait values
 ranked_traits <-
   fw_traits %>%
-  ## Keep only bwg name and traits that do not have to do with feeding mode, dropping BS
-  dplyr::select(dplyr::matches("AS|DM|RE|RF|LO|RM|MD|CP|BF",
+  ## Keep only bwg name and traits that do not have to do with feeding mode, keeping BS
+  dplyr::select(dplyr::matches("AS|BS|DM|RE|RF|LO|RM|MD|CP|BF",
                                ignore.case = F)) %>%
   ## Rank each column according to values
   dplyr::mutate(across(.cols = everything(),
@@ -55,56 +55,60 @@ ranked_traits <-
                                     na.last = "keep")))
 
 # Run PCA
-RES_pca_nobs <-
+RES_pca_withbs <-
   SYNCSA::pca(ranked_traits)
 
-# # Visualise the PCA axes --------------------------------------------------
-# # Quick look at the variables
-# RES_pca_nobs$eigenvalues
-# head(RES_pca_nobs$individuals)
-# RES_pca_nobs$variables
+# Visualise the PCA axes --------------------------------------------------
+# Quick look at the variables
+RES_pca_withbs$eigenvalues
+head(RES_pca_withbs$individuals)
+RES_pca_withbs$variables
+# Plot the first four axes (points and arrows) in a grid, as in script 04
+plot_grid_withbs <-
+  cowplot::plot_grid(plotlist = c(plz_plot_my_pca(PCA = RES_pca_withbs,
+                                                  axes = c(1,2),
+                                                  type = "points",
+                                                  dats = fw_traits),
+                                  plz_plot_my_pca(PCA = RES_pca_withbs,
+                                                  axes = c(1,2),
+                                                  type = "arrows",
+                                                  dats = fw_traits),
+                                  plz_plot_my_pca(PCA = RES_pca_withbs,
+                                                  axes = c(1,3),
+                                                  type = "points",
+                                                  dats = fw_traits),
+                                  plz_plot_my_pca(PCA = RES_pca_withbs,
+                                                  axes = c(1,3),
+                                                  type = "arrows",
+                                                  dats = fw_traits),
+                                  plz_plot_my_pca(PCA = RES_pca_withbs,
+                                                  axes = c(1,4),
+                                                  type = "points",
+                                                  dats = fw_traits),
+                                  plz_plot_my_pca(PCA = RES_pca_withbs,
+                                                  axes = c(1,4),
+                                                  type = "arrows",
+                                                  dats = fw_traits)),
+                     ncol = 2,
+                     nrow = 3,
+                     rel_widths = c (1.2, 1))
+# Display the grid
+plot_grid_withbs
+# Save the grid
+## PDF
+ggplot2::ggsave(here::here("plots",
+                           "figs2.pdf"),
+                plot_grid_withbs,
+                width = 13,
+                height = 13.5)
+## PNG
+ggplot2::ggsave(here::here("plots",
+                           "figs2.png"),
+                plot_grid_withbs,
+                width = 13,
+                height = 13.5)
 
-# # Plot the first four axes (points and arrows) in a grid, as in script 04
-# plot_grid_nobs <-
-#   cowplot::plot_grid(plotlist = c(plz_plot_my_pca(PCA = RES_pca_nobs,
-#                                                   axes = c(1,2),
-#                                                   type = "points",
-#                                                   dats = fw_traits),
-#                                   plz_plot_my_pca(PCA = RES_pca_nobs,
-#                                                   axes = c(1,2),
-#                                                   type = "arrows",
-#                                                   dats = fw_traits),
-#                                   plz_plot_my_pca(PCA = RES_pca_nobs,
-#                                                   axes = c(1,3),
-#                                                   type = "points",
-#                                                   dats = fw_traits),
-#                                   plz_plot_my_pca(PCA = RES_pca_nobs,
-#                                                   axes = c(1,3),
-#                                                   type = "arrows",
-#                                                   dats = fw_traits),
-#                                   plz_plot_my_pca(PCA = RES_pca_nobs,
-#                                                   axes = c(1,4),
-#                                                   type = "points",
-#                                                   dats = fw_traits),
-#                                   plz_plot_my_pca(PCA = RES_pca_nobs,
-#                                                   axes = c(1,4),
-#                                                   type = "arrows",
-#                                                   dats = fw_traits)),
-#                      ncol = 2,
-#                      nrow = 3,
-#                      rel_widths = c (1.2, 1))
-
-# # Display the grid
-# plot_grid_nobs
-
-# # Save the grid
-# ggplot2::ggsave(here::here("plots",
-#                            "figs2.pdf"),
-#                 plot_grid_nobs,
-#                 width = 13,
-#                 height = 13.5)
-
-# Prepare data with no-BS axes --------------------------------------------
+# Prepare data with with-BS axes ------------------------------------------
 # Basal species
 basal <-
   c("algae","FPOM","CPOM","microorganisms",
@@ -126,7 +130,7 @@ species_list <-
 
 # Get PCA scores for all species, keeping first 4 axes
 axes <-
-  RES_pca_nobs$individuals[,1:4] %>%
+  RES_pca_withbs$individuals[,1:4] %>%
   ## Scale for mean zero and standard deviation one
   scale(center = TRUE,
         scale = TRUE) %>%
@@ -222,9 +226,9 @@ hypervolumes <-
   ## Get proportion of overall hull
   dplyr::mutate(prop_hull = hull / overall_volume)
 
-# Combine no-BS axes with the flux data
+# Combine with-BS axes with the flux data
 ## Per consumer
-fluxes_long_percons_nobs <-
+fluxes_long_percons_withbs <-
   fluxes_long_percons %>%
   ## Drop old axes
   dplyr::select(-dplyr::contains("Axis")) %>%
@@ -232,7 +236,7 @@ fluxes_long_percons_nobs <-
                      dplyr::rename(consumer = bwg_name),
                    by = "consumer")
 ## Per pair
-fluxes_long_perpair_nobs <-
+fluxes_long_perpair_withbs <-
   fluxes_long_perpair %>%
   ## Drop old distances
   dplyr::select(-func_dist, -dplyr::contains("dist_axis")) %>%
@@ -241,14 +245,14 @@ fluxes_long_perpair_nobs <-
                                    dplyr::contains("dist_axis")),
                    by = c("consumer", "resource"))
 ## Per bromeliad
-fluxes_long_perbrom_nobs <-
+fluxes_long_perbrom_withbs <-
   fluxes_long_perbrom %>%
   ## Drop old hull and distance
   dplyr::select(-dplyr::any_of(c("hull", "prop_hull", "avg_func_dist"))) %>%
   dplyr::left_join(hypervolumes,
                    by = c("bromeliad_id")) %>%
   ## Add average functional distance
-  dplyr::left_join(fluxes_long_perpair_nobs %>%
+  dplyr::left_join(fluxes_long_perpair_withbs %>%
                      dplyr::select(func_dist, site_code, bromeliad_id) %>%
                      dplyr::group_by(site_code, bromeliad_id) %>%
                      dplyr::summarise(avg_func_dist = mean(func_dist, na.rm = TRUE)),
@@ -256,7 +260,7 @@ fluxes_long_perbrom_nobs <-
 
 # Hypothesis 1 - models at the scale of consumers -------------------------
 # Non-linear model of raw energy flow entering consumer node ~ Axis.1
-consflow_model_axis1_nobs <-
+consflow_model_axis1_withbs <-
   brms::brm(log(flux_raw + 0.001) ~
               scale(Axis.1,
                     scale = FALSE, center = TRUE) +
@@ -268,15 +272,15 @@ consflow_model_axis1_nobs <-
             family = gaussian(),
             control = list(adapt_delta = 0.99,
                            max_treedepth = 15),
-            data = fluxes_long_percons_nobs)
+            data = fluxes_long_percons_withbs)
 ## Check assumptions
-plot(consflow_model_axis1_nobs)
+plot(consflow_model_axis1_withbs)
 ## Look at the effect
-bayestestR::describe_posterior(consflow_model_axis1_nobs)
-performance::r2_bayes(consflow_model_axis1_nobs)
+bayestestR::describe_posterior(consflow_model_axis1_withbs)
+performance::r2_bayes(consflow_model_axis1_withbs)
 
 # Non-linear model of raw energy flow entering consumer node ~ Axis.2
-consflow_model_axis2_nobs <-
+consflow_model_axis2_withbs <-
   brms::brm(log(flux_raw + 0.001) ~
               scale(Axis.2,
                     scale = FALSE, center = TRUE) +
@@ -288,15 +292,15 @@ consflow_model_axis2_nobs <-
             family = gaussian(),
             control = list(adapt_delta = 0.99,
                            max_treedepth = 15),
-            data = fluxes_long_percons_nobs)
+            data = fluxes_long_percons_withbs)
 ## Check assumptions
-plot(consflow_model_axis2_nobs)
+plot(consflow_model_axis2_withbs)
 ## Look at the effect
-bayestestR::describe_posterior(consflow_model_axis2_nobs)
-performance::r2_bayes(consflow_model_axis2_nobs)
+bayestestR::describe_posterior(consflow_model_axis2_withbs)
+performance::r2_bayes(consflow_model_axis2_withbs)
 
 # Non-linear model of raw energy flow entering consumer node ~ Axis.3
-consflow_model_axis3_nobs <-
+consflow_model_axis3_withbs <-
   brms::brm(log(flux_raw + 0.001) ~
               scale(Axis.3,
                     scale = FALSE, center = TRUE) +
@@ -308,15 +312,15 @@ consflow_model_axis3_nobs <-
             family = gaussian(),
             control = list(adapt_delta = 0.99,
                            max_treedepth = 15),
-            data = fluxes_long_percons_nobs)
+            data = fluxes_long_percons_withbs)
 ## Check assumptions
-plot(consflow_model_axis3_nobs)
+plot(consflow_model_axis3_withbs)
 ## Look at the effect
-bayestestR::describe_posterior(consflow_model_axis3_nobs)
-performance::r2_bayes(consflow_model_axis3_nobs)
+bayestestR::describe_posterior(consflow_model_axis3_withbs)
+performance::r2_bayes(consflow_model_axis3_withbs)
 
 # Non-linear model of raw energy flow entering consumer node ~ Axis.4
-consflow_model_axis4_nobs <-
+consflow_model_axis4_withbs <-
   brms::brm(log(flux_raw + 0.001) ~
               scale(Axis.4,
                     scale = FALSE, center = TRUE) +
@@ -328,30 +332,30 @@ consflow_model_axis4_nobs <-
             family = gaussian(),
             control = list(adapt_delta = 0.99,
                            max_treedepth = 15),
-            data = fluxes_long_percons_nobs)
+            data = fluxes_long_percons_withbs)
 ## Check assumptions
-plot(consflow_model_axis4_nobs)
+plot(consflow_model_axis4_withbs)
 ## Look at the effect
-bayestestR::describe_posterior(consflow_model_axis4_nobs)
-performance::r2_bayes(consflow_model_axis4_nobs)
+bayestestR::describe_posterior(consflow_model_axis4_withbs)
+performance::r2_bayes(consflow_model_axis4_withbs)
 
 # Save models
-readr::write_rds(x = consflow_model_axis1_nobs,
+readr::write_rds(x = consflow_model_axis1_withbs,
                  file = here::here("data",
-                                   "consflow_model_axis1_nobs.RDS"))
-readr::write_rds(x = consflow_model_axis2_nobs,
+                                   "consflow_model_axis1_withbs.RDS"))
+readr::write_rds(x = consflow_model_axis2_withbs,
                  file = here::here("data",
-                                   "consflow_model_axis2_nobs.RDS"))
-readr::write_rds(x = consflow_model_axis3_nobs,
+                                   "consflow_model_axis2_withbs.RDS"))
+readr::write_rds(x = consflow_model_axis3_withbs,
                  file = here::here("data",
-                                   "consflow_model_axis3_nobs.RDS"))
-readr::write_rds(x = consflow_model_axis4_nobs,
+                                   "consflow_model_axis3_withbs.RDS"))
+readr::write_rds(x = consflow_model_axis4_withbs,
                  file = here::here("data",
-                                   "consflow_model_axis4_nobs.RDS"))
+                                   "consflow_model_axis4_withbs.RDS"))
 
 # Hypothesis 2 - more functional dissimilarity in a pair means less energy flow ----
 # Overall functional distance
-pairflow_model_overall_nobs <-
+pairflow_model_overall_withbs <-
   brms::brm(log(flux_raw_pair + 0.001) ~
               scale(func_dist,
                     center = TRUE, scale = FALSE) +
@@ -363,15 +367,15 @@ pairflow_model_overall_nobs <-
             family = gaussian(),
             control = list(adapt_delta = 0.95,
                            max_treedepth = 15),
-            data = fluxes_long_perpair_nobs)
+            data = fluxes_long_perpair_withbs)
 ## Check assumptions
-plot(pairflow_model_overall_nobs)
+plot(pairflow_model_overall_withbs)
 ## Look at the effect
-bayestestR::describe_posterior(pairflow_model_overall_nobs)
-performance::r2_bayes(pairflow_model_overall_nobs)
+bayestestR::describe_posterior(pairflow_model_overall_withbs)
+performance::r2_bayes(pairflow_model_overall_withbs)
 
 # Distance for Axis 1
-pairflow_model_axis1_nobs <-
+pairflow_model_axis1_withbs <-
   brms::brm(log(flux_raw_pair + 0.001) ~
               scale(dist_axis1,
                     center = TRUE, scale = FALSE) +
@@ -383,15 +387,15 @@ pairflow_model_axis1_nobs <-
             family = gaussian(),
             control = list(adapt_delta = 0.95,
                            max_treedepth = 15),
-            data = fluxes_long_perpair_nobs)
+            data = fluxes_long_perpair_withbs)
 ## Check assumptions
-plot(pairflow_model_axis1_nobs)
+plot(pairflow_model_axis1_withbs)
 ## Look at the effect
-bayestestR::describe_posterior(pairflow_model_axis1_nobs)
-performance::r2_bayes(pairflow_model_axis1_nobs)
+bayestestR::describe_posterior(pairflow_model_axis1_withbs)
+performance::r2_bayes(pairflow_model_axis1_withbs)
 
 # Distance for Axis 2
-pairflow_model_axis2_nobs <-
+pairflow_model_axis2_withbs <-
   brms::brm(log(flux_raw_pair + 0.001) ~
               scale(dist_axis2,
                     center = TRUE, scale = FALSE) +
@@ -403,15 +407,15 @@ pairflow_model_axis2_nobs <-
             family = gaussian(),
             control = list(adapt_delta = 0.95,
                            max_treedepth = 15),
-            data = fluxes_long_perpair_nobs)
+            data = fluxes_long_perpair_withbs)
 ## Check assumptions
-plot(pairflow_model_axis2_nobs)
+plot(pairflow_model_axis2_withbs)
 ## Look at the effect
-bayestestR::describe_posterior(pairflow_model_axis2_nobs)
-performance::r2_bayes(pairflow_model_axis2_nobs)
+bayestestR::describe_posterior(pairflow_model_axis2_withbs)
+performance::r2_bayes(pairflow_model_axis2_withbs)
 
 # Distance for Axis 3
-pairflow_model_axis3_nobs <-
+pairflow_model_axis3_withbs <-
   brms::brm(log(flux_raw_pair + 0.001) ~
               scale(dist_axis3,
                     center = TRUE, scale = FALSE) +
@@ -423,15 +427,15 @@ pairflow_model_axis3_nobs <-
             family = gaussian(),
             control = list(adapt_delta = 0.95,
                            max_treedepth = 15),
-            data = fluxes_long_perpair_nobs)
+            data = fluxes_long_perpair_withbs)
 ## Check assumptions
-plot(pairflow_model_axis3_nobs)
+plot(pairflow_model_axis3_withbs)
 ## Look at the effect
-bayestestR::describe_posterior(pairflow_model_axis3_nobs)
-performance::r2_bayes(pairflow_model_axis3_nobs)
+bayestestR::describe_posterior(pairflow_model_axis3_withbs)
+performance::r2_bayes(pairflow_model_axis3_withbs)
 
 # Distance for Axis 4
-pairflow_model_axis4_nobs <-
+pairflow_model_axis4_withbs <-
   brms::brm(log(flux_raw_pair + 0.001) ~
               scale(dist_axis4,
                     center = TRUE, scale = FALSE) +
@@ -443,34 +447,34 @@ pairflow_model_axis4_nobs <-
             family = gaussian(),
             control = list(adapt_delta = 0.95,
                            max_treedepth = 15),
-            data = fluxes_long_perpair_nobs)
+            data = fluxes_long_perpair_withbs)
 ## Check assumptions
-plot(pairflow_model_axis4_nobs)
+plot(pairflow_model_axis4_withbs)
 ## Look at the effect
-bayestestR::describe_posterior(pairflow_model_axis4_nobs)
-performance::r2_bayes(pairflow_model_axis4_nobs)
+bayestestR::describe_posterior(pairflow_model_axis4_withbs)
+performance::r2_bayes(pairflow_model_axis4_withbs)
 
 # Save models
-readr::write_rds(x = pairflow_model_overall_nobs,
+readr::write_rds(x = pairflow_model_overall_withbs,
                  file = here::here("data",
-                                   "pairflow_model_overall_nobs.RDS"))
-readr::write_rds(x = pairflow_model_axis1_nobs,
+                                   "pairflow_model_overall_withbs.RDS"))
+readr::write_rds(x = pairflow_model_axis1_withbs,
                  file = here::here("data",
-                                   "pairflow_model_axis1_nobs.RDS"))
-readr::write_rds(x = pairflow_model_axis2_nobs,
+                                   "pairflow_model_axis1_withbs.RDS"))
+readr::write_rds(x = pairflow_model_axis2_withbs,
                  file = here::here("data",
-                                   "pairflow_model_axis2_nobs.RDS"))
-readr::write_rds(x = pairflow_model_axis3_nobs,
+                                   "pairflow_model_axis2_withbs.RDS"))
+readr::write_rds(x = pairflow_model_axis3_withbs,
                  file = here::here("data",
-                                   "pairflow_model_axis3_nobs.RDS"))
-readr::write_rds(x = pairflow_model_axis4_nobs,
+                                   "pairflow_model_axis3_withbs.RDS"))
+readr::write_rds(x = pairflow_model_axis4_withbs,
                  file = here::here("data",
-                                   "pairflow_model_axis4_nobs.RDS"))
+                                   "pairflow_model_axis4_withbs.RDS"))
 
 # Hypothesis 3 - more and less imbalanced flow if less functional distances in whole food web ----
 # Total flow
 ## Volume
-totalflow_model_vol_nobs <-
+totalflow_model_vol_withbs <-
   brms::brm(log(totalflow_Jy) ~
               scale(log(prop_hull),
                     center = TRUE, scale = FALSE) +
@@ -481,34 +485,34 @@ totalflow_model_vol_nobs <-
             family = gaussian(),
             control = list(adapt_delta = 0.95,
                            max_treedepth = 15),
-            data = fluxes_long_perbrom_nobs)
+            data = fluxes_long_perbrom_withbs)
 ## Check assumptions
-plot(totalflow_model_vol_nobs)
+plot(totalflow_model_vol_withbs)
 ## Look at the effect
-bayestestR::describe_posterior(totalflow_model_vol_nobs)
-performance::r2_bayes(totalflow_model_vol_nobs)
+bayestestR::describe_posterior(totalflow_model_vol_withbs)
+performance::r2_bayes(totalflow_model_vol_withbs)
 ## Distance
-totalflow_model_dist_nobs <-
+totalflow_model_dist_withbs <-
   brms::brm(log(totalflow_Jy) ~
               scale(avg_func_dist,
                     center = TRUE, scale = FALSE) +
               I(scale(avg_func_dist, center = TRUE, scale = FALSE)^2) +
-              (1 + scale(log(prop_hull),
+              (1 + scale(avg_func_dist,
                          center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
             family = gaussian(),
             control = list(adapt_delta = 0.95,
                            max_treedepth = 15),
-            data = fluxes_long_perbrom_nobs)
+            data = fluxes_long_perbrom_withbs)
 ## Check assumptions
-plot(totalflow_model_dist_nobs)
+plot(totalflow_model_dist_withbs)
 ## Look at the effect
-bayestestR::describe_posterior(totalflow_model_dist_nobs)
-performance::r2_bayes(totalflow_model_dist_nobs)
+bayestestR::describe_posterior(totalflow_model_dist_withbs)
+performance::r2_bayes(totalflow_model_dist_withbs)
 
 # Flow to predators
 ## Volume
-predflow_model_vol_nobs <-
+predflow_model_vol_withbs <-
   brms::brm(log(predflow_Jy + 0.01) ~
               scale(log(prop_hull),
                     center = TRUE, scale = FALSE) +
@@ -519,34 +523,34 @@ predflow_model_vol_nobs <-
             family = gaussian(),
             control = list(adapt_delta = 0.95,
                            max_treedepth = 15),
-            data = fluxes_long_perbrom_nobs)
+            data = fluxes_long_perbrom_withbs)
 ## Check assumptions
-plot(predflow_model_vol_nobs)
+plot(predflow_model_vol_withbs)
 ## Look at the effect
-bayestestR::describe_posterior(predflow_model_vol_nobs)
-performance::r2_bayes(predflow_model_vol_nobs)
+bayestestR::describe_posterior(predflow_model_vol_withbs)
+performance::r2_bayes(predflow_model_vol_withbs)
 ## Distance
-predflow_model_dist_nobs <-
+predflow_model_dist_withbs <-
   brms::brm(log(predflow_Jy + 0.01) ~
               scale(avg_func_dist,
                     center = TRUE, scale = FALSE) +
               I(scale(avg_func_dist, center = TRUE, scale = FALSE)^2) +
-              (1 + scale(log(prop_hull),
+              (1 + scale(avg_func_dist,
                          center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
             family = gaussian(),
             control = list(adapt_delta = 0.95,
                            max_treedepth = 15),
-            data = fluxes_long_perbrom_nobs)
+            data = fluxes_long_perbrom_withbs)
 ## Check assumptions
-plot(predflow_model_dist_nobs)
+plot(predflow_model_dist_withbs)
 ## Look at the effect
-bayestestR::describe_posterior(predflow_model_dist_nobs)
-performance::r2_bayes(predflow_model_dist_nobs)
+bayestestR::describe_posterior(predflow_model_dist_withbs)
+performance::r2_bayes(predflow_model_dist_withbs)
 
 # Gini index
 ## Volume
-gini_model_vol_nobs <-
+gini_model_vol_withbs <-
 
   brms::brm(gini ~
               scale(log(prop_hull),
@@ -558,47 +562,47 @@ gini_model_vol_nobs <-
             family = gaussian(),
             control = list(adapt_delta = 0.95,
                            max_treedepth = 15),
-            data = fluxes_long_perbrom_nobs)
+            data = fluxes_long_perbrom_withbs)
 ## Check assumptions
-plot(gini_model_vol_nobs)
+plot(gini_model_vol_withbs)
 ## Look at the effect
-bayestestR::describe_posterior(gini_model_vol_nobs)
-performance::r2_bayes(gini_model_vol_nobs)
+bayestestR::describe_posterior(gini_model_vol_withbs)
+performance::r2_bayes(gini_model_vol_withbs)
 ## Distance
-gini_model_dist_nobs <-
+gini_model_dist_withbs <-
   brms::brm(gini ~
               scale(log(avg_func_dist),
                     center = TRUE, scale = FALSE) +
               I(scale(log(avg_func_dist), center = TRUE, scale = FALSE)^2) +
-              (1 + scale(log(prop_hull),
+              (1 + scale(log(avg_func_dist),
                          center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
             family = gaussian(),
             control = list(adapt_delta = 0.95,
                            max_treedepth = 15),
-            data = fluxes_long_perbrom_nobs)
+            data = fluxes_long_perbrom_withbs)
 ## Check assumptions
-plot(gini_model_dist_nobs)
+plot(gini_model_dist_withbs)
 ## Look at the effect
-bayestestR::describe_posterior(gini_model_dist_nobs)
-performance::r2_bayes(gini_model_dist_nobs)
+bayestestR::describe_posterior(gini_model_dist_withbs)
+performance::r2_bayes(gini_model_dist_withbs)
 
 # Save models
-readr::write_rds(x = totalflow_model_vol_nobs,
+readr::write_rds(x = totalflow_model_vol_withbs,
                  file = here::here("data",
-                                   "totalflow_model_vol_nobs.RDS"))
-readr::write_rds(x = predflow_model_vol_nobs,
+                                   "totalflow_model_vol_withbs.RDS"))
+readr::write_rds(x = predflow_model_vol_withbs,
                  file = here::here("data",
-                                   "predflow_model_vol_nobs.RDS"))
-readr::write_rds(x = gini_model_vol_nobs,
+                                   "predflow_model_vol_withbs.RDS"))
+readr::write_rds(x = gini_model_vol_withbs,
                  file = here::here("data",
-                                   "gini_model_vol_nobs.RDS"))
-readr::write_rds(x = totalflow_model_dist_nobs,
+                                   "gini_model_vol_withbs.RDS"))
+readr::write_rds(x = totalflow_model_dist_withbs,
                  file = here::here("data",
-                                   "totalflow_model_dist_nobs.RDS"))
-readr::write_rds(x = predflow_model_dist_nobs,
+                                   "totalflow_model_dist_withbs.RDS"))
+readr::write_rds(x = predflow_model_dist_withbs,
                  file = here::here("data",
-                                   "predflow_model_dist_nobs.RDS"))
-readr::write_rds(x = gini_model_dist_nobs,
+                                   "predflow_model_dist_withbs.RDS"))
+readr::write_rds(x = gini_model_dist_withbs,
                  file = here::here("data",
-                                   "gini_model_dist_nobs.RDS"))
+                                   "gini_model_dist_withbs.RDS"))

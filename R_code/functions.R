@@ -46,7 +46,7 @@ return(ret)
 
 
 # Make food webs -----------------------------------------------------------
-make_food_webs <- function(taxon_names, basal_species, binary_matrices, biomass_data){
+make_food_webs <- function(binary_matrices, biomass_data){
   ## Mostly written by Eoin O'Gorman
   # This line is really important or character text will be seen as factors, 
   # creating problems in Cheddar
@@ -680,7 +680,7 @@ plot_food_web <- function(bromtoplot,
 
 
 # Labels for plots --------------------------------------------------------
-full_label <- function(var, scale = "none"){
+full_label <- function(var){
   
   
   # First set of hypotheses
@@ -695,7 +695,7 @@ full_label <- function(var, scale = "none"){
       "Pelagicity (PC2 score)"
   if(var == "Axis.3")
     ret <- 
-      "Lack of morphological defense (PC3 score)"
+      "Morphological defense (PC3 score)"
   if(var == "Axis.4")
     ret <- 
       "Complexity of life cycle (PC4 score)"
@@ -712,7 +712,7 @@ full_label <- function(var, scale = "none"){
       "Difference in pelagicity \n(PC2 scores)"
   if(var == "dist_axis3")
     ret <- 
-      "Difference in moprhological defense \n(PC3 scores)"
+      "Difference in morphological defense \n(PC3 scores)"
   if(var == "dist_axis4")
     ret <- 
       "Difference in complexity of life cycle \n(PC4 scores)"
@@ -789,7 +789,7 @@ full_label <- function(var, scale = "none"){
 }
 
 # Basic line plot ---------------------------------------------------------
-basic_line <- function(model, dats, x_var, y_var, index = 1, colour = NA, scale = NA){
+basic_line <- function(model, dats, x_var, y_var, index = 1, scale = NA){
   # Get effect
   model_effect <- 
     brms::conditional_effects(model,
@@ -879,96 +879,79 @@ basic_line <- function(model, dats, x_var, y_var, index = 1, colour = NA, scale 
   
 }
 
-# Get point range to plot -------------------------------------------------
-get_point_range <- function(x_var, model_effect, dats){
-  # Get max
-  range <- 
-    dats %>% 
-    dplyr::select(colnames(model_effect)[1:2]) %>% 
-    dplyr::group_by(pick(2)) %>% 
-    dplyr::summarise(dplyr::across(where(is.numeric),
-                                   list(
-                                     min = ~min(.x) - 0.01,
-                                     max = ~max(.x) + 0.001),
-                                   .names = '{fn}'))
-  
-  # Transform data to NAs if above or below cutoff
-  ret <- 
-    model_effect %>% 
-    dplyr::left_join(range, 
-                     by = colnames(model_effect)[2]) %>% 
-    dplyr::mutate(dplyr::across(c(estimate__, lower__, upper__),
-                                ~ifelse(effect1__ <= min | effect1__ >= max,
-                                        NA, .)))
-  # Return 
-  return(ret)
-  
-  
-  
-  
-  
-  
-  
-}
 # Get title for significant relationships ---------------------------------
-title_sig <- function(sitename, model, index){
-  # In cases where there is no interaction to plot
-  if(index !=3){
-    ## Extract pd and percent in rope
-    pd <- 
-      round(bayestestR::pd(model)$pd[index],
+title_sig <- function(model, index, interaction = FALSE){
+  # Helper - pull the pd and % in ROPE for one parameter, format the label,
+  # and flag whether that parameter clears the significance threshold
+  # (pd greater than 99.9% and less than 5% of the posterior inside the ROPE)
+  summarise_term <- function(param_index){
+    ## Probability of direction, as a percentage
+    pd <-
+      round(bayestestR::pd(model)$pd[param_index],
             digits = 3) * 100
-    rope <- 
-      round(bayestestR::rope(model)$ROPE_Percentage[index],
+    ## Percentage of the posterior falling within the ROPE
+    rope <-
+      round(bayestestR::rope(model)$ROPE_Percentage[param_index],
             digits = 3) * 100
-    ## Depending on if pd and ROPE meet trheshold make text bold or not
-    ret <- 
-      paste0("pd = ", 
-             round(pd,
-                   digits = 3),
-             "%; ",
-             "% rope = ", 
-             round(rope,
-                   digits = 3))
+    ## Return the formatted text and the significance flag together
+    list(text = paste0("pd = ",
+                       round(pd,
+                             digits = 3),
+                       "%; ",
+                       "% rope = ",
+                       round(rope,
+                             digits = 3)),
+         sig = pd > 99.9 & rope < 5)
+  }
 
-  # In cases where we have to plot the interaction
-  } else if(index == 3){
-    ## Initiate string
-    ret <- 
+  # In cases where there is no interaction to plot --------------------------
+  if(isFALSE(interaction)){
+    ## Summarise the single focal term (e.g. the quadratic term at index 3)
+    term <-
+      summarise_term(index)
+    ## Keep the label, and set bold face only if the term is significant
+    ret <-
+      list(label = term$text,
+           fontface = ifelse(term$sig,
+                             "bold",
+                             "plain"))
+
+  # In cases where we have to plot the interaction --------------------------
+  } else {
+    ## Initiate the label string and a running significance flag
+    label <-
       ""
-  
-    ## Two reps of extracting coefficients
-    for(i in c(2,4)){
-      ## Add beginning of string depeding on rep
+    sig <-
+      FALSE
+
+    ## Two reps of extracting coefficients (resource higher, then lower)
+    for(i in c(2, 4)){
+      ## Add beginning of string depending on rep
       if(i == 2)
-        ret <- 
-          paste0(ret, "R. higher: ")
+        label <-
+          paste0(label, "R. higher: ")
       if(i == 4)
-        ret <- 
-          paste0(ret, ";\nR. lower: ")
-      
-      
-      ## Extract pd and percent in rope
-      pd <- 
-        round(bayestestR::pd(model)$pd[i],
-              digits = 3) * 100
-      rope <- 
-        round(bayestestR::rope(model)$ROPE_Percentage[i],
-              digits = 3) * 100
-      ## Store it in expression
-      ret <- paste0(ret,
-                     "pd = ", 
-                     round(pd,
-                           digits = 3),
-                     "%; ",
-                     "% rope = ", 
-                     round(rope,
-                           digits = 3))}}
-  
+        label <-
+          paste0(label, ";\nR. lower: ")
+
+      ## Summarise this arm of the interaction
+      term <-
+        summarise_term(i)
+      ## Append its text, and flag significance if either arm is significant
+      label <-
+        paste0(label, term$text)
+      sig <-
+        sig | term$sig}
+
+    ## Keep the label, and set bold face if either arm is significant
+    ret <-
+      list(label = label,
+           fontface = ifelse(sig,
+                            "bold",
+                            "plain"))}
+
   ## Return
   return(ret)
-  
-  
 }
 
 # Fit the whole suite of models for a single site -------------------------

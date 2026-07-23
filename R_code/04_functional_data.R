@@ -54,10 +54,10 @@ fw_traits <-
 
 # Rank trait values
 ranked_traits <- 
-  fw_traits %>% 
-  ## Keep only bwg name and traits that do not have to do with feeding mode
-  dplyr::select(dplyr::matches("AS|BS|DM|RE|RF|LO|RM|MD|CP|BF",
-                               ignore.case = F)) %>% 
+  fw_traits %>%
+  ## Keep only bwg name and traits that do not have to do with feeding mode and body size
+  dplyr::select(dplyr::matches("AS|DM|RE|RF|LO|RM|MD|CP|BF",
+                               ignore.case = F)) %>%
   ## Rank each column according to values
   dplyr::mutate(across(.cols = everything(),
                        .fns = ~rank(.x,
@@ -105,8 +105,15 @@ plot_grid <-
 
 
 # Save plot
+## PDF
 ggplot2::ggsave(here::here("plots",
                            "figs1.pdf"),
+                plot_grid,
+                width = 13,
+                height = 13.5)
+## PNG
+ggplot2::ggsave(here::here("plots",
+                           "figs1.png"),
                 plot_grid,
                 width = 13,
                 height = 13.5)
@@ -280,8 +287,8 @@ hypervolumes <-
 ## Combine
 fluxes_long_percons <- 
   readr::read_csv(here::here("data",
-                             "fluxes_long_percons.csv")) %>% 
-  dplyr::left_join(axes %>% 
+                             "fluxes_long_percons.csv")) %>%
+  dplyr::left_join(axes %>%
                      ## Rename bwg_name column to join
                      dplyr::rename(consumer = bwg_name),
                    by = c("consumer"))
@@ -292,10 +299,10 @@ readr::write_csv(fluxes_long_percons,
 
 # Per pair
 ## Combine
-fluxes_long_perpair <- 
+fluxes_long_perpair <-
   readr::read_csv(here::here("data",
-                             "fluxes_long_perpair.csv")) %>% 
-  dplyr::left_join(dist_values %>% 
+                             "fluxes_long_perpair.csv")) %>%
+  dplyr::left_join(dist_values %>%
                      dplyr::select(consumer, resource, func_dist = distance, 
                                    dplyr::contains("dist_axis")),
                    by = c("consumer", "resource"))

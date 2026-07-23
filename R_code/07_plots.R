@@ -365,9 +365,17 @@ fig2 <-
                      ncol = 2)
 
 # Save
+## PDF
 ggplot2::ggsave(filename = here::here("plots",
                                       "fig2.pdf"),
                 fig2,
+                height = 8,
+                width = 9)
+## PNG
+ggplot2::ggsave(filename = here::here("plots",
+                                      "fig2.png"),
+                fig2,
+                bg = "white",
                 height = 8,
                 width = 9)
 
@@ -527,111 +535,23 @@ fig3 <-
                      ncol = 2)
 
 # Save
+## PDF
 ggplot2::ggsave(filename = here::here("plots",
                                       "fig3.pdf"),
                 fig3,
+                height = 12,
+                width = 9)
+## PNG
+ggplot2::ggsave(filename = here::here("plots",
+                                      "fig3.png"),
+                fig3,
+                bg = "white",
                 height = 12,
                 width = 9)
 
 # Figure 4 (run script 05)  ------------------------------------------------
 # Fig 4a
 fig4a <- 
-  basic_line(model = totalflow_model_vol, 
-             index = 1,
-             dats = fluxes_long_perbrom, 
-             x_var = "prop_hull",
-             y_var= "totalflow_Jy",
-             scale = "none") +
-  scale_y_continuous(breaks = c(-3,
-                                0,
-                                2.5,
-                                5,
-                                7),
-                     labels = c(0,
-                                1,
-                                10,
-                                100,
-                                1000),
-                     limits = c(-6, 7.2)) +
-  scale_x_continuous(breaks = c(seq(from = -15,
-                                    to = 0,
-                                    by = 3)),
-                     labels = c(expression(paste("10"^{-7})),
-                                expression(paste("10"^{-6})),
-                                expression(paste("10"^{-4})),
-                                0.002,
-                                0.05,
-                                1)) +
-  theme(axis.title.y = element_text(margin = margin(r = 2,  l = 5)),
-        axis.title.x = element_text(margin = margin(t = 15)),
-        axis.title = element_text(size = rel(1.2)),
-        legend.title = element_text(size = rel(1.2)),
-        legend.text = element_text(size = rel(1.2))) 
-
-# Fig 4b
-fig4b <- 
-  basic_line(model = predflow_model_vol, 
-             index = 1,
-             dats = fluxes_long_perbrom %>% 
-               dplyr::mutate(predflow_Jy = predflow_Jy + 0.001), 
-             x_var = "prop_hull",
-             y_var= "predflow_Jy",
-             scale = "none") +
-  scale_y_continuous(breaks = c(-6.9,
-                                -5,
-                                -2.5,
-                                0,
-                                2.5, 
-                                5,
-                                7),
-                     labels = c(0,
-                                0.005,
-                                0.1,
-                                1,
-                                10,
-                                150,
-                                1000),
-                     limits = c(-13, 7.2)) +
-  scale_x_continuous(breaks = c(seq(from = -15,
-                                    to = 0,
-                                    by = 3)),
-                     labels = c(expression(paste("10"^{-7})),
-                                expression(paste("10"^{-6})),
-                                expression(paste("10"^{-4})),
-                                0.002,
-                                0.05,
-                                1)) +
-  theme(axis.title.y = element_text(margin = margin(r = 2,  l = 5)),
-        axis.title.x = element_text(margin = margin(t = 15)),
-        axis.title = element_text(size = rel(1.2)),
-        legend.title = element_text(size = rel(1.2)),
-        legend.text = element_text(size = rel(1.2))) 
-
-# Fig 4c
-fig4c <- 
-  basic_line(model = gini_model_vol, 
-             index = 1,
-             dats = fluxes_long_perbrom, 
-             x_var = "prop_hull",
-             y_var = "gini",
-             scale = "y_original") +
-  scale_x_continuous(breaks = c(seq(from = -15,
-                                    to = 0,
-                                    by = 3)),
-                     labels = c(expression(paste("10"^{-7})),
-                                expression(paste("10"^{-6})),
-                                expression(paste("10"^{-4})),
-                                0.002,
-                                0.05,
-                                1)) +
-  theme(axis.title.y = element_text(margin = margin(r = 2,  l = 5)),
-        axis.title.x = element_text(margin = margin(t = 15)),
-        axis.title = element_text(size = rel(1.2)),
-        legend.title = element_text(size = rel(1.2)),
-        legend.text = element_text(size = rel(1.2))) 
-
-# Fig 4d
-fig4d <- 
   basic_line(model = totalflow_model_dist, 
              index = 1,
              dats = fluxes_long_perbrom, 
@@ -648,14 +568,15 @@ fig4d <-
                                 10,
                                 100,
                                 1000),
-                     limits = c(-3.1, 7.2)) +
+                     limits = c(-3.2, 10)) +
   theme(axis.title.y = element_text(margin = margin(r = 2,  l = 5)),
         axis.title.x = element_text(margin = margin(t = 15)),
         axis.title = element_text(size = rel(1.2)),
         legend.title = element_text(size = rel(1.2)),
         legend.text = element_text(size = rel(1.2))) 
-# Fig 4e
-fig4e <- 
+
+# Fig 4b
+fig4b <- 
   basic_line(model = predflow_model_dist, 
              index = 1,
              dats = fluxes_long_perbrom %>% 
@@ -677,20 +598,117 @@ fig4e <-
                                 10,
                                 150,
                                 1000),
-                     limits = c(-7, 7.2)) +
+                     limits = c(-14, 10)) +
   theme(axis.title.y = element_text(margin = margin(r = 2,  l = 5)),
         axis.title.x = element_text(margin = margin(t = 15)),
         axis.title = element_text(size = rel(1.2)),
         legend.title = element_text(size = rel(1.2)),
         legend.text = element_text(size = rel(1.2))) 
-# Fig 4f
-fig4f <- 
+
+# Fig 4c
+fig4c <- 
   basic_line(model = gini_model_dist, 
              index = 1,
              dats = fluxes_long_perbrom, 
              x_var = "avg_func_dist",
              y_var= "gini",
              scale = "both_original") +
+  theme(axis.title.y = element_text(margin = margin(r = 2,  l = 5)),
+        axis.title.x = element_text(margin = margin(t = 15)),
+        axis.title = element_text(size = rel(1.2)),
+        legend.title = element_text(size = rel(1.2)),
+        legend.text = element_text(size = rel(1.2))) # Fig 4a
+
+# Fig 4d
+fig4d <- 
+  basic_line(model = totalflow_model_vol, 
+             index = 1,
+             dats = fluxes_long_perbrom, 
+             x_var = "prop_hull",
+             y_var= "totalflow_Jy",
+             scale = "none") +
+  scale_y_continuous(breaks = c(-3,
+                                0,
+                                2.5,
+                                5,
+                                7),
+                     labels = c(0,
+                                1,
+                                10,
+                                100,
+                                1000),
+                     limits = c(-3.2, 10)) +
+  scale_x_continuous(breaks = c(seq(from = -15,
+                                    to = 0,
+                                    by = 3)),
+                     labels = c(expression(paste("10"^{-7})),
+                                expression(paste("10"^{-6})),
+                                expression(paste("10"^{-4})),
+                                0.002,
+                                0.05,
+                                1)) +
+  theme(axis.title.y = element_text(margin = margin(r = 2,  l = 5)),
+        axis.title.x = element_text(margin = margin(t = 15)),
+        axis.title = element_text(size = rel(1.2)),
+        legend.title = element_text(size = rel(1.2)),
+        legend.text = element_text(size = rel(1.2))) 
+
+# Fig 4e
+fig4e <- 
+  basic_line(model = predflow_model_vol, 
+             index = 1,
+             dats = fluxes_long_perbrom %>% 
+               dplyr::mutate(predflow_Jy = predflow_Jy + 0.001), 
+             x_var = "prop_hull",
+             y_var= "predflow_Jy",
+             scale = "none") +
+  scale_y_continuous(breaks = c(-6.9,
+                                -5,
+                                -2.5,
+                                0,
+                                2.5, 
+                                5,
+                                7),
+                     labels = c(0,
+                                0.005,
+                                0.1,
+                                1,
+                                10,
+                                150,
+                                1000),
+                     limits = c(-14, 10)) +
+  scale_x_continuous(breaks = c(seq(from = -15,
+                                    to = 0,
+                                    by = 3)),
+                     labels = c(expression(paste("10"^{-7})),
+                                expression(paste("10"^{-6})),
+                                expression(paste("10"^{-4})),
+                                0.002,
+                                0.05,
+                                1)) +
+  theme(axis.title.y = element_text(margin = margin(r = 2,  l = 5)),
+        axis.title.x = element_text(margin = margin(t = 15)),
+        axis.title = element_text(size = rel(1.2)),
+        legend.title = element_text(size = rel(1.2)),
+        legend.text = element_text(size = rel(1.2))) 
+
+# Fig 4f
+fig4f <- 
+  basic_line(model = gini_model_vol, 
+             index = 1,
+             dats = fluxes_long_perbrom, 
+             x_var = "prop_hull",
+             y_var = "gini",
+             scale = "y_original") +
+  scale_x_continuous(breaks = c(seq(from = -15,
+                                    to = 0,
+                                    by = 3)),
+                     labels = c(expression(paste("10"^{-7})),
+                                expression(paste("10"^{-6})),
+                                expression(paste("10"^{-4})),
+                                0.002,
+                                0.05,
+                                1)) +
   theme(axis.title.y = element_text(margin = margin(r = 2,  l = 5)),
         axis.title.x = element_text(margin = margin(t = 15)),
         axis.title = element_text(size = rel(1.2)),
@@ -714,312 +732,18 @@ fig4 <-
                      nrow = 2)
 
 # Save
+## PDF
 ggplot2::ggsave(filename = here::here("plots",
                                       "fig4.pdf"),
                 fig4,
                 height = 10,
                 width = 15)
-
-
-
-# Figures S2 - s10 (run script 04) FIXXXXXXXXXXXXXXXX----------------------------------------------
-# Load site matrices
-site_matrices <- 
-  load_matrices(folder = here::here("data",
-                                    "matrices"),
-                ending = "_PM.txt") 
-
-# Load models
-masterlist_sites <- 
-  readr::read_rds(here::here("data",
-                             "masterlist_sites.RDS"))
-
-# Lists to store plots
-masterlist_siteplots <- 
-  list()
-
-# Make list for x and y labels
-## Xlabs
-xlabs <- 
-  c("cons_P",
-    "CN_dist",
-    "CP_dist",
-    "CNP_dist",
-    "avg_CN_dist",
-    "avg_CP_dist",
-    "avg_CNP_dist",
-    "avg_CN_dist",
-    "avg_CP_dist",
-    "avg_CNP_dist")
-## Ylabs
-ylabs <- 
-  c("flux_raw",
-    "flux_raw_pair",
-    "flux_raw_pair",
-    "flux_raw_pair",
-    "totalflow_Jy",
-    "totalflow_Jy",
-    "totalflow_Jy",
-    "predflow_Jy",
-    "predflow_Jy",
-    "predflow_Jy")
-
-
-# Loop to plot for all sites
-
-for(i in 1:length(masterlist_sites)){
-  ## Extract list
-  sublist <- 
-    masterlist_sites[[i]]
-  
-  ## Temporary list to store plots
-  templist <- 
-    list()
-  
-  ## Sanity check
-  print(i)
-  
-  ## Prep data for plots
-  if(i == 1){
-    dats <- 
-      fluxes_long_percons %>% 
-      dplyr::filter(site == names(site_matrices)[i]) %>% 
-      dplyr::mutate(flux_prop = flux_prop + 1e-3,
-                    flux_raw = flux_raw + 1e-3)
-  } else if(i %in% c(2:4)){
-    dats <- 
-      fluxes_long_perpair %>%
-      dplyr::filter(site == names(site_matrices)[i]) %>%
-      dplyr::mutate(flux_prop_pair = flux_prop_pair + 1e-3,
-                    flux_raw_pair = flux_raw_pair + 1e-3)
-  } else {
-    dats <- 
-      dats <- 
-      fluxes_long_perbrom %>% 
-      dplyr::filter(site == names(site_matrices)[i])
-  }
-  
-  
-  ## Loop running thRrough list of models
-  for(j in 1:length(site_matrices)){
-    ### Sanity check
-    print(names(site_matrices)[j])
-    
-    ### Extract model
-    model <- 
-      sublist[[j]]
-    
-    ## Make title 
-    title <- 
-      paste0(names(site_matrices)[j],
-             "; N = ",
-             nrow(model$data))
-    
-    ## Make different rules based on index
-    ### Here we have two relationships in the first model
-    if(i == 1){
-      tempplot <- 
-        list(basic_line(model = model, 
-                   dats = model$data, 
-                   index = 1,
-                   x_var = "cons_CPI_crisp", 
-                   y_var = ylabs[i]) +
-               ggtitle(title) +
-               annotate("text",
-                        x = -Inf, 
-                        y = Inf,
-                        hjust = 0,
-                        vjust = 2,
-                        label = title_sig(sitename = names(site_matrices)[j], 
-                                          model = model, 
-                                          index = 1)) +
-               theme(axis.title.y = element_text(margin = margin(r = 0,  l = 10))),
-             basic_line(model = model, 
-                        index = 2,
-                        dats = model$data, 
-                        x_var = "cons_P", 
-                        y_var = ylabs[i]) +
-               ggtitle(title) +
-               annotate("text",
-                        x = -Inf, 
-                        y = Inf,
-                        hjust = 0,
-                        vjust = 2,
-                        label = title_sig(sitename = names(site_matrices)[j], 
-                                          model = model, 
-                                          index = 2)) +
-               theme(axis.title.y = element_text(margin = margin(r = 0,  l = 10))))
-    } else 
-      ### Here we have the interaction
-      if(i %in% c(2:3)){
-        tempplot <- 
-          basic_line(model = model, 
-                     dats = model$data, 
-                     index = 3,
-                     colour = paste0("lower_cons_",
-                                     stringr::str_replace(string = xlabs[i],
-                                                   pattern = "_dist",
-                                                   replacement = "")),
-                     x_var = xlabs[i],
-                     y_var = ylabs[i],
-                     scale = "none") +
-          ggtitle(title) + 
-          theme(axis.title.y = element_text(margin = margin(r = 0,  l = 10),
-                                            size = rel(0.9)),
-                legend.position = "none")
-        
-      } else{
-        ### Here we are all good
-        #### Make plot
-        tempplot <- 
-          basic_line(model = model, 
-                     dats = model$data,
-                     index = 1,
-                     x_var = xlabs[i], 
-                     y_var = ylabs[i],
-                     scale = "none") +
-          ggtitle(title) + 
-          annotate("text",
-                   x = -Inf, 
-                   y = Inf,
-                   hjust = 0,
-                   vjust = 2, 
-                   label = title_sig(sitename = names(site_matrices)[j], 
-                                     model = model, 
-                                     index = 1)) +
-          theme(axis.title.y = element_text(margin = margin(r = 0,  l = 15),
-                                            size = rel(0.8)))
-
-      }
-  
-    ## Add to list
-    templist[[length(templist) + 1]] <- 
-      tempplot
-    
-  }
-  
-  ## Add to list
-  masterlist_siteplots[[length(masterlist_siteplots) + 1]] <- 
-    templist
-  
-}
-
-# Save plots
-## fluxraw vs cpi
-plot_grid <- 
-  cowplot::plot_grid(plotlist = masterlist_siteplots[[1]] %>% 
-                       purrr::map(1),
-                     nrow = 6,
-                     ncol = 5) 
-ggplot2::ggsave(plot_grid,
-                height = 15,
-                width = 15,
-                filename = here::here("plots",
-                                      "figs1.pdf")) 
-## fluxraw vs p
-plot_grid <- 
-  cowplot::plot_grid(plotlist = masterlist_siteplots[[1]] %>% 
-                       purrr::map(2),
-                     nrow = 6,
-                     ncol = 5)
-ggplot2::ggsave(plot_grid,
-                height = 15,
-                width = 15,
-                filename = here::here("plots",
-                                      "figs2.pdf"))
-## fluxraw vs cndist
-plot_grid <- 
-  cowplot::plot_grid(plotlist = masterlist_siteplots[[2]],
-                     nrow = 6,
-                     ncol = 5)
-ggplot2::ggsave(plot_grid,
-                height = 15,
-                width = 15,
-                filename = here::here("plots",
-                                      "figs3.pdf"))
-## fluxraw vs cpdist
-plot_grid <- 
-  cowplot::plot_grid(plotlist = masterlist_siteplots[[3]],
-                     nrow = 6,
-                     ncol = 5)
-ggplot2::ggsave(plot_grid,
-                height = 15,
-                width = 15,
-                filename = here::here("plots",
-                                      "figs4.pdf"))
-## fluxraw vs cnpdist
-plot_grid <- 
-  cowplot::plot_grid(plotlist = masterlist_siteplots[[4]],
-                     nrow = 6,
-                     ncol = 5)
-ggplot2::ggsave(plot_grid,
-                height = 15,
-                width = 15,
-                filename = here::here("plots",
-                                      "figs5.pdf"))
-## totalflow vs cn dist
-plot_grid <- 
-  cowplot::plot_grid(plotlist = masterlist_siteplots[[5]],
-                     nrow = 6,
-                     ncol = 5)
-ggplot2::ggsave(plot_grid,
-                height = 15,
-                width = 15,
-                filename = here::here("plots",
-                                      "figs6.pdf"))
-## totalflow vs cp dist
-plot_grid <- 
-  cowplot::plot_grid(plotlist = masterlist_siteplots[[6]],
-                     nrow = 6,
-                     ncol = 5)
-ggplot2::ggsave(plot_grid,
-                height = 15,
-                width = 15,
-                filename = here::here("plots",
-                                      "figs7.pdf"))
-## totalflow vs cnp dist
-plot_grid <- 
-  cowplot::plot_grid(plotlist = masterlist_siteplots[[7]],
-                     nrow = 6,
-                     ncol = 5)
-ggplot2::ggsave(plot_grid,
-                height = 15,
-                width = 15,
-                filename = here::here("plots",
-                                      "figs8.pdf"))
-## pred flow vs cn dist
-plot_grid <- 
-  cowplot::plot_grid(plotlist = masterlist_siteplots[[8]],
-                     nrow = 6,
-                     ncol = 5,
-                     align = "hv")
-ggplot2::ggsave(plot_grid,
-                height = 15,
-                width = 15,
-                filename = here::here("plots",
-                                      "figs9.pdf"))
-## pred flow vs cp dist
-plot_grid <- 
-  cowplot::plot_grid(plotlist = masterlist_siteplots[[9]],
-                     nrow = 6,
-                     ncol = 5)
-ggplot2::ggsave(plot_grid,
-                height = 15,
-                width = 15,
-                filename = here::here("plots",
-                                      "figs10.pdf"))
-## pred flow vs cnp dist
-plot_grid <- 
-  cowplot::plot_grid(plotlist = masterlist_siteplots[[10]],
-                     nrow = 6,
-                     ncol = 5)
-ggplot2::ggsave(plot_grid,
-                height = 15,
-                width = 15,
-                filename = here::here("plots",
-                                      "figs11.pdf"))
-
-
-
+## PNG
+ggplot2::ggsave(filename = here::here("plots",
+                                      "fig4.png"),
+                fig4,
+                bg = "white",
+                height = 10,
+                width = 15)
 
 

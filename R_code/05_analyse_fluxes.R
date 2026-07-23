@@ -27,31 +27,31 @@ fluxes_long_perbrom <-
 
 # Load models from the cloud ----------------------------------------------
 # List of models
-# model_list <- 
-#   c(
-#     "consflow_model_axis1",
-#     "consflow_model_axis2",
-#     "consflow_model_axis3",
-#     "consflow_model_axis4",
-#     "pairflow_model_overall",
-#     "pairflow_model_axis1",
-#     "pairflow_model_axis2",
-#     "pairflow_model_axis3",
-#     "pairflow_model_axis4",
-#     "totalflow_model_vol",
-#     "predflow_model_vol",
-#     "gini_model_vol",
-#     "totalflow_model_dist",
-#     "predflow_model_dist",
-#     "gini_model_dist"
-#     )
+ model_list <- 
+   c(
+     "consflow_model_axis1",
+     "consflow_model_axis2",
+     "consflow_model_axis3",
+     "consflow_model_axis4",
+     "pairflow_model_overall",
+     "pairflow_model_axis1",
+     "pairflow_model_axis2",
+     "pairflow_model_axis3",
+     "pairflow_model_axis4",
+     "totalflow_model_vol",
+     "predflow_model_vol",
+     "gini_model_vol",
+     "totalflow_model_dist",
+     "predflow_model_dist",
+     "gini_model_dist"
+     )
 
 # #  Check if model present in environment, and if not load it
-# for (model in model_list) {
-#   if (!exists(model)) {
-#     assign(model, 
-#            readr::read_rds(here::here("data",
-#                                        paste0(model, ".RDS"))))}}
+for (model in model_list) {
+  if (!exists(model)) {
+    assign(model, 
+           readr::read_rds(here::here("data",
+                                      paste0(model, ".RDS"))))}}
 
 
 # Hypothesis 1 - models at the scale of consumers ------------------------------------------------------------
@@ -302,7 +302,7 @@ totalflow_model_dist <-
               scale(avg_func_dist,
                     center = TRUE, scale = FALSE) +
             I(scale(avg_func_dist, center = TRUE, scale = FALSE)^2) +
-            (1 + scale(log(prop_hull),
+            (1 + scale(avg_func_dist,
                       center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
             family = gaussian(),      
@@ -340,7 +340,7 @@ predflow_model_dist <-
               scale(avg_func_dist,
                     center = TRUE, scale = FALSE) +
               I(scale(avg_func_dist, center = TRUE, scale = FALSE)^2) +
-              (1 + scale(log(prop_hull),
+              (1 + scale(avg_func_dist,
                          center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
             family = gaussian(),      
@@ -378,7 +378,7 @@ gini_model_dist <-
               scale(log(avg_func_dist),
                     center = TRUE, scale = FALSE) +
               I(scale(log(avg_func_dist), center = TRUE, scale = FALSE)^2) +
-              (1 + scale(log(prop_hull),
+              (1 + scale(log(avg_func_dist),
                          center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
             family = gaussian(),      

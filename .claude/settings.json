@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xxd)",
+      "Bash(ls -la \"~\\\\$\"*)",
+      "Bash(ls -la .~*)",
+      "Bash(python -c ' *)",
+      "Bash(cd \"c:/Users/pagro/OneDrive - McGill University/Projects/enflows/data\" && cp Pierre_energy_flow_MS_SI.docx Pierre_energy_flow_MS_SI.backup.docx && echo \"backup created\")",
+      "Bash(python _fill_si.py)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\pagro\\OneDrive - McGill University\\Projects\\enflows\\data"
+    ]
+  }
+}
