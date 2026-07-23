@@ -97,23 +97,23 @@ plot_spec <-
   tibble::tribble(
     ~position, ~grain,      ~x_var,          ~y_var,          ~scale,          ~y_offset, ~figname,
     # Hypothesis 1 - raw flow entering a consumer node ~ each PC axis
-    1L,        "percons",   "Axis.1",        "flux_raw",      "x_scale",       0.001,     "figs3",
-    2L,        "percons",   "Axis.2",        "flux_raw",      "x_scale",       0.001,     "figs4",
-    3L,        "percons",   "Axis.3",        "flux_raw",      "x_scale",       0.001,     "figs5",
-    4L,        "percons",   "Axis.4",        "flux_raw",      "x_scale",       0.001,     "figs6",
+    1L,        "percons",   "Axis.1",        "flux_raw",      "x_scale",       0.001,     "figs2",
+    2L,        "percons",   "Axis.2",        "flux_raw",      "x_scale",       0.001,     "figs3",
+    3L,        "percons",   "Axis.3",        "flux_raw",      "x_scale",       0.001,     "figs4",
+    4L,        "percons",   "Axis.4",        "flux_raw",      "x_scale",       0.001,     "figs5",
     # Hypothesis 2 - raw flow in a consumer-resource pair ~ functional distance
-    5L,        "perpair",   "func_dist",     "flux_raw_pair", "x_scale",       0.001,     "figs7",
-    6L,        "perpair",   "dist_axis1",    "flux_raw_pair", "x_scale",       0.001,     "figs8",
-    7L,        "perpair",   "dist_axis2",    "flux_raw_pair", "x_scale",       0.001,     "figs9",
-    8L,        "perpair",   "dist_axis3",    "flux_raw_pair", "x_scale",       0.001,     "figs10",
-    9L,        "perpair",   "dist_axis4",    "flux_raw_pair", "x_scale",       0.001,     "figs11",
+    5L,        "perpair",   "func_dist",     "flux_raw_pair", "x_scale",       0.001,     "figs6",
+    6L,        "perpair",   "dist_axis1",    "flux_raw_pair", "x_scale",       0.001,     "figs7",
+    7L,        "perpair",   "dist_axis2",    "flux_raw_pair", "x_scale",       0.001,     "figs8",
+    8L,        "perpair",   "dist_axis3",    "flux_raw_pair", "x_scale",       0.001,     "figs9",
+    9L,        "perpair",   "dist_axis4",    "flux_raw_pair", "x_scale",       0.001,     "figs10",
     # Hypothesis 3 - whole-web flow ~ functional volume and distance
-    10L,       "perbrom",   "prop_hull",     "totalflow_Jy",  "none",          0,         "figs12",
-    11L,       "perbrom",   "avg_func_dist", "totalflow_Jy",  "x_scale",       0,         "figs13",
-    12L,       "perbrom",   "prop_hull",     "predflow_Jy",   "none",          0.01,      "figs14",
-    13L,       "perbrom",   "avg_func_dist", "predflow_Jy",   "x_scale",       0.01,      "figs15",
-    14L,       "perbrom",   "prop_hull",     "gini",          "y_original",    0,         "figs16",
-    15L,       "perbrom",   "avg_func_dist", "gini",          "both_original", 0,         "figs17")
+    10L,       "perbrom",   "prop_hull",     "totalflow_Jy",  "none",          0,         "figs11",
+    11L,       "perbrom",   "avg_func_dist", "totalflow_Jy",  "x_scale",       0,         "figs12",
+    12L,       "perbrom",   "prop_hull",     "predflow_Jy",   "none",          0.01,      "figs13",
+    13L,       "perbrom",   "avg_func_dist", "predflow_Jy",   "x_scale",       0.01,      "figs14",
+    14L,       "perbrom",   "prop_hull",     "gini",          "y_original",    0,         "figs15",
+    15L,       "perbrom",   "avg_func_dist", "gini",          "both_original", 0,         "figs16")
 
 # Bundle the three data grains so each spec row can grab the right one
 grain_data <- 

@@ -40,7 +40,7 @@ species_names <-
   dplyr::select(species_id, bwg_name) %>% 
   dplyr::distinct()
 
-# PCA without functional groups relating to food  -------------------------------------------
+# PCA without functional groups relating to food or body size  -------------------------------------------
 # Get traits
 fw_traits <- 
   ## Get fw data
