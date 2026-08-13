@@ -698,7 +698,7 @@ full_label <- function(var){
       "Morphological defense (PC3 score)"
   if(var == "Axis.4")
     ret <- 
-      "Complexity of life cycle (PC4 score)"
+      "Simplicity of life cycle (PC4 score)"
   
   # Second set of hypotheses
   if(var == "flux_raw_pair")
@@ -715,10 +715,10 @@ full_label <- function(var){
       "Difference in morphological defense \n(PC3 scores)"
   if(var == "dist_axis4")
     ret <- 
-      "Difference in complexity of life cycle \n(PC4 scores)"
+      "Difference in simplicity of life cycle \n(PC4 scores)"
   if(var == "func_dist")
     ret <- 
-      "Euclidean distance in fuctional hypervolume"
+      "Euclidean distance in fuctional \nhypervolume"
   
   
   # Third set of hypotheses
@@ -737,52 +737,6 @@ full_label <- function(var){
   if(var == "avg_func_dist")
     ret <- 
       "Average Euclidean distance \nin fuctional hypervolume"
-  
-  
-  # Misc (DELETE?)
-  if(var == "cons_CPI_defuzzified")
-    ret <- 
-      "Defuzzified CPI value of consumer"
-  
-  if(var == "avg_bodymass_g")
-    ret <- 
-      "Average body mass of consumer (g)"
-  
-  if(var == "n_removed")
-    ret <- 
-      "Number of species removed \nfrom site species pool"
-  
-  if(var == "n_species")
-    ret <- 
-      "Number of species present \nin site species pool"
-  
-  if(var == "rsquared")
-    ret <- 
-      "R squared \nof model"
-  
-  if(var == "pd_int")
-    ret <- 
-      "pd of intercept"
-  
-  if(var == "pd_rel1")
-    ret <- 
-      "pd of first-order \nrelationship"
-  
-  if(var == "pd_rel2")
-    ret <- 
-      "pd of second-order \nrelationship"
-  
-  if(var == "rope_int")
-    ret <- 
-      "% in ROPE of intercept"
-  
-  if(var == "rope_rel1")
-    ret <- 
-      "% in ROPE of first-\norder relationship"
-  
-  if(var == "rope_rel2")
-    ret <- 
-      "% in ROPE of second-\norder relationship"
 
   # Return
   return(ret)

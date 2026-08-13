@@ -113,6 +113,30 @@ brms::loo(consflow_model_axis3,
 brms::loo(consflow_model_axis4, 
           consflow_model_axis4_linear)
 
+# Save models and remove from memorey to make room
+## Save
+readr::write_rds(consflow_model_axis1_linear,
+                 here::here("data",
+                            "consflow_model_axis1_linear.RDS"))
+readr::write_rds(consflow_model_axis2_linear,
+                 here::here("data",
+                            "consflow_model_axis2_linear.RDS"))
+readr::write_rds(consflow_model_axis3_linear,
+                 here::here("data",
+                            "consflow_model_axis3_linear.RDS"))
+readr::write_rds(consflow_model_axis4_linear,
+                 here::here("data",
+                            "consflow_model_axis4_linear.RDS"))
+## Delete
+rm(consflow_model_axis1_linear,
+   consflow_model_axis1,
+   consflow_model_axis2_linear,
+   consflow_model_axis2,
+   consflow_model_axis3_linear,
+   consflow_model_axis3, 
+   consflow_model_axis4_linear,
+   consflow_model_axis4)
+
 # Hypothesis 2 - linear models at the scale of consumer-resource pairs ----
 # Linear flow ~ overall functional distance
 pairflow_model_overall_linear <-
@@ -186,6 +210,35 @@ brms::loo(pairflow_model_axis3,
           pairflow_model_axis3_linear)
 brms::loo(pairflow_model_axis4, 
           pairflow_model_axis4_linear)
+
+# Save models and remove from memorey to make room
+## Save
+readr::write_rds(pairflow_model_overall_linear,
+                 here::here("data",
+                            "pairflow_model_overall_linear.RDS"))
+readr::write_rds(pairflow_model_axis1_linear,
+                 here::here("data",
+                            "pairflow_model_axis1_linear.RDS"))
+readr::write_rds(pairflow_model_axis2_linear,
+                 here::here("data",
+                            "pairflow_model_axis2_linear.RDS"))
+readr::write_rds(pairflow_model_axis3_linear,
+                 here::here("data",
+                            "pairflow_model_axis3_linear.RDS"))
+readr::write_rds(pairflow_model_axis4_linear,
+                 here::here("data",
+                            "pairflow_model_axis4_linear.RDS"))
+## Delete
+rm(pairflow_model_overall_linear, 
+   pairflow_model_overall,
+   pairflow_model_axis1_linear, 
+   pairflow_model_axis1,
+   pairflow_model_axis2_linear, 
+   pairflow_model_axis2,
+   pairflow_model_axis3_linear,
+   pairflow_model_axis3,
+   pairflow_model_axis4_linear
+   pairflow_model_axis4)
 
 # Hypothesis 3 - linear models at the scale of whole food webs --------
 # Total flow - volume
@@ -271,33 +324,6 @@ brms::loo(gini_model_dist,
 
 
 # Save the linear models
-readr::write_rds(consflow_model_axis1_linear,
-                 here::here("data",
-                            "consflow_model_axis1_linear.RDS"))
-readr::write_rds(consflow_model_axis2_linear,
-                 here::here("data",
-                            "consflow_model_axis2_linear.RDS"))
-readr::write_rds(consflow_model_axis3_linear,
-                 here::here("data",
-                            "consflow_model_axis3_linear.RDS"))
-readr::write_rds(consflow_model_axis4_linear,
-                 here::here("data",
-                            "consflow_model_axis4_linear.RDS"))
-readr::write_rds(pairflow_model_overall_linear,
-                 here::here("data",
-                            "pairflow_model_overall_linear.RDS"))
-readr::write_rds(pairflow_model_axis1_linear,
-                 here::here("data",
-                            "pairflow_model_axis1_linear.RDS"))
-readr::write_rds(pairflow_model_axis2_linear,
-                 here::here("data",
-                            "pairflow_model_axis2_linear.RDS"))
-readr::write_rds(pairflow_model_axis3_linear,
-                 here::here("data",
-                            "pairflow_model_axis3_linear.RDS"))
-readr::write_rds(pairflow_model_axis4_linear,
-                 here::here("data",
-                            "pairflow_model_axis4_linear.RDS"))
 readr::write_rds(totalflow_model_vol_linear,
                  here::here("data",
                             "totalflow_model_vol_linear.RDS"))

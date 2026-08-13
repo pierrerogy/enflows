@@ -65,9 +65,6 @@ names(site_matrices) %>%
                                       ".RDS")))
   })
 
-
-
-
 # Figures S2 - S16 ----------------------
 
 # Load the per-site models -------------------------------------------------
@@ -121,7 +118,7 @@ grain_data <-
        perpair = fluxes_long_perpair,
        perbrom = fluxes_long_perbrom)
 
-# Draw and save one supplementary figure per model ------------------------
+# Draw and save one  figure per model ------------------------
 # Walk over the spec, one row (i.e. one model, hence one figure) at a time
 purrr::pwalk(.l = plot_spec,
              .f = function(position, grain, x_var, y_var, scale, y_offset, figname){
@@ -137,9 +134,13 @@ purrr::pwalk(.l = plot_spec,
                  purrr::imap(.x = persite_models,
                              .f = function(site_suite, site){
                                ### Pull this site's model for the focal relationship
-                               model <- 
+                               model <-
                                  site_suite[[position]]
-                               
+
+                               ### Look at the effect
+                               print(bayestestR::describe_posterior(model))
+                               print(performance::r2_bayes(model))
+
                                ### Subset raw data to this site, offset the response
                                ### (matches the fit, avoids log(0))
                                dats_site <-
@@ -147,10 +148,14 @@ purrr::pwalk(.l = plot_spec,
                                  dplyr::filter(site_code == site) %>% 
                                  dplyr::mutate(!!y_var := .data[[y_var]] + y_offset)
                                
-                               ### Quadratic term label + bold flag (pd > 99.9, rope < 5)
+                               ### Quadratic term significance
                                quad_sig <-
                                  title_sig(model = model,
                                            index = 3)
+                               ### Linear term significance
+                               linear_sig <-
+                                 title_sig(model = model,
+                                           index = 2)
 
                                ### Panel: site + N title, quadratic term annotation
                                basic_line(model = model,
@@ -159,6 +164,8 @@ purrr::pwalk(.l = plot_spec,
                                           x_var = x_var,
                                           y_var = y_var,
                                           scale = scale) +
+                                 ## Extra headroom on top so the annotations don't sit on the points
+                                 scale_y_continuous(expand = expansion(mult = c(0.05, 0.2))) +
                                  ggtitle(paste0(site,
                                                 "; N = ",
                                                 nrow(model$data))) +
@@ -166,9 +173,16 @@ purrr::pwalk(.l = plot_spec,
                                           x = -Inf,
                                           y = Inf,
                                           hjust = 0,
-                                          vjust = 2,
+                                          vjust = 1.5,
                                           label = quad_sig$label,
                                           fontface = quad_sig$fontface) +
+                                 annotate(geom = "text",
+                                          x = -Inf,
+                                          y = Inf,
+                                          hjust = 0,
+                                          vjust = 3,
+                                          label = linear_sig$label,
+                                          fontface = linear_sig$fontface) +
                                  theme(axis.title.y = element_text(margin = margin(r = 0,  l = 10),
                                                                    size = rel(0.8)))})
                
@@ -179,9 +193,17 @@ purrr::pwalk(.l = plot_spec,
                                     ncol = 5)
                
                ## Save to the plots folder, one PDF per relationship
+               ### In PDF
                ggplot2::ggsave(plot_grid,
                                height = 15,
                                width = 15,
                                filename = here::here("plots",
                                                      paste0(figname,
-                                                            ".pdf")))})
+                                                            ".pdf")))
+               ### In PNG
+               ggplot2::ggsave(plot_grid,
+                               height = 15,
+                               width = 15,
+                               filename = here::here("plots",
+                                                     paste0(figname,
+                                                            ".png")))})

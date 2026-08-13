@@ -333,7 +333,7 @@ instars_pooled <-
                                  "Culex",
                                  "WyeomyiiaSP2"))) 
 
-# Estimate relationships to one more instar, ie adulthood -----------------
+# Estimate relationships to one more instar, i.e. adulthood -----------------
 ## Get biomass for the different instars
 larvalmass <- 
   ## Read data
