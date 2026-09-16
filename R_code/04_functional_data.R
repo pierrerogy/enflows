@@ -13,7 +13,7 @@
 # Dray, S., … Gorné, L. D. (2016). The global spectrum of plant form
 # and function. Nature, 529, 167–171. https://doi.org/10.1038/nature16489
 # ftp://pbil.univ-lyon1.fr/pub/datasets/dray/Diaz_Nature/
-# And ultimately modified by  which is the most proximate source of the data here
+# And ultimately modified by ref below which is the most proximate source of the data here
 ## Srivastava, D. S. et al. 2023. Geographical variation in the trait‐based assembly 
 ## patterns of multitrophic invertebrate communities. Functional Ecology 37: 73–86.
 
