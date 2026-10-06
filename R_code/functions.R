@@ -728,9 +728,6 @@ full_label <- function(var){
   if(var == "totalflow_Jy")
     ret <- 
       expression(paste("Total energy flow (log J.y"^"-1"*")"))
-  if(var == "predflow_Jy")
-    ret <- 
-      expression(paste("Energy flow to \npredators (log J.y"^"-1"*")"))
   if(var == "prop_hull")
     ret <- 
       expression(paste("Proportion of overall functional \nhull covered by food web"))
@@ -928,7 +925,7 @@ fit_site_suite <- function(site, percons, perpair, perbrom){
 
   # Return the whole suite as a named list
   list(
-    # Hypothesis 1 - raw flow entering a consumer node ~ each PC axis -----
+    # Hypothesis 1 - consumer node -----
     ## Axis 1
     consflow_model_axis1 <- 
       brms::brm(log(flux_raw + 0.001) ~
@@ -978,7 +975,7 @@ fit_site_suite <- function(site, percons, perpair, perbrom){
                                max_treedepth = 15),
                 data = dats_percons),
 
-    # Hypothesis 2 - raw flow in a pair ~ functional distance ------------
+    # Hypothesis 2 - consumer - resource pair ------------
     ## Overall functional distance
     pairflow_model_overall <- 
       brms::brm(log(flux_raw_pair + 0.001) ~
@@ -1040,18 +1037,8 @@ fit_site_suite <- function(site, percons, perpair, perbrom){
                                max_treedepth = 15),
                 data = dats_perpair),
 
-    # Hypothesis 3 - whole-web flow ~ functional volume and distance -----
-    ## Total flow against hull volume
-    totalflow_model_vol <- 
-      brms::brm(log(totalflow_Jy) ~
-                  scale(log(prop_hull),
-                        center = TRUE, scale = FALSE) +
-                  I(scale(log(prop_hull), center = TRUE, scale = FALSE)^2),
-                iter = 20000,
-                family = gaussian(),
-                control = list(adapt_delta = 0.95,
-                               max_treedepth = 15),
-                data = dats_perbrom),
+    # Hypothesis 3 - food web level -----
+
     ## Total flow against average functional distance
     totalflow_model_dist <-
       brms::brm(log(totalflow_Jy) ~
@@ -1063,9 +1050,10 @@ fit_site_suite <- function(site, percons, perpair, perbrom){
                 control = list(adapt_delta = 0.95,
                                max_treedepth = 15),
                 data = dats_perbrom),
-    ## Flow to predators against hull volume
-    predflow_model_vol <-
-      brms::brm(log(predflow_Jy + 0.01) ~
+
+    ## Total flow against hull volume
+    totalflow_model_vol <- 
+      brms::brm(log(totalflow_Jy) ~
                   scale(log(prop_hull),
                         center = TRUE, scale = FALSE) +
                   I(scale(log(prop_hull), center = TRUE, scale = FALSE)^2),
@@ -1074,28 +1062,8 @@ fit_site_suite <- function(site, percons, perpair, perbrom){
                 control = list(adapt_delta = 0.95,
                                max_treedepth = 15),
                 data = dats_perbrom),
-    ## Flow to predators against average functional distance
-    predflow_model_dist <- 
-      brms::brm(log(predflow_Jy + 0.01) ~
-                  scale(avg_func_dist,
-                        center = TRUE, scale = FALSE) +
-                  I(scale(avg_func_dist, center = TRUE, scale = FALSE)^2),
-                iter = 20000,
-                family = gaussian(),
-                control = list(adapt_delta = 0.95,
-                               max_treedepth = 15),
-                data = dats_perbrom),
-    ## Gini index of fluxes against hull volume
-    gini_model_vol <- 
-      brms::brm(gini ~
-                  scale(log(prop_hull),
-                        center = TRUE, scale = FALSE) +
-                  I(scale(log(prop_hull), center = TRUE, scale = FALSE)^2),
-                iter = 20000,
-                family = gaussian(),
-                control = list(adapt_delta = 0.95,
-                               max_treedepth = 15),
-                data = dats_perbrom),
+
+
     ## Gini index of fluxes against average functional distance
     gini_model_dist <- 
       brms::brm(gini ~
@@ -1106,7 +1074,19 @@ fit_site_suite <- function(site, percons, perpair, perbrom){
                 family = gaussian(),
                 control = list(adapt_delta = 0.95,
                                max_treedepth = 15),
-                data = dats_perbrom))
+                data = dats_perbrom)),
+
+    ## Gini index of fluxes against hull volume
+    gini_model_vol <- 
+      brms::brm(gini ~
+                  scale(log(prop_hull),
+                        center = TRUE, scale = FALSE) +
+                  I(scale(log(prop_hull), center = TRUE, scale = FALSE)^2),
+                iter = 20000,
+                family = gaussian(),
+                control = list(adapt_delta = 0.95,
+                               max_treedepth = 15),
+                data = dats_perbrom)
 }
 
 

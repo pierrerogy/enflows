@@ -52,10 +52,8 @@ model_list <-
     "pairflow_model_axis3",
     "pairflow_model_axis4",
     "totalflow_model_vol",
-    "predflow_model_vol",
     "gini_model_vol",
     "totalflow_model_dist",
-    "predflow_model_dist",
     "gini_model_dist"
     )
 
@@ -576,36 +574,6 @@ fig4a <-
         legend.text = element_text(size = rel(1.2))) 
 
 # Fig 4b
-fig4b <- 
-  basic_line(model = predflow_model_dist, 
-             index = 1,
-             dats = fluxes_long_perbrom %>% 
-               dplyr::mutate(predflow_Jy = predflow_Jy + 0.001), 
-             x_var = "avg_func_dist",
-             y_var= "predflow_Jy",
-             scale = "x_scale") +
-  scale_y_continuous(breaks = c(-6.9,
-                                -5,
-                                -2.5,
-                                0,
-                                2.5, 
-                                5,
-                                7),
-                     labels = c(0,
-                                0.005,
-                                0.1,
-                                1,
-                                10,
-                                150,
-                                1000),
-                     limits = c(-14, 10)) +
-  theme(axis.title.y = element_text(margin = margin(r = 2,  l = 5)),
-        axis.title.x = element_text(margin = margin(t = 15)),
-        axis.title = element_text(size = rel(1.2)),
-        legend.title = element_text(size = rel(1.2)),
-        legend.text = element_text(size = rel(1.2))) 
-
-# Fig 4c
 fig4c <- 
   basic_line(model = gini_model_dist, 
              index = 1,
@@ -617,9 +585,9 @@ fig4c <-
         axis.title.x = element_text(margin = margin(t = 15)),
         axis.title = element_text(size = rel(1.2)),
         legend.title = element_text(size = rel(1.2)),
-        legend.text = element_text(size = rel(1.2))) # Fig 4a
+        legend.text = element_text(size = rel(1.2))) 
 
-# Fig 4d
+# Fig 4c
 fig4d <- 
   basic_line(model = totalflow_model_vol, 
              index = 1,
@@ -653,47 +621,8 @@ fig4d <-
         legend.title = element_text(size = rel(1.2)),
         legend.text = element_text(size = rel(1.2))) 
 
-# Fig 4e
-fig4e <- 
-  basic_line(model = predflow_model_vol, 
-             index = 1,
-             dats = fluxes_long_perbrom %>% 
-               dplyr::mutate(predflow_Jy = predflow_Jy + 0.001), 
-             x_var = "prop_hull",
-             y_var= "predflow_Jy",
-             scale = "none") +
-  scale_y_continuous(breaks = c(-6.9,
-                                -5,
-                                -2.5,
-                                0,
-                                2.5, 
-                                5,
-                                7),
-                     labels = c(0,
-                                0.005,
-                                0.1,
-                                1,
-                                10,
-                                150,
-                                1000),
-                     limits = c(-14, 10)) +
-  scale_x_continuous(breaks = c(seq(from = -15,
-                                    to = 0,
-                                    by = 3)),
-                     labels = c(expression(paste("10"^{-7})),
-                                expression(paste("10"^{-6})),
-                                expression(paste("10"^{-4})),
-                                0.002,
-                                0.05,
-                                1)) +
-  theme(axis.title.y = element_text(margin = margin(r = 2,  l = 5)),
-        axis.title.x = element_text(margin = margin(t = 15)),
-        axis.title = element_text(size = rel(1.2)),
-        legend.title = element_text(size = rel(1.2)),
-        legend.text = element_text(size = rel(1.2))) 
-
-# Fig 4f
-fig4f <- 
+# Fig 4d
+fig4d <- 
   basic_line(model = gini_model_vol, 
              index = 1,
              dats = fluxes_long_perbrom, 
@@ -724,11 +653,7 @@ fig4 <-
                                      fig4c +
                                        ggtitle("(c)"), 
                                      fig4d +
-                                       ggtitle("(d)"), 
-                                     fig4e +
-                                       ggtitle("(e)"), 
-                                     fig4f +
-                                       ggtitle("(f)")),
+                                       ggtitle("(d)")),
                      nrow = 2)
 
 # Save
@@ -736,14 +661,14 @@ fig4 <-
 ggplot2::ggsave(filename = here::here("plots",
                                       "fig4.pdf"),
                 fig4,
-                height = 10,
-                width = 15)
+                height = 8,
+                width = 9)
 ## PNG
 ggplot2::ggsave(filename = here::here("plots",
                                       "fig4.png"),
                 fig4,
                 bg = "white",
-                height = 10,
-                width = 15)
+                height = 8,
+                width = 9)
 
 

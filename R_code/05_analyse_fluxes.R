@@ -333,45 +333,7 @@ plot(totalflow_model_vol)
 bayestestR::describe_posterior(totalflow_model_vol)
 performance::r2_bayes(totalflow_model_vol)
 
-# Flow to predators
-## Distance
-predflow_model_dist <- 
-  brms::brm(log(predflow_Jy + 0.01) ~
-              scale(avg_func_dist,
-                    center = TRUE, scale = FALSE) +
-              I(scale(avg_func_dist, center = TRUE, scale = FALSE)^2) +
-              (1 + scale(avg_func_dist,
-                         center = TRUE, scale = FALSE) |site_code),
-            iter = 20000,
-            family = gaussian(),      
-            control = list(adapt_delta = 0.95,
-                           max_treedepth = 15),
-            data = fluxes_long_perbrom)
-## Check assumptions
-plot(predflow_model_dist)
-## Look at the effect
-bayestestR::describe_posterior(predflow_model_dist)
-performance::r2_bayes(predflow_model_dist)
-## Volume
-predflow_model_vol <- 
-  brms::brm(log(predflow_Jy + 0.01) ~
-              scale(log(prop_hull),
-                    center = TRUE, scale = FALSE) +
-            I(scale(log(prop_hull), center = TRUE, scale = FALSE)^2) +
-            (1 + scale(log(prop_hull),
-                      center = TRUE, scale = FALSE) |site_code),
-            iter = 20000,
-            family = gaussian(),      
-            control = list(adapt_delta = 0.95,
-                           max_treedepth = 15),
-            data = fluxes_long_perbrom)
-## Check assumptions
-plot(predflow_model_vol)
-## Look at the effect
-bayestestR::describe_posterior(predflow_model_vol)
-performance::r2_bayes(predflow_model_vol)
-
-# Flow to predators
+# Inequality in flow
 ## Distance
 gini_model_dist <- 
   brms::brm(gini ~
@@ -416,12 +378,6 @@ readr::write_rds(x = totalflow_model_dist,
 readr::write_rds(x = totalflow_model_vol,
                  file = here::here("data",
                                    "totalflow_model_vol.RDS"))
-readr::write_rds(x = predflow_model_dist,
-                 file = here::here("data",
-                                   "predflow_model_dist.RDS"))
-readr::write_rds(x = predflow_model_vol,
-                 file = here::here("data",
-                                   "predflow_model_vol.RDS"))
 readr::write_rds(x = gini_model_dist,
                  file = here::here("data",
                                    "gini_model_dist.RDS"))

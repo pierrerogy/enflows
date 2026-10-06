@@ -105,12 +105,10 @@ plot_spec <-
     8L,        "perpair",   "dist_axis3",    "flux_raw_pair", "x_scale",       0.001,     "figs9",
     9L,        "perpair",   "dist_axis4",    "flux_raw_pair", "x_scale",       0.001,     "figs10",
     # Hypothesis 3 - whole-web flow ~ functional volume and distance
-    10L,       "perbrom",   "prop_hull",     "totalflow_Jy",  "none",          0,         "figs11",
-    11L,       "perbrom",   "avg_func_dist", "totalflow_Jy",  "x_scale",       0,         "figs12",
-    12L,       "perbrom",   "prop_hull",     "predflow_Jy",   "none",          0.01,      "figs13",
-    13L,       "perbrom",   "avg_func_dist", "predflow_Jy",   "x_scale",       0.01,      "figs14",
-    14L,       "perbrom",   "prop_hull",     "gini",          "y_original",    0,         "figs15",
-    15L,       "perbrom",   "avg_func_dist", "gini",          "both_original", 0,         "figs16")
+    10L,       "perbrom",   "avg_func_dist", "totalflow_Jy",  "x_scale",       0,         "figs11",
+    11L,       "perbrom",   "prop_hull",     "totalflow_Jy",  "none",          0,         "figs12",
+    13L,       "perbrom",   "avg_func_dist", "gini",          "both_original", 0,         "figs13",
+    14L,       "perbrom",   "prop_hull",     "gini",          "y_original",    0,         "figs14")
 
 # Bundle the three data grains so each spec row can grab the right one
 grain_data <- 

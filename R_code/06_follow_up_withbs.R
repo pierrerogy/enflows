@@ -510,44 +510,6 @@ plot(totalflow_model_dist_withbs)
 bayestestR::describe_posterior(totalflow_model_dist_withbs)
 performance::r2_bayes(totalflow_model_dist_withbs)
 
-# Flow to predators
-## Volume
-predflow_model_vol_withbs <-
-  brms::brm(log(predflow_Jy + 0.01) ~
-              scale(log(prop_hull),
-                    center = TRUE, scale = FALSE) +
-              I(scale(log(prop_hull), center = TRUE, scale = FALSE)^2) +
-              (1 + scale(log(prop_hull),
-                         center = TRUE, scale = FALSE) |site_code),
-            iter = 20000,
-            family = gaussian(),
-            control = list(adapt_delta = 0.95,
-                           max_treedepth = 15),
-            data = fluxes_long_perbrom_withbs)
-## Check assumptions
-plot(predflow_model_vol_withbs)
-## Look at the effect
-bayestestR::describe_posterior(predflow_model_vol_withbs)
-performance::r2_bayes(predflow_model_vol_withbs)
-## Distance
-predflow_model_dist_withbs <-
-  brms::brm(log(predflow_Jy + 0.01) ~
-              scale(avg_func_dist,
-                    center = TRUE, scale = FALSE) +
-              I(scale(avg_func_dist, center = TRUE, scale = FALSE)^2) +
-              (1 + scale(avg_func_dist,
-                         center = TRUE, scale = FALSE) |site_code),
-            iter = 20000,
-            family = gaussian(),
-            control = list(adapt_delta = 0.95,
-                           max_treedepth = 15),
-            data = fluxes_long_perbrom_withbs)
-## Check assumptions
-plot(predflow_model_dist_withbs)
-## Look at the effect
-bayestestR::describe_posterior(predflow_model_dist_withbs)
-performance::r2_bayes(predflow_model_dist_withbs)
-
 # Gini index
 ## Volume
 gini_model_vol_withbs <-

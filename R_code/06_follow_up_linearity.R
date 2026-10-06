@@ -263,28 +263,6 @@ totalflow_model_dist_linear <-
             control = list(adapt_delta = 0.95,
                            max_treedepth = 15),
             data = fluxes_long_perbrom)
-# Flow to predators - volume
-predflow_model_vol_linear <-
-  brms::brm(log(predflow_Jy + 0.01) ~
-              scale(log(prop_hull), center = TRUE, scale = FALSE) +
-              (1 + scale(log(prop_hull),
-                         center = TRUE, scale = FALSE) |site_code),
-            iter = 20000,
-            family = gaussian(),
-            control = list(adapt_delta = 0.95,
-                           max_treedepth = 15),
-            data = fluxes_long_perbrom)
-# Flow to predators - distance
-predflow_model_dist_linear <-
-  brms::brm(log(predflow_Jy + 0.01) ~
-              scale(avg_func_dist, center = TRUE, scale = FALSE) +
-              (1 + scale(avg_func_dist,
-                         center = TRUE, scale = FALSE) |site_code),
-            iter = 20000,
-            family = gaussian(),
-            control = list(adapt_delta = 0.95,
-                           max_treedepth = 15),
-            data = fluxes_long_perbrom)
 # Gini index - volume
 gini_model_vol_linear <-
   brms::brm(gini ~
@@ -313,10 +291,6 @@ brms::loo(totalflow_model_vol,
           totalflow_model_vol_linear)
 brms::loo(totalflow_model_dist, 
           totalflow_model_dist_linear)
-brms::loo(predflow_model_vol, 
-          predflow_model_vol_linear)
-brms::loo(predflow_model_dist, 
-          predflow_model_dist_linear)
 brms::loo(gini_model_vol, 
           gini_model_vol_linear)
 brms::loo(gini_model_dist, 
@@ -330,12 +304,6 @@ readr::write_rds(totalflow_model_vol_linear,
 readr::write_rds(totalflow_model_dist_linear,
                  here::here("data",
                             "totalflow_model_dist_linear.RDS"))
-readr::write_rds(predflow_model_vol_linear,
-                 here::here("data",
-                            "predflow_model_vol_linear.RDS"))
-readr::write_rds(predflow_model_dist_linear,
-                 here::here("data",
-                            "predflow_model_dist_linear.RDS"))
 readr::write_rds(gini_model_vol_linear,
                  here::here("data",
                             "gini_model_vol_linear.RDS"))

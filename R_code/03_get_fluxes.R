@@ -419,22 +419,7 @@ fluxes_long_perbrom <-
                    dplyr::across(flux_raw,
                                  ~ sum(.),
                                  .names = "totalflow_Jy")) %>% 
-  dplyr::ungroup() %>% 
-  ## Add flow just to predators
-  dplyr::left_join(fluxes_long_percons %>% 
-                     ## Keep just predators
-                     dplyr::filter(cons_functional_group %in% c("piercer", "engulfer")) %>%
-                     dplyr::select(site_code, bromeliad_id, flux_raw) %>%
-                     ## Group by site and bromeliad id
-                     dplyr::group_by(site_code, bromeliad_id) %>%
-                     ## Summarise
-                     dplyr::summarise(dplyr::across(flux_raw,
-                                                    ~ sum(.),
-                                                    .names = "predflow_Jy")),
-                   by = c("site_code", "bromeliad_id")) %>% 
-  ## Mutate predator flow to 0 if NA (no predators)
-  dplyr::mutate(predflow_Jy = ifelse(is.na(predflow_Jy),
-                                 0, predflow_Jy))
+  dplyr::ungroup()
 
 
 # Write data
