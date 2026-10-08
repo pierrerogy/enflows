@@ -473,24 +473,6 @@ readr::write_rds(x = pairflow_model_axis4_withbs,
 
 # Hypothesis 3 - more and less imbalanced flow if less functional distances in whole food web ----
 # Total flow
-## Volume
-totalflow_model_vol_withbs <-
-  brms::brm(log(totalflow_Jy) ~
-              scale(log(prop_hull),
-                    center = TRUE, scale = FALSE) +
-              I(scale(log(prop_hull), center = TRUE, scale = FALSE)^2) +
-              (1 + scale(log(prop_hull),
-                         center = TRUE, scale = FALSE) |site_code),
-            iter = 20000,
-            family = gaussian(),
-            control = list(adapt_delta = 0.95,
-                           max_treedepth = 15),
-            data = fluxes_long_perbrom_withbs)
-## Check assumptions
-plot(totalflow_model_vol_withbs)
-## Look at the effect
-bayestestR::describe_posterior(totalflow_model_vol_withbs)
-performance::r2_bayes(totalflow_model_vol_withbs)
 ## Distance
 totalflow_model_dist_withbs <-
   brms::brm(log(totalflow_Jy) ~
@@ -509,8 +491,45 @@ plot(totalflow_model_dist_withbs)
 ## Look at the effect
 bayestestR::describe_posterior(totalflow_model_dist_withbs)
 performance::r2_bayes(totalflow_model_dist_withbs)
+## Volume
+totalflow_model_vol_withbs <-
+  brms::brm(log(totalflow_Jy) ~
+              scale(log(prop_hull),
+                    center = TRUE, scale = FALSE) +
+              I(scale(log(prop_hull), center = TRUE, scale = FALSE)^2) +
+              (1 + scale(log(prop_hull),
+                         center = TRUE, scale = FALSE) |site_code),
+            iter = 20000,
+            family = gaussian(),
+            control = list(adapt_delta = 0.95,
+                           max_treedepth = 15),
+            data = fluxes_long_perbrom_withbs)
+## Check assumptions
+plot(totalflow_model_vol_withbs)
+## Look at the effect
+bayestestR::describe_posterior(totalflow_model_vol_withbs)
+performance::r2_bayes(totalflow_model_vol_withbs)
+
 
 # Gini index
+## Distance
+gini_model_dist_withbs <-
+  brms::brm(gini ~
+              scale(log(avg_func_dist),
+                    center = TRUE, scale = FALSE) +
+              I(scale(log(avg_func_dist), center = TRUE, scale = FALSE)^2) +
+              (1 + scale(log(avg_func_dist),
+                         center = TRUE, scale = FALSE) |site_code),
+            iter = 20000,
+            family = gaussian(),
+            control = list(adapt_delta = 0.95,
+                           max_treedepth = 15),
+            data = fluxes_long_perbrom_withbs)
+## Check assumptions
+plot(gini_model_dist_withbs)
+## Look at the effect
+bayestestR::describe_posterior(gini_model_dist_withbs)
+performance::r2_bayes(gini_model_dist_withbs)
 ## Volume
 gini_model_vol_withbs <-
 
@@ -530,41 +549,20 @@ plot(gini_model_vol_withbs)
 ## Look at the effect
 bayestestR::describe_posterior(gini_model_vol_withbs)
 performance::r2_bayes(gini_model_vol_withbs)
-## Distance
-gini_model_dist_withbs <-
-  brms::brm(gini ~
-              scale(log(avg_func_dist),
-                    center = TRUE, scale = FALSE) +
-              I(scale(log(avg_func_dist), center = TRUE, scale = FALSE)^2) +
-              (1 + scale(log(avg_func_dist),
-                         center = TRUE, scale = FALSE) |site_code),
-            iter = 20000,
-            family = gaussian(),
-            control = list(adapt_delta = 0.95,
-                           max_treedepth = 15),
-            data = fluxes_long_perbrom_withbs)
-## Check assumptions
-plot(gini_model_dist_withbs)
-## Look at the effect
-bayestestR::describe_posterior(gini_model_dist_withbs)
-performance::r2_bayes(gini_model_dist_withbs)
+
 
 # Save models
-readr::write_rds(x = totalflow_model_vol_withbs,
-                 file = here::here("data",
-                                   "totalflow_model_vol_withbs.RDS"))
-readr::write_rds(x = predflow_model_vol_withbs,
-                 file = here::here("data",
-                                   "predflow_model_vol_withbs.RDS"))
-readr::write_rds(x = gini_model_vol_withbs,
-                 file = here::here("data",
-                                   "gini_model_vol_withbs.RDS"))
 readr::write_rds(x = totalflow_model_dist_withbs,
                  file = here::here("data",
                                    "totalflow_model_dist_withbs.RDS"))
-readr::write_rds(x = predflow_model_dist_withbs,
+readr::write_rds(x = totalflow_model_vol_withbs,
                  file = here::here("data",
-                                   "predflow_model_dist_withbs.RDS"))
+                                   "totalflow_model_vol_withbs.RDS"))
 readr::write_rds(x = gini_model_dist_withbs,
                  file = here::here("data",
-                                   "gini_model_dist_withbs.RDS"))
+                                   "gini_model_dist_withbs.RDS"))                                   
+readr::write_rds(x = gini_model_vol_withbs,
+                 file = here::here("data",
+                                   "gini_model_vol_withbs.RDS"))
+
+

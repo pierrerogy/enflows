@@ -39,10 +39,8 @@ fluxes_long_perbrom <-
      "pairflow_model_axis3",
      "pairflow_model_axis4",
      "totalflow_model_vol",
-     "predflow_model_vol",
      "gini_model_vol",
      "totalflow_model_dist",
-     "predflow_model_dist",
      "gini_model_dist"
      )
 
@@ -290,7 +288,6 @@ readr::write_rds(x = pairflow_model_axis4,
 # Hypothesis 3 - more and less imbalanced flow if less functional distances in whole food web --------------------------------
 # Histograms
 hist(log(fluxes_long_perbrom$totalflow_Jy))
-hist(log(fluxes_long_perbrom$predflow_Jy))
 hist(fluxes_long_perbrom$gini)
 hist(log(fluxes_long_perbrom$prop_hull))
 hist(fluxes_long_perbrom$avg_func_dist)

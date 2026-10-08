@@ -38,10 +38,8 @@ model_list <-
     "pairflow_model_axis3",
     "pairflow_model_axis4",
     "totalflow_model_vol",
-    "predflow_model_vol",
     "gini_model_vol",
     "totalflow_model_dist",
-    "predflow_model_dist",
     "gini_model_dist"
     )
 
@@ -237,21 +235,10 @@ rm(pairflow_model_overall_linear,
    pairflow_model_axis2,
    pairflow_model_axis3_linear,
    pairflow_model_axis3,
-   pairflow_model_axis4_linear
+   pairflow_model_axis4_linear,
    pairflow_model_axis4)
 
 # Hypothesis 3 - linear models at the scale of whole food webs --------
-# Total flow - volume
-totalflow_model_vol_linear <-
-  brms::brm(log(totalflow_Jy) ~
-              scale(log(prop_hull), center = TRUE, scale = FALSE) +
-              (1 + scale(log(prop_hull),
-                         center = TRUE, scale = FALSE) |site_code),
-            iter = 20000,
-            family = gaussian(),
-            control = list(adapt_delta = 0.95,
-                           max_treedepth = 15),
-            data = fluxes_long_perbrom)
 # Total flow - distance
 totalflow_model_dist_linear <-
   brms::brm(log(totalflow_Jy) ~
@@ -263,9 +250,9 @@ totalflow_model_dist_linear <-
             control = list(adapt_delta = 0.95,
                            max_treedepth = 15),
             data = fluxes_long_perbrom)
-# Gini index - volume
-gini_model_vol_linear <-
-  brms::brm(gini ~
+# Total flow - volume
+totalflow_model_vol_linear <-
+  brms::brm(log(totalflow_Jy) ~
               scale(log(prop_hull), center = TRUE, scale = FALSE) +
               (1 + scale(log(prop_hull),
                          center = TRUE, scale = FALSE) |site_code),
@@ -279,6 +266,17 @@ gini_model_dist_linear <-
   brms::brm(gini ~
               scale(log(avg_func_dist), center = TRUE, scale = FALSE) +
               (1 + scale(log(avg_func_dist),
+                         center = TRUE, scale = FALSE) |site_code),
+            iter = 20000,
+            family = gaussian(),
+            control = list(adapt_delta = 0.95,
+                           max_treedepth = 15),
+            data = fluxes_long_perbrom)
+# Gini index - volume
+gini_model_vol_linear <-
+  brms::brm(gini ~
+              scale(log(prop_hull), center = TRUE, scale = FALSE) +
+              (1 + scale(log(prop_hull),
                          center = TRUE, scale = FALSE) |site_code),
             iter = 20000,
             family = gaussian(),
@@ -310,3 +308,8 @@ readr::write_rds(gini_model_vol_linear,
 readr::write_rds(gini_model_dist_linear,
                  here::here("data",
                             "gini_model_dist_linear.RDS"))
+
+
+
+                               
+

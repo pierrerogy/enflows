@@ -1074,7 +1074,7 @@ fit_site_suite <- function(site, percons, perpair, perbrom){
                 family = gaussian(),
                 control = list(adapt_delta = 0.95,
                                max_treedepth = 15),
-                data = dats_perbrom)),
+                data = dats_perbrom),
 
     ## Gini index of fluxes against hull volume
     gini_model_vol <- 
@@ -1086,7 +1086,7 @@ fit_site_suite <- function(site, percons, perpair, perbrom){
                 family = gaussian(),
                 control = list(adapt_delta = 0.95,
                                max_treedepth = 15),
-                data = dats_perbrom)
+                data = dats_perbrom))
 }
 
 

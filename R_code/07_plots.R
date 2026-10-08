@@ -561,12 +561,12 @@ fig4a <-
                                 2.5,
                                 5,
                                 7),
-                     labels = c(0,
+                     labels = c(0.01,
                                 1,
                                 10,
                                 100,
                                 1000),
-                     limits = c(-3.2, 10)) +
+                     limits = c(-7, 10)) +
   theme(axis.title.y = element_text(margin = margin(r = 2,  l = 5)),
         axis.title.x = element_text(margin = margin(t = 15)),
         axis.title = element_text(size = rel(1.2)),
@@ -574,7 +574,7 @@ fig4a <-
         legend.text = element_text(size = rel(1.2))) 
 
 # Fig 4b
-fig4c <- 
+fig4b <- 
   basic_line(model = gini_model_dist, 
              index = 1,
              dats = fluxes_long_perbrom, 
@@ -588,7 +588,7 @@ fig4c <-
         legend.text = element_text(size = rel(1.2))) 
 
 # Fig 4c
-fig4d <- 
+fig4c <- 
   basic_line(model = totalflow_model_vol, 
              index = 1,
              dats = fluxes_long_perbrom, 
@@ -600,12 +600,12 @@ fig4d <-
                                 2.5,
                                 5,
                                 7),
-                     labels = c(0,
+                     labels = c(0.01,
                                 1,
                                 10,
                                 100,
                                 1000),
-                     limits = c(-3.2, 10)) +
+                     limits = c(-7, 10)) +
   scale_x_continuous(breaks = c(seq(from = -15,
                                     to = 0,
                                     by = 3)),
