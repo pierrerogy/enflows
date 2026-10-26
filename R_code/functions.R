@@ -507,12 +507,7 @@ plot_food_web <- function(bromtoplot,
   basal <- 
     c("algae", "FPOM", "CPOM", "microzooplankton",
     "mesozooplankton", "bromeliad.tissue", "microorganisms")
-  
-  # # Left aside for now
-  # # Define functional group shape coding
-  # shapes <- 
-  #   c("resource" = NA, "scraper"= 15 , "gatherer" = 16, "filter.feeder" = 17, 
-  #     "shredder" = 18, "predator" = 4 , "unknown" = 13)
+
   
   # Filter bromeliad in web
   web <- 
@@ -601,30 +596,6 @@ plot_food_web <- function(bromtoplot,
                                      cons_biomass = biomass),
                      by = "consumer")
   
-  # # Last step finally, adding functional group to web
-  # # GIVE UP FOR NOW
-  # levels <- 
-  #   levels %>% 
-  #   ## Add functional group
-  #   dplyr::left_join(web %>% 
-  #                      dplyr::select(consumer, 
-  #                                    fg = cons_functional_group) %>% 
-  #                      dplyr::distinct() %>% 
-  #                      dplyr::rename(species = consumer),
-  #                    by = "species") %>% 
-  #   ## add resource functional group, and add exception for unknown ones
-  #   dplyr::mutate(fg = ifelse(species %in% basal & is.na(fg),
-  #                             "resource", 
-  #                             ifelse(species %notin% basal & is.na(fg),
-  #                                    "unknown", fg))) %>% 
-  #   ## finally make piercers and engulfers as a single predator group
-  #   dplyr::mutate(fg = ifelse(fg %in% c("engulfer", "piercer"),
-  #                             "predator", fg)) %>% 
-  #   ## aaaand add shape parameter
-  #   dplyr::left_join(shapes,
-  #                    by = "fg")
-  
-  
   # Plot
   ## Base plot on levels tibble
   ret <- 
@@ -650,13 +621,6 @@ plot_food_web <- function(bromtoplot,
       ## Axis labels
       xlab("") +
       ylab("Trophic level") +
-      # ## Add point shape based on functional group kind of gave up because 
-      # ## adds to much, kinda ugly
-      # geom_point(aes(shape = fg), 
-      #            size = 7) +
-      # scale_shape_manual(values = shapes,
-      #                    name = "Functional \ngroup")
-      #geom_text(data = colvec_x, aes(x = x, y = y, label = code), colour = 'black', size = 2) +
       ## Species labels
       geom_label(aes(label = label),
                  color = "white",
